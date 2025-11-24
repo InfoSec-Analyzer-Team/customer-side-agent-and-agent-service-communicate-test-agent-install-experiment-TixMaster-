@@ -127,12 +127,21 @@ app.use(errorHandler);
 /**
  * 🚀 啟動伺服器
  */
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
     console.log(`🚀 TixMaster API server running on http://localhost:${PORT}`);
     console.log(`📊 Health check: http://localhost:${PORT}/health`);
     console.log(`🔐 OAuth routes:`);
     console.log(`   - Google login: http://localhost:${PORT}/auth/google`);
     console.log(`   - Callback: http://localhost:${PORT}/auth/google/callback`);
+    console.log(`🚩 Feature flags: http://localhost:${PORT}/api/feature-flags`);
+
+    // Initialize feature flags
+    try {
+        await featureFlagsMiddleware.initialize();
+        console.log(`✅ Feature flags initialized`);
+    } catch (error) {
+        console.error(`❌ Failed to initialize feature flags:`, error);
+    }
 });
 
 module.exports = app;
