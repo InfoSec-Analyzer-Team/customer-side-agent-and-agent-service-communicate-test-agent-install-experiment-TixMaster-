@@ -8,9 +8,9 @@ interface EventCardProps {
 
 const EventCard: React.FC<EventCardProps> = ({ event }) => {
     return (
-        <Link href={`/events/${event.id}`} className="group block">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-transform transform group-hover:scale-105 duration-300">
-                <div className="relative h-48 w-full">
+        <Link href={`/events/${event.id}`} className="block hover:opacity-90 transition-opacity">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden border border-gray-200 dark:border-gray-700">
+                <div className="relative h-40 w-full">
                     <img
                         src={event.image}
                         alt={event.title}
@@ -18,21 +18,21 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
                     />
                 </div>
                 <div className="p-4">
-                    <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                    <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white">
                         {event.title}
                     </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-1">
-                        📅 {new Date(event.date).toLocaleDateString()}
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                        {new Date(event.date).toLocaleDateString('zh-TW')}
                     </p>
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
-                        📍 {event.location}
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                        {event.location}
                     </p>
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-gray-700">
                         <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                            ${event.price}
+                            NT$ {event.price}
                         </span>
-                        <span className="px-3 py-1 bg-blue-600 text-white text-sm rounded-full group-hover:bg-blue-700 transition-colors">
-                            Buy Tickets
+                        <span className="text-sm text-blue-600 dark:text-blue-400">
+                            查看詳情 →
                         </span>
                     </div>
                 </div>
