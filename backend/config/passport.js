@@ -95,6 +95,9 @@ passport.use(new Auth0Strategy({
         }
     }
 ));
+    
+// 印出當前使用的 callback URL（方便部署時快速確認）
+console.log('[Auth0] Using callback URL =', process.env.AUTH0_CALLBACK_URL || 'http://localhost:3000/auth/callback');
 
 /**
  * 🔐 serializeUser - 決定要在 session 中儲存什麼
