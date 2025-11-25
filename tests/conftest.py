@@ -17,6 +17,16 @@ def admin_token():
 
     jwt_secret = os.getenv('JWT_SECRET')
     if not jwt_secret:
+        # fallback: try to read backend/.env for JWT_SECRET (CI step writes the file)
+        try:
+            with open('backend/.env', 'r', encoding='utf-8') as f:
+                for line in f:
+                    if line.strip().startswith('JWT_SECRET='):
+                        jwt_secret = line.strip().split('=', 1)[1]
+                        break
+        except Exception:
+            jwt_secret = None
+    if not jwt_secret:
         return None
 
     # Attempt to generate ADMIN_TOKEN using the repository's Node helper.
