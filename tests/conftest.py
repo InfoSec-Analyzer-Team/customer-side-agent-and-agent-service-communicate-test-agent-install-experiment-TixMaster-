@@ -1,4 +1,5 @@
 import os
+import subprocess
 import pytest
 
 
@@ -9,4 +10,26 @@ def base_url():
 
 @pytest.fixture(scope='session')
 def admin_token():
-    return os.getenv('ADMIN_TOKEN')
+    # Prefer explicit ADMIN_TOKEN. If missing, but JWT_SECRET exists, generate token via Node script.
+    token = os.getenv('ADMIN_TOKEN')
+    if token:
+        return token
+
+    jwt_secret = os.getenv('JWT_SECRET')
+    if not jwt_secret:
+        return None
+
+    # Attempt to generate ADMIN_TOKEN using the repository's Node helper.
+    try:
+        # run from repo root; node script reads backend/.env fallback if needed
+        proc = subprocess.run([
+            'node', 'tools/gen_admin_jwt.js'
+        ], check=True, capture_output=True, text=True)
+        token = proc.stdout.strip()
+        if token:
+            # export into environment for any downstream code
+            os.environ['ADMIN_TOKEN'] = token
+            return token
+    except Exception:
+        # if generation fails, return None so tests skip as before
+        return None
