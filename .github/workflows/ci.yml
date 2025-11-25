@@ -76,14 +76,37 @@ jobs:
           fi
           echo "Wrote backend/.env (with defaults for Auth0 if secrets absent)"
 
+      - name: Export JWT_SECRET to workflow env
+        env:
+          JWT_SECRET_FROM_SECRETS: ${{ secrets.JWT_SECRET }}
+        run: |
+          if [ -n "$JWT_SECRET_FROM_SECRETS" ]; then
+            echo "JWT_SECRET=$JWT_SECRET_FROM_SECRETS" >> $GITHUB_ENV
+          else
+            echo "JWT_SECRET=dev_secret_for_tests" >> $GITHUB_ENV
+          fi
+
       - name: Skip Postgres DB setup (SKIP_DB=true)
         run: |
           echo "SKIP_DB=true set - skipping postgres setup in CI"
 
-      - name: Generate admin JWT and export as env
+      - name: Generate admin JWT and export as env (robust)
         id: gen_token
         run: |
-          echo "ADMIN_TOKEN=$(node tools/gen_admin_jwt.js)" >> $GITHUB_ENV
+          set -e
+          # Try using the repository helper first; fallback to inline generator if missing
+          if [ -f tools/gen_admin_jwt.js ]; then
+            TOKEN=$(node tools/gen_admin_jwt.js || true)
+          else
+            TOKEN=""
+          fi
+
+          if [ -z "$TOKEN" ]; then
+            echo "tools/gen_admin_jwt.js not available or returned empty, using inline generator"
+            TOKEN=$(node -e "const crypto=require('crypto');const s=process.env.JWT_SECRET||'dev_secret_for_tests';function b(u){return Buffer.from(u).toString('base64').replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');}const h=b(JSON.stringify({alg:'HS256',typ:'JWT'}));const now=Math.floor(Date.now()/1000);const p=b(JSON.stringify({userId:1,email:'admin@tixmaster.com',role:'admin',iat:now,exp:now+7*24*3600}));const sig=crypto.createHmac('sha256',s).update(h+'.'+p).digest('base64').replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');console.log(h+'.'+p+'.'+sig);")
+          fi
+
+          echo "ADMIN_TOKEN=$TOKEN" >> $GITHUB_ENV
 
       - name: Start backend server (background via npm)
         run: |
