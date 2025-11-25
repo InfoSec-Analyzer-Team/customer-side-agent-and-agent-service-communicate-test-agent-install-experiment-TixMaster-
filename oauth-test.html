@@ -192,9 +192,9 @@
         <div class="info-box">
             <h4>🔍 OAuth 流程說明：</h4>
             <p>1. 點擊「Google 登入」按鈕</p>
-            <p>2. 導向 <code>/auth/google</code></p>
+            <p>2. 導向 <code>/auth/login</code></p>
             <p>3. Google 授權頁面</p>
-            <p>4. 回調到 <code>/auth/google/callback</code></p>
+            <p>4. 回調到 <code>/auth/callback</code></p>
             <p>5. 重導回此頁面並帶著 JWT token</p>
         </div>
     </div>
@@ -209,8 +209,8 @@
         function loginWithGoogle() {
             console.log('📍 啟動 Google OAuth 流程...');
 
-            // 導向後端 OAuth 路由
-            window.location.href = 'http://localhost:3000/auth/google';
+        // 導向後端 OAuth 路由（相對路徑）
+        window.location.href = '/auth/login';
         }
 
         /**

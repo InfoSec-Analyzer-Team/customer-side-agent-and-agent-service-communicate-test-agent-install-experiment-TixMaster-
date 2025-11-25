@@ -5,7 +5,8 @@
  * 測試 toggle 功能的 true/false 控制
  */
 
-const API_BASE = 'http://localhost:3000/api';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+const API_BASE = `${BASE_URL}/api`;
 
 // 顏色輸出
 const colors = {
@@ -347,7 +348,7 @@ async function runAllTests() {
     try {
         // 檢查後端連線
         logTest('檢查後端連線');
-        const healthResponse = await fetch('http://localhost:3000/health');
+    const healthResponse = await fetch(`${BASE_URL}/health`);
         if (!healthResponse.ok) {
             throw new Error('後端伺服器未運行');
         }

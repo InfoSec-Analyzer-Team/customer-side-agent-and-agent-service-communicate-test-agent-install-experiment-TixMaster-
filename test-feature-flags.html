@@ -127,7 +127,8 @@
 
     <script src="featureFlags.js"></script>
     <script>
-        const API_BASE = 'http://localhost:3000';
+    // Use relative base so this test page works both locally and when deployed
+    const API_BASE = '';
 
         function log(elementId, message, isError = false) {
             const element = document.getElementById(elementId);
@@ -289,7 +290,7 @@
         window.addEventListener('load', () => {
             console.log('%c🚩 Feature Flags 測試頁面', 'font-size: 20px; color: #2563eb; font-weight: bold;');
             console.log('請使用頁面上的按鈕進行測試，所有詳細日誌都會顯示在這裡。');
-            console.log('後端 API: http://localhost:3000');
+            console.log('後端 API: 使用相對路徑 /api（同一 host）');
         });
     </script>
 </body>

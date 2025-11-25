@@ -32,7 +32,7 @@ async function checkAdmin() {
             console.log('創建時間:', admin.created_at);
 
             console.log('\n登入資訊：');
-            console.log('  URL: http://localhost:3000/admin-login.html');
+            console.log("  URL: /admin-login.html  (訪問你的部署主機的此路徑)");
             console.log('  Email: admin@tixmaster.com');
             console.log('  密碼: admin123');
         }

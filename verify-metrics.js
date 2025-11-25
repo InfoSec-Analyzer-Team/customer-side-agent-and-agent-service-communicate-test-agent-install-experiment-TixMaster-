@@ -6,7 +6,8 @@
  * 用於驗證 Hypothesis 1 和 Hypothesis 2
  */
 
-const API_BASE = 'http://localhost:3000/api';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
+const API_BASE = `${BASE_URL}/api`;
 
 // 顏色輸出
 const colors = {
@@ -210,7 +211,7 @@ async function main() {
     try {
         // 1. 檢查後端連線
         console.log('\n檢查後端連線...');
-        const healthResponse = await fetch('http://localhost:3000/health');
+    const healthResponse = await fetch(`${BASE_URL}/health`);
         if (!healthResponse.ok) {
             throw new Error('後端伺服器未運行');
         }

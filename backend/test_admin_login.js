@@ -8,7 +8,8 @@ async function testLogin() {
     try {
         console.log('測試管理員登入 API...\n');
 
-        const response = await fetch('http://localhost:3000/api/users/login', {
+    const base = process.env.BASE_URL || 'http://localhost:3000';
+    const response = await fetch(`${base}/api/users/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
