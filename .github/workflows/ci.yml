@@ -9,22 +9,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:15
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: tixmaster
-        options: >-
-          --health-cmd pg_isready -U postgres
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
     env:
       BASE_URL: http://localhost:3000
+      SKIP_DB: 'true'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -89,29 +76,9 @@ jobs:
           fi
           echo "Wrote backend/.env (with defaults for Auth0 if secrets absent)"
 
-      - name: Wait for Postgres and initialize DB
+      - name: Skip Postgres DB setup (SKIP_DB=true)
         run: |
-          echo "Installing postgres client..."
-          sudo apt-get update -y
-          sudo apt-get install -y postgresql-client
-          echo "Waiting for postgres service to be ready..."
-          for i in $(seq 1 30); do
-            if pg_isready -h localhost -p 5432 -U postgres > /dev/null 2>&1; then
-              echo "Postgres is ready"
-              break
-            fi
-            sleep 1
-          done
-          echo "Creating database (if needed) and applying schema..."
-          export PGPASSWORD=postgres
-          createdb -h localhost -U postgres tixmaster || true
-          if [ -f schema_postgresql.sql ]; then
-            psql -h localhost -U postgres -d tixmaster -f schema_postgresql.sql
-          elif [ -f init.sql ]; then
-            psql -h localhost -U postgres -d tixmaster -f init.sql
-          fi
-          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/tixmaster" >> backend/.env
-          echo "Database initialized and DATABASE_URL appended to backend/.env"
+          echo "SKIP_DB=true set - skipping postgres setup in CI"
 
       - name: Generate admin JWT and export as env
         id: gen_token

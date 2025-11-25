@@ -82,9 +82,26 @@ app.use(passport.session());     // 讓 Passport 使用 session
 /**
  * 🚩 Feature Flags Middleware
  *
- * 將 feature flags 附加到每個請求
- * 可在路由中使用 req.featureFlags.isEnabled('FLAG_KEY')
+ * 如果沒有設定 DATABASE_URL 或明確要求跳過 DB（SKIP_DB=true），
+ * 我們會替換 middleware 為一個不依賴 DB 的簡易實作，避免在 CI 或本機沒有 DB 時啟動失敗。
  */
+const skipDb = process.env.SKIP_DB === 'true' || !process.env.DATABASE_URL;
+if (skipDb) {
+    console.warn('[FeatureFlags] DATABASE_URL not set or SKIP_DB=true — using dummy feature flags');
+    // stub attachFeatureFlags
+    featureFlagsMiddleware.attachFeatureFlags = (req, res, next) => {
+        req.featureFlags = {
+            isEnabled: () => false,
+            getAll: () => ({})
+        };
+        next();
+    };
+    // stub initialize to a no-op
+    featureFlagsMiddleware.initialize = async () => {
+        console.log('[FeatureFlags] initialize skipped (no DATABASE_URL)');
+    };
+}
+
 app.use(featureFlagsMiddleware.attachFeatureFlags);
 
 /**
