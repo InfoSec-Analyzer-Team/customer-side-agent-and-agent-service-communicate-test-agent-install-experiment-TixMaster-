@@ -34,6 +34,15 @@ router.get('/login',
     })
 );
 
+// 開始 Auth0 Signup（註冊）流程 - 會在 Auth0 下啟用 signup 畫面
+router.get('/signup',
+    passport.authenticate('auth0', {
+        scope: ['openid', 'profile', 'email'],
+        session: false,
+        authParams: { screen_hint: 'signup' }
+    })
+);
+
 /**
  * 路由 2: GET /auth/google/callback
  * 🔄 處理 Google 授權回調
