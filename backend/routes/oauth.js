@@ -62,10 +62,27 @@ router.get('/signup',
  * - ?error=xxx         (失敗時)
  */
 router.get('/callback',
-    passport.authenticate('auth0', {
-        failureRedirect: '/login.html?error=oauth_failed',
-        session: false
-    }),
+    // 先印出 callback 收到的 query（Auth0 會傳回 code / error / state）
+    (req, res, next) => {
+        console.log('[Auth0] /auth/callback query =', req.query);
+        next();
+    },
+    // 使用 custom callback 以便在失敗時記錄更詳細資訊
+    (req, res, next) => {
+        passport.authenticate('auth0', { session: false }, (err, user, info) => {
+            if (err) {
+                console.error('❌ passport authenticate error:', err, info);
+                return res.redirect('/login.html?error=oauth_failed');
+            }
+            if (!user) {
+                console.error('❌ passport authenticate failed, info:', info);
+                return res.redirect('/login.html?error=oauth_failed');
+            }
+            // 將 user 掛回 req，進入下一個處理器
+            req.user = user;
+            next();
+        })(req, res, next);
+    },
 
     async (req, res) => {
         try {
