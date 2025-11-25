@@ -1,0 +1,14 @@
+name: Ops Dependabot Config Test
+
+on:
+  push:
+    branches:
+      - "ops/dependabot-config" # 指定你的開發分支（已修正為你推送的分支名稱）
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test
+        run: echo "Testing on dev branch"
