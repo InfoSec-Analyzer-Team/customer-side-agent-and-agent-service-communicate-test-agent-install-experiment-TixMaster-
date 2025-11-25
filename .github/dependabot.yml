@@ -1,0 +1,43 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    rebase-strategy: "auto"
+    labels:
+      - "security"
+  - package-ecosystem: "npm"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    rebase-strategy: "auto"
+    labels:
+      - "security"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "ci"
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "docker"
+
+# 可選：若需忽略某些套件或設定更細緻的更新策略，可在此加入 `allow` / `ignore` 條目。
+# 範例：
+#  - package-ecosystem: "npm"
+#    directory: "/"
+#    schedule:
+#      interval: "weekly"
+#    ignore:
+#      - dependency-name: "left-pad"
+#        versions:
+#          - "<2.0.0"
