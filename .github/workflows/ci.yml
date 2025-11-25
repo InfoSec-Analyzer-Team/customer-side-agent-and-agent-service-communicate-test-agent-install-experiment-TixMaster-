@@ -121,9 +121,7 @@ jobs:
       - name: Start backend server (background via npm)
         run: |
           if [ -f backend/package.json ]; then
-            # ensure backend deps installed
             npm ci --prefix backend || (cat backend/npm-install.log 2>/dev/null || true; exit 1)
-            # start via npm to ensure correct local node_modules resolution
             npm --prefix backend start > backend/server.log 2>&1 & echo $! > backend/server.pid || true
             echo "Started backend (if applicable). PID: $(cat backend/server.pid 2>/dev/null || echo 'none')"
           else
