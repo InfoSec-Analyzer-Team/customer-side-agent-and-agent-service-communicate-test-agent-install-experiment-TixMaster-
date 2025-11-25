@@ -34,6 +34,10 @@ jobs:
         run: |
           if [ -f package.json ]; then npm ci; fi
 
+      - name: Install backend npm dependencies
+        run: |
+          if [ -f backend/package.json ]; then npm ci --prefix backend; fi
+
       - name: Install Playwright browsers
         run: |
           npx playwright install --with-deps
@@ -53,6 +57,21 @@ jobs:
         id: gen_token
         run: |
           echo "ADMIN_TOKEN=$(node tools/gen_admin_jwt.js)" >> $GITHUB_ENV
+
+      - name: Start backend server (background)
+        run: |
+          # start backend in background and record pid & logs
+          if [ -f backend/package.json ]; then
+            nohup node backend/server.js > backend/server.log 2>&1 & echo $! > backend/server.pid || true
+            echo "Started backend (if applicable). PID: $(cat backend/server.pid 2>/dev/null || echo 'none')"
+          else
+            echo "No backend/package.json found; skipping backend start"
+          fi
+
+      - name: Wait for backend health endpoint
+        run: |
+          # wait up to 30s for health endpoint
+          npx wait-on http://localhost:3000/health --timeout 30000 || (echo "backend didn't respond to /health" && exit 1)
 
       - name: Run npm audit (backend)
         run: |
@@ -81,6 +100,19 @@ jobs:
       - name: Run Playwright tests
         run: |
           npx playwright test --reporter=html
+
+      - name: Stop backend server and show logs
+        if: always()
+        run: |
+          if [ -f backend/server.pid ]; then
+            echo "Killing backend pid $(cat backend/server.pid)" || true
+            kill $(cat backend/server.pid) || true
+            sleep 1
+          fi
+          if [ -f backend/server.log ]; then
+            echo "==== backend/server.log (last 200 lines) ===="
+            tail -n 200 backend/server.log || true
+          fi
 
       - name: Upload test reports
         uses: actions/upload-artifact@v4
