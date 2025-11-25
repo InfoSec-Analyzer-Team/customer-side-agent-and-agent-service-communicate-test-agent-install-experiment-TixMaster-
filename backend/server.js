@@ -124,25 +124,53 @@ app.use('/api/analytics', analyticsRouter);
  * - 以 backend 的 __dirname 向上尋找 repo root
  * - 若找不到靜態資料夾或 index.html，會在 logs 顯示警告
  */
-const staticPath = path.join(__dirname, '..');
-if (fs.existsSync(staticPath)) {
-    console.log(`[static] Serving static files from ${staticPath}`);
-    app.use(express.static(staticPath));
-} else {
-    console.warn(`[static] Warning: static path not found: ${staticPath}`);
+// Try to locate a static directory that contains index.html. Different
+// deployment environments (Railway/Render/Docker) may place the repo at
+// different working directories, so probe several likely candidates.
+const candidates = [
+    path.join(__dirname, '..'),           // repo root relative to backend
+    path.join(__dirname, '..', 'public'), // repo root / public
+    path.join(__dirname, 'public'),       // backend/public
+    path.join(process.cwd(), '..'),       // parent of current cwd
+    path.join(process.cwd(), '.'),        // current working dir
+    path.resolve('/workspace'),           // some CI use /workspace
+    path.resolve('/')                     // fallback to root
+];
+
+let chosenStatic = null;
+for (const c of candidates) {
+    try {
+        const idx = path.join(c, 'index.html');
+        if (fs.existsSync(idx)) {
+            chosenStatic = c;
+            console.log(`[static] Found index.html in ${c}`);
+            break;
+        }
+    } catch (e) {
+        // ignore inaccessible paths
+    }
 }
 
-// Fallback: for non-API and non-auth routes, serve index.html if present
+if (chosenStatic) {
+    console.log(`[static] Serving static files from ${chosenStatic}`);
+    app.use(express.static(chosenStatic));
+} else {
+    console.warn('[static] Warning: could not locate index.html in any candidate paths.');
+    console.warn('[static] Candidates checked:', candidates.join(', '));
+}
+
+// Fallback: for non-API and non-auth routes, serve index.html if present in chosenStatic
 app.use((req, res, next) => {
-    // Let API and auth routes go through
     if (req.path.startsWith('/api') || req.path.startsWith('/auth')) return next();
 
-    const indexFile = path.join(staticPath, 'index.html');
-    if (fs.existsSync(indexFile)) {
-        return res.sendFile(indexFile);
+    if (chosenStatic) {
+        const indexFile = path.join(chosenStatic, 'index.html');
+        if (fs.existsSync(indexFile)) {
+            return res.sendFile(indexFile);
+        }
     }
 
-    // No index.html — continue to next handler (will eventually return JSON 404)
+    // No index.html found — continue to next handler which will return JSON 404
     return next();
 });
 
