@@ -9,6 +9,20 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: tixmaster
+        options: >-
+          --health-cmd pg_isready -U postgres
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     env:
       BASE_URL: http://localhost:3000
     steps:
@@ -42,16 +56,62 @@ jobs:
         run: |
           npx playwright install --with-deps
 
-      - name: Create backend .env from secret (optional)
+      - name: Create backend .env from secrets (provide defaults)
         run: |
-          # If JWT_SECRET is provided as a secret, write it into backend/.env
+          mkdir -p backend
+          # Write JWT secret if provided, otherwise leave default dev secret
           if [ -n "${{ secrets.JWT_SECRET }}" ]; then
-            mkdir -p backend
             echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" > backend/.env
-            echo "Wrote backend/.env from secret"
           else
-            echo "JWT_SECRET secret not set; skipping backend/.env creation"
+            echo "JWT_SECRET=dev_secret_for_tests" > backend/.env
           fi
+          # Provide Auth0 values: use secrets if set, otherwise use placeholders so passport-auth0 won't throw
+          if [ -n "${{ secrets.AUTH0_DOMAIN }}" ]; then
+            echo "AUTH0_DOMAIN=${{ secrets.AUTH0_DOMAIN }}" >> backend/.env
+          else
+            echo "AUTH0_DOMAIN=example.local" >> backend/.env
+          fi
+          if [ -n "${{ secrets.AUTH0_CLIENT_ID }}" ]; then
+            echo "AUTH0_CLIENT_ID=${{ secrets.AUTH0_CLIENT_ID }}" >> backend/.env
+          else
+            echo "AUTH0_CLIENT_ID=local-client-id" >> backend/.env
+          fi
+          if [ -n "${{ secrets.AUTH0_CLIENT_SECRET }}" ]; then
+            echo "AUTH0_CLIENT_SECRET=${{ secrets.AUTH0_CLIENT_SECRET }}" >> backend/.env
+          else
+            echo "AUTH0_CLIENT_SECRET=local-client-secret" >> backend/.env
+          fi
+          # Optional callback URL
+          if [ -n "${{ secrets.AUTH0_CALLBACK_URL }}" ]; then
+            echo "AUTH0_CALLBACK_URL=${{ secrets.AUTH0_CALLBACK_URL }}" >> backend/.env
+          else
+            echo "AUTH0_CALLBACK_URL=http://localhost:3000/auth/callback" >> backend/.env
+          fi
+          echo "Wrote backend/.env (with defaults for Auth0 if secrets absent)"
+
+      - name: Wait for Postgres and initialize DB
+        run: |
+          echo "Installing postgres client..."
+          sudo apt-get update -y
+          sudo apt-get install -y postgresql-client
+          echo "Waiting for postgres service to be ready..."
+          for i in $(seq 1 30); do
+            if pg_isready -h localhost -p 5432 -U postgres > /dev/null 2>&1; then
+              echo "Postgres is ready"
+              break
+            fi
+            sleep 1
+          done
+          echo "Creating database (if needed) and applying schema..."
+          export PGPASSWORD=postgres
+          createdb -h localhost -U postgres tixmaster || true
+          if [ -f schema_postgresql.sql ]; then
+            psql -h localhost -U postgres -d tixmaster -f schema_postgresql.sql
+          elif [ -f init.sql ]; then
+            psql -h localhost -U postgres -d tixmaster -f init.sql
+          fi
+          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/tixmaster" >> backend/.env
+          echo "Database initialized and DATABASE_URL appended to backend/.env"
 
       - name: Generate admin JWT and export as env
         id: gen_token

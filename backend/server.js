@@ -1,8 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const session = require('express-session');  // NEW - Session 管理
-const passport = require('./config/passport');  // NEW - Passport 設定
 require('dotenv').config();
+const passport = require('./config/passport');  // NEW - Passport 設定
 
 const errorHandler = require('./middleware/errorHandler');
 const featureFlagsMiddleware = require('./middleware/featureFlags');
