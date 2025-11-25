@@ -150,6 +150,64 @@
             padding: 40px;
             color: #9ca3af;
         }
+
+        /* Feature Flags Section */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 26px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #10b981;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        .flag-description {
+            color: #6b7280;
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+
+        .flag-updated {
+            color: #9ca3af;
+            font-size: 0.75rem;
+            font-style: italic;
+        }
     </style>
 </head>
 
@@ -226,7 +284,30 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Feature Flags 功能開關管理 -->
+        <div class="table-section">
+            <h2>🚩 功能開關管理 (Feature Flags)</h2>
+            <table id="featureFlagsTable">
+                <thead>
+                    <tr>
+                        <th>功能名稱</th>
+                        <th>功能說明</th>
+                        <th>狀態</th>
+                        <th>更新時間</th>
+                    </tr>
+                </thead>
+                <tbody id="featureFlagsBody">
+                    <tr>
+                        <td colspan="4" class="empty-state">載入中...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
+
+    <!-- Load Feature Flags Service -->
+    <script src="featureFlags.js"></script>
 
     <script>
         // 檢查管理員登入狀態
@@ -295,11 +376,82 @@
             }
         }
 
-        // 載入資料
-        loadDashboardData();
+        // 載入 Feature Flags
+        async function loadFeatureFlags() {
+            try {
+                await FeatureFlags.init();
+                const flags = FeatureFlags.getAll();
 
-        // 每 5 秒自動更新一次資料
+                const featureFlagsBody = document.getElementById('featureFlagsBody');
+                const flagKeys = Object.keys(flags);
+
+                if (flagKeys.length === 0) {
+                    featureFlagsBody.innerHTML = '<tr><td colspan="4" class="empty-state">尚無功能開關</td></tr>';
+                    return;
+                }
+
+                featureFlagsBody.innerHTML = flagKeys.map(key => {
+                    const flag = flags[key];
+                    const updatedTime = flag.updatedAt ? new Date(flag.updatedAt).toLocaleString('zh-TW') : '-';
+
+                    return `
+                        <tr>
+                            <td><strong>${key}</strong></td>
+                            <td>
+                                <div>${flag.description || '無說明'}</div>
+                                <div class="flag-updated">最後更新: ${updatedTime}</div>
+                            </td>
+                            <td>
+                                <label class="toggle-switch">
+                                    <input type="checkbox"
+                                           ${flag.enabled ? 'checked' : ''}
+                                           onchange="toggleFeatureFlag('${key}', this.checked)">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <span style="margin-left: 10px; font-weight: 600; color: ${flag.enabled ? '#10b981' : '#6b7280'}">
+                                    ${flag.enabled ? '已啟用' : '已停用'}
+                                </span>
+                            </td>
+                            <td>${updatedTime}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Failed to load feature flags:', error);
+                document.getElementById('featureFlagsBody').innerHTML =
+                    '<tr><td colspan="4" class="empty-state" style="color: #ef4444;">載入失敗：無法連接到後端伺服器</td></tr>';
+            }
+        }
+
+        // 切換 Feature Flag
+        async function toggleFeatureFlag(key, enabled) {
+            try {
+                await FeatureFlags.updateFlag(key, enabled);
+                console.log(`Feature flag ${key} updated to ${enabled}`);
+
+                // 重新載入 Feature Flags
+                await loadFeatureFlags();
+
+                // 顯示成功訊息
+                alert(`功能開關 "${key}" 已${enabled ? '啟用' : '停用'}`);
+            } catch (error) {
+                console.error('Failed to update feature flag:', error);
+                alert(`更新失敗: ${error.message}`);
+
+                // 重新載入以恢復原狀
+                await loadFeatureFlags();
+            }
+        }
+
+        // 載入所有資料
+        loadDashboardData();
+        loadFeatureFlags();
+
+        // 每 5 秒自動更新使用者資料
         setInterval(loadDashboardData, 5000);
+
+        // 每 30 秒自動更新 Feature Flags
+        setInterval(loadFeatureFlags, 30000);
     </script>
 </body>
 

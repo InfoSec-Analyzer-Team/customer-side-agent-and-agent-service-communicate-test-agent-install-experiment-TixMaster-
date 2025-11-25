@@ -5,6 +5,7 @@ const passport = require('./config/passport');  // NEW - Passport 設定
 require('dotenv').config();
 
 const errorHandler = require('./middleware/errorHandler');
+const featureFlagsMiddleware = require('./middleware/featureFlags');
 
 // Import routes
 const usersRouter = require('./routes/users');
@@ -69,11 +70,19 @@ app.use(session({
 
 /**
  * 🔑 Passport 初始化
- * 
+ *
  * 必須在 session 之後初始化！
  */
 app.use(passport.initialize());  // 初始化 Passport
 app.use(passport.session());     // 讓 Passport 使用 session
+
+/**
+ * 🚩 Feature Flags Middleware
+ *
+ * 將 feature flags 附加到每個請求
+ * 可在路由中使用 req.featureFlags.isEnabled('FLAG_KEY')
+ */
+app.use(featureFlagsMiddleware.attachFeatureFlags);
 
 /**
  * 🏥 Health check endpoint
