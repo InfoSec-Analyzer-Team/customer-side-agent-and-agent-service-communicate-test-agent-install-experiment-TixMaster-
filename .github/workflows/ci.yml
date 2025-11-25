@@ -58,20 +58,37 @@ jobs:
         run: |
           echo "ADMIN_TOKEN=$(node tools/gen_admin_jwt.js)" >> $GITHUB_ENV
 
-      - name: Start backend server (background)
+      - name: Start backend server (background via npm)
         run: |
-          # start backend in background and record pid & logs
           if [ -f backend/package.json ]; then
-            nohup node backend/server.js > backend/server.log 2>&1 & echo $! > backend/server.pid || true
+            # ensure backend deps installed
+            npm ci --prefix backend || (cat backend/npm-install.log 2>/dev/null || true; exit 1)
+            # start via npm to ensure correct local node_modules resolution
+            npm --prefix backend start > backend/server.log 2>&1 & echo $! > backend/server.pid || true
             echo "Started backend (if applicable). PID: $(cat backend/server.pid 2>/dev/null || echo 'none')"
           else
             echo "No backend/package.json found; skipping backend start"
           fi
 
-      - name: Wait for backend health endpoint
+      - name: Wait for backend health endpoint (poll, up to 60s)
         run: |
-          # wait up to 30s for health endpoint
-          npx wait-on http://localhost:3000/health --timeout 30000 || (echo "backend didn't respond to /health" && exit 1)
+          echo "Waiting up to 60s for http://localhost:3000/health"
+          SUCCESS=0
+          for i in $(seq 1 60); do
+            if curl -sSf http://localhost:3000/health > /dev/null 2>&1; then
+              echo "Backend health OK after ${i}s"
+              SUCCESS=1
+              break
+            fi
+            sleep 1
+          done
+          if [ "$SUCCESS" -ne 1 ]; then
+            echo "backend didn't respond to /health within 60s"
+            echo "==== backend/server.log (tail) ===="
+            tail -n 200 backend/server.log || true
+            echo "==== end server.log ===="
+            exit 1
+          fi
 
       - name: Run npm audit (backend)
         run: |
