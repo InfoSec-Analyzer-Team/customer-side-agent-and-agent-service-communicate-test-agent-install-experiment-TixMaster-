@@ -224,10 +224,10 @@
             }
         });
 
-        // Google OAuth 登入
+        // 第三方 OAuth 登入（Auth0）
         function loginWithGoogle() {
-            // 導向後端 OAuth 路由
-            window.location.href = 'http://localhost:3000/auth/google';
+            // 導向後端 OAuth 路由，啟動 Auth0 登入流程
+            window.location.href = 'http://localhost:3000/auth/login';
         }
 
         // 檢查 URL 中的 token (OAuth 回調)

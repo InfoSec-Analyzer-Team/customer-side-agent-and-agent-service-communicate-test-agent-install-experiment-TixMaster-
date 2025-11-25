@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const passport = require('../config/passport');
 const jwt = require('jsonwebtoken');
+const { ROLES } = require('../config/roles');
 
 /**
  * 🚀 OAuth 路由檔案
@@ -25,13 +26,11 @@ const jwt = require('jsonwebtoken');
  * 3. Passport 重導向到 Google 登入頁面（附帶 client_id, redirect_uri 等參數）
  * 4. 使用者在 Google 頁面登入並授權
  */
-router.get('/google',
-    passport.authenticate('google', {
-        // 要求 Google 提供的資料權限
-        scope: ['profile', 'email'],
-
-        // 使用 session 來追蹤登入狀態
-        session: false  // 我們用 JWT，不需要 session
+// 開始 Auth0 登入流程
+router.get('/login',
+    passport.authenticate('auth0', {
+        scope: ['openid', 'profile', 'email'],
+        session: false
     })
 );
 
@@ -53,63 +52,30 @@ router.get('/google',
  * - ?code=xxx          (成功時)
  * - ?error=xxx         (失敗時)
  */
-router.get('/google/callback',
-    passport.authenticate('google', {
-        // 驗證失敗時的處理
+router.get('/callback',
+    passport.authenticate('auth0', {
         failureRedirect: '/login.html?error=oauth_failed',
-
-        // 不使用 session（因為我們用 JWT）
         session: false
     }),
 
-    // ✅ 認證成功的處理函數
     async (req, res) => {
         try {
-            // req.user 是從 passport.js 的 verify callback 傳來的
             const user = req.user;
+            console.log('✅ Auth0 登入成功:', user && user.email);
 
-            console.log('✅ OAuth 登入成功:', user.email);
-
-            // 🎫 產生 JWT token
-            // 這個 token 包含使用者資訊，前端會用它來證明身份
             const token = jwt.sign(
                 {
                     userId: user.id,
                     email: user.email,
-                    // 特別標記：這是 OAuth 登入的使用者
-                    loginMethod: 'google'
+                    role: user.role || ROLES.USER,
+                    loginMethod: 'auth0'
                 },
                 process.env.JWT_SECRET,
-                { expiresIn: '7d' }  // 7 天後過期
+                { expiresIn: '7d' }
             );
 
-            /**
-             * 🔀 重導向回前端首頁，並帶著 token
-             * 
-             * 方式一：透過 URL fragment (#)
-             * 優點：token 不會被伺服器記錄
-             * 缺點：需要前端 JavaScript 處理
-             */
+            // 透過 URL fragment 回傳 token（前端會解析並儲存）
             res.redirect(`/login.html#token=${token}`);
-
-            /**
-             * 方式二：透過 Query parameter (?)
-             * 缺點：token 會出現在 URL，較不安全
-             * res.redirect(`/index.html?token=${token}`);
-             */
-
-            /**
-             * 方式三：透過 Cookie
-             * 優點：更安全
-             * 缺點：需要處理 CORS
-             * 
-             * res.cookie('token', token, {
-             *   httpOnly: true,
-             *   secure: process.env.NODE_ENV === 'production',
-             *   maxAge: 7 * 24 * 60 * 60 * 1000  // 7 days
-             * });
-             * res.redirect('/index.html');
-             */
 
         } catch (error) {
             console.error('❌ 回調處理錯誤:', error);

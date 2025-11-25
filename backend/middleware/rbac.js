@@ -31,8 +31,8 @@ const checkRole = (requiredRole) => {
 };
 
 /**
- * Check if user has a specific permission
- * @param {string} permission - Permission required
+ * Check if user has a specific permission or any of a list of permissions
+ * @param {string|string[]} permission - Permission required or array of permissions (OR logic)
  */
 const checkPermission = (permission) => {
     return (req, res, next) => {
@@ -43,10 +43,15 @@ const checkPermission = (permission) => {
         const userRole = req.user.role || ROLES.USER;
         const permissions = ROLE_PERMISSIONS[userRole] || [];
 
-        if (!permissions.includes(permission)) {
+        // Normalize to array for OR-checking
+        const required = Array.isArray(permission) ? permission : [permission];
+
+        const hasAny = required.some(p => permissions.includes(p));
+
+        if (!hasAny) {
             return res.status(403).json({
                 error: 'Forbidden',
-                message: `Missing permission: ${permission}`
+                message: `Missing permission: ${required.join(', ')}`
             });
         }
 

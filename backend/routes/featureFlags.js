@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
+const authenticateToken = require('../middleware/auth');
+const { checkPermission } = require('../middleware/rbac');
+const { PERMISSIONS } = require('../config/roles');
 
 // GET /api/feature-flags - 取得所有功能開關
 router.get('/', async (req, res, next) => {
@@ -53,7 +56,8 @@ router.get('/:key', async (req, res, next) => {
 });
 
 // PUT /api/feature-flags/:key - 更新功能開關 (管理員用)
-router.put('/:key', async (req, res, next) => {
+// Require authentication and manage-feature-flags permission
+router.put('/:key', authenticateToken, checkPermission(PERMISSIONS.MANAGE_FEATURE_FLAGS), async (req, res, next) => {
     try {
         const { key } = req.params;
         const { enabled } = req.body;

@@ -9,7 +9,7 @@ CREATE TYPE discount_type AS ENUM ('percentage', 'fixed_amount');
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL, -- 修正：這裡存放的是 Hash 值，非明文
+    password_hash VARCHAR(255), -- 修正：這裡存放的是 Hash 值，對 OAuth-only 帳號允許 NULL
     name VARCHAR(100) NOT NULL,
     phone VARCHAR(20),
     role VARCHAR(50) DEFAULT 'user', -- RBAC 角色

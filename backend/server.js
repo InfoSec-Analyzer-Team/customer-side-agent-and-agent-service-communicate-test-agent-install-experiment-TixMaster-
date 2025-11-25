@@ -140,8 +140,8 @@ app.listen(PORT, () => {
     console.log(`🚀 TixMaster API server running on http://localhost:${PORT}`);
     console.log(`📊 Health check: http://localhost:${PORT}/health`);
     console.log(`🔐 OAuth routes:`);
-    console.log(`   - Google login: http://localhost:${PORT}/auth/google`);
-    console.log(`   - Callback: http://localhost:${PORT}/auth/google/callback`);
+    console.log(`   - Auth0 login: http://localhost:${PORT}/auth/login`);
+    console.log(`   - Callback: http://localhost:${PORT}/auth/callback`);
 });
 
 module.exports = app;

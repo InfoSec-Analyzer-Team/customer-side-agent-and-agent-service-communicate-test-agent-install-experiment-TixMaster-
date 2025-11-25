@@ -1,5 +1,5 @@
 const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
+const Auth0Strategy = require('passport-auth0');
 const db = require('./database');
 
 /**
@@ -13,67 +13,41 @@ const db = require('./database');
  * 5. 我們在 callback 中處理使用者資料（存入資料庫）
  */
 
-// 設定 Google OAuth 策略
-passport.use(new GoogleStrategy({
-    // Client ID - Google 用來識別你的應用程式
-    clientID: process.env.GOOGLE_CLIENT_ID,
-
-    // Client Secret - 證明你的應用程式身份（絕不能洩露！）
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-
-    // Callback URL - Google 授權後要跳回的網址
-    // 必須與 Google Console 設定的一致
-    callbackURL: process.env.GOOGLE_CALLBACK_URL || "http://localhost:3000/auth/google/callback",
-
-    // 要求 Google 提供的資料範圍
-    // 'profile' = 姓名、照片等基本資料
-    // 'email' = 電子郵件地址
-    scope: ['profile', 'email']
+// 設定 Auth0 OAuth 策略
+passport.use(new Auth0Strategy({
+    domain: process.env.AUTH0_DOMAIN,
+    clientID: process.env.AUTH0_CLIENT_ID,
+    clientSecret: process.env.AUTH0_CLIENT_SECRET,
+    callbackURL: process.env.AUTH0_CALLBACK_URL || "http://localhost:3000/auth/callback",
+    scope: 'openid profile email'
 },
 
-    /**
-     * 🎯 Verify Callback - Google 授權成功後會呼叫這個函數
-     * 
-     * @param {string} accessToken - 存取令牌（用來呼叫 Google API）
-     * @param {string} refreshToken - 刷新令牌（token 過期時用來取得新 token）
-     * @param {object} profile - Google 使用者資料
-     * @param {function} done - 完成回調（告訴 Passport 處理結果）
-     * 
-     * profile 物件範例：
-     * {
-     *   id: '107234567890123456789',
-     *   displayName: '王小明',
-     *   emails: [{ value: 'user@gmail.com', verified: true }],
-     *   photos: [{ value: 'https://...' }]
-     * }
-     */
-    async function (accessToken, refreshToken, profile, done) {
+    async function (accessToken, refreshToken, extraParams, profile, done) {
         try {
-            console.log('📧 Google OAuth - 收到使用者資料:', profile.displayName);
+            console.log('📧 Auth0 OAuth - 收到使用者資料:', profile.displayName || profile.username);
 
-            // Step 1: 檢查這個 Google 帳號是否已經註冊過
+            const providerId = profile.id;
+
+            // Step 1: 檢查這個 Auth0 帳號是否已經註冊過
             const oauthCheck = await db.query(
                 'SELECT * FROM oauth_accounts WHERE provider = $1 AND provider_user_id = $2',
-                ['google', profile.id]
+                ['auth0', providerId]
             );
 
             let user;
 
             if (oauthCheck.rows.length > 0) {
-                // 🔄 情況 A: 已經註冊過 - 直接登入
                 console.log('✅ 使用者已存在，直接登入');
-
                 const oauthAccount = oauthCheck.rows[0];
 
-                // 取得完整使用者資料
                 const userResult = await db.query(
-                    'SELECT id, email, name, phone, created_at FROM users WHERE id = $1',
+                    'SELECT id, email, name, phone, role FROM users WHERE id = $1',
                     [oauthAccount.user_id]
                 );
 
                 user = userResult.rows[0];
 
-                // 更新 OAuth token（Google 可能會給新的 token）
+                // 更新 token
                 await db.query(
                     `UPDATE oauth_accounts 
            SET access_token = $1, 
@@ -85,51 +59,38 @@ passport.use(new GoogleStrategy({
                 );
 
             } else {
-                // 🆕 情況 B: 第一次用 Google 登入 - 建立新帳號
-                console.log('🆕 新使用者，建立帳號');
+                console.log('🆕 新使用者或連結現有帳號');
 
                 const email = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
-                const name = profile.displayName || 'Google User';
+                const name = profile.displayName || profile.username || 'Auth0 User';
 
-                // 檢查這個 email 是否已經用傳統方式註冊過
-                const existingUser = await db.query(
-                    'SELECT * FROM users WHERE email = $1',
-                    [email]
-                );
+                // 如果此 email 已存在，將 OAuth 帳號連結到現有使用者
+                const existingUser = email ? await db.query('SELECT * FROM users WHERE email = $1', [email]) : { rows: [] };
 
                 if (existingUser.rows.length > 0) {
-                    // 👤 Email 已存在 - 將 OAuth 帳號連結到現有使用者
-                    console.log('🔗 Email 已存在，連結 OAuth 帳號');
                     user = existingUser.rows[0];
-
                 } else {
-                    // 🎉 完全新的使用者 - 建立新紀錄
                     const userResult = await db.query(
                         `INSERT INTO users (email, name, password_hash, created_at) 
              VALUES ($1, $2, NULL, NOW()) 
-             RETURNING id, email, name, phone, created_at`,
+             RETURNING id, email, name, phone, role`,
                         [email, name]
-                        // 注意：password_hash 是 NULL，因為 OAuth 使用者不需要密碼
                     );
-
                     user = userResult.rows[0];
                 }
 
-                // 建立 OAuth 帳號紀錄
                 await db.query(
                     `INSERT INTO oauth_accounts 
            (user_id, provider, provider_user_id, access_token, refresh_token, token_expires_at, created_at)
            VALUES ($1, $2, $3, $4, $5, NOW() + INTERVAL '1 hour', NOW())`,
-                    [user.id, 'google', profile.id, accessToken, refreshToken]
+                    [user.id, 'auth0', providerId, accessToken, refreshToken]
                 );
             }
 
-            // ✅ 完成！告訴 Passport 認證成功
-            // user 物件會被傳給 serializeUser
             done(null, user);
 
         } catch (error) {
-            console.error('❌ Google OAuth 錯誤:', error);
+            console.error('❌ Auth0 OAuth 錯誤:', error);
             done(error, null);
         }
     }

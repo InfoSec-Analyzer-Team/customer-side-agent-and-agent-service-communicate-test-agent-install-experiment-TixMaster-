@@ -6,7 +6,7 @@
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,  -- bcrypt 雜湊
+    password_hash VARCHAR(255),  -- bcrypt 雜湊；允許 NULL 以支援 OAuth-only 帳號
     name VARCHAR(100) NOT NULL,
     phone VARCHAR(20),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

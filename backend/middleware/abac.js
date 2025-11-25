@@ -43,22 +43,33 @@ const checkPolicy = (policyFn) => {
 
 /**
  * Policy: User can only access their own data
- * Assumes resource ID is in req.params.id or req.user.id matches target
+ * Checks several common places for IDs and compares as strings to avoid
+ * type mismatches (number vs string). Returns true when the user is the
+ * target owner. For profile-style endpoints where no target ID is present
+ * we treat the requestor as the owner (backwards-compatible behavior).
  */
 const isOwner = (user, req) => {
-    // If accessing /users/:id
-    if (req.params.id) {
-        return user.id === req.params.id;
+    const userId = user && (user.userId || user.id);
+
+    // If accessing /resources/:id or similar
+    if (req.params && req.params.id) {
+        return String(userId) === String(req.params.id);
     }
-    // If accessing /users/profile (implicit own profile)
-    return true;
+
+    // If caller provided an explicit target in body (e.g., { id: '...' })
+    if (req.body && (req.body.id || req.body.userId)) {
+        return String(userId) === String(req.body.id || req.body.userId);
+    }
+
+    // Fallback: profile-style endpoints (no explicit target) -> allow
+    return Boolean(userId);
 };
 
 /**
  * Policy: User is admin OR owner
  */
 const isAdminOrOwner = (user, req) => {
-    if (user.role === 'admin') return true;
+    if (user && (user.role === 'admin' || user.role === 'ADMIN')) return true;
     return isOwner(user, req);
 };
 
