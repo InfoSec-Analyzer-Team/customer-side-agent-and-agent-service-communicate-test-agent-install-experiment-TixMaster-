@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node migrate_database.js:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

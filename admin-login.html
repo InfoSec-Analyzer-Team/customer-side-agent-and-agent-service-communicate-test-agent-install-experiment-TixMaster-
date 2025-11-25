@@ -115,8 +115,8 @@
 
         <form id="adminLoginForm">
             <div class="form-group">
-                <label for="username">管理員帳號</label>
-                <input type="text" id="username" name="username" required placeholder="請輸入管理員帳號">
+                <label for="username">Email</label>
+                <input type="email" id="username" name="username" required placeholder="請輸入管理員 Email">
             </div>
 
             <div class="form-group">
@@ -128,30 +128,56 @@
         </form>
 
         <div class="back-link">
-            <a href="simple.html">← 返回首頁</a>
+            <a href="index.html">← 返回首頁</a>
         </div>
     </div>
 
     <script>
-        document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
+        const API_BASE_URL = 'http://localhost:3000/api';
+
+        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const username = document.getElementById('username').value;
+            const email = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
-            // 簡單的管理員驗證（實際應該由後端驗證）
-            // 預設管理員帳號：admin / admin123
-            if (username === 'admin' && password === 'admin123') {
-                // 儲存管理員登入狀態
+            try {
+                // 調用後端 API 登入
+                const response = await fetch(`${API_BASE_URL}/users/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || '登入失敗');
+                }
+
+                const data = await response.json();
+
+                // 檢查是否為管理員
+                if (data.user.role !== 'admin') {
+                    alert('此帳號沒有管理員權限');
+                    return;
+                }
+
+                // 儲存管理員登入狀態和 token
                 localStorage.setItem('adminUser', JSON.stringify({
-                    username: username,
+                    username: data.user.name,
+                    email: data.user.email,
+                    token: data.token,
+                    role: data.user.role,
                     loginTime: new Date().toISOString()
                 }));
 
                 alert('登入成功！');
                 window.location.href = 'admin-dashboard.html';
-            } else {
-                alert('帳號或密碼錯誤');
+            } catch (error) {
+                console.error('登入錯誤:', error);
+                alert(`登入失敗: ${error.message}`);
             }
         });
     </script>

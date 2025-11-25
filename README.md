@@ -20,7 +20,7 @@ TixMaster 是一個現代化的售票系統，採用 **Hypothesis-Driven Develop
 
 ```
 TixMaster/
-├── simple.html              # 🏠 首頁（活動列表）
+├── index.html               # 🏠 首頁（活動列表）
 ├── register.html            # 📝 使用者註冊頁面
 ├── login.html               # 🔐 使用者登入頁面
 ├── event-detail.html        # 🎤 活動詳情頁面（購票）
@@ -36,7 +36,7 @@ TixMaster/
 
 1. **瀏覽活動**
    ```
-   雙擊開啟 simple.html
+   雙擊開啟 index.html
    ```
 
 2. **註冊帳號**
@@ -61,13 +61,13 @@ TixMaster/
 
 ```bash
 # Windows
-start simple.html
+start index.html
 
 # Mac
-open simple.html
+open index.html
 
 # Linux
-xdg-open simple.html
+xdg-open index.html
 ```
 
 ---

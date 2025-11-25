@@ -132,10 +132,19 @@ const FeatureFlags = (() => {
             const requestBody = { enabled: booleanEnabled };
             console.log('[FeatureFlags] Request body:', JSON.stringify(requestBody));
 
+            // Get admin token from localStorage
+            const adminUser = JSON.parse(localStorage.getItem('adminUser') || 'null');
+            const token = adminUser ? adminUser.token : null;
+
+            if (!token) {
+                throw new Error('管理員未登入或 token 已過期');
+            }
+
             const response = await fetch(`${API_BASE_URL}/feature-flags/${key}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(requestBody)
             });

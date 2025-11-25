@@ -72,7 +72,7 @@ CREATE TABLE analytics_events (
    - 將 `ENABLE_CHECKOUT_TIMER` 切換為 **OFF** (停用)
 
 2. **執行購票流程 (建議 10-20 次)**：
-   - 打開 [simple.html](simple.html)
+   - 打開 [index.html](index.html)
    - 點擊任一活動 → 進入活動詳情頁
    - 點擊「立即購票」→ 進入結帳頁
    - **重點：此時應該看不到倒數計時器**
@@ -91,7 +91,7 @@ CREATE TABLE analytics_events (
    - 將 `ENABLE_CHECKOUT_TIMER` 切換為 **ON** (啟用)
 
 2. **執行購票流程 (建議 10-20 次)**：
-   - 打開 [simple.html](simple.html)
+   - 打開 [index.html](index.html)
    - 點擊任一活動 → 進入活動詳情頁
    - 點擊「立即購票」→ 進入結帳頁
    - **重點：此時應該看到紅色倒數計時器橫幅**
