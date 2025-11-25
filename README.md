@@ -293,3 +293,72 @@ GET    /api/orders/:id      # 查詢訂單
 5. 🔜 部署到雲端平台
 
 **目前進度：前端完成 ✅ | 資料庫設計完成 ✅**
+
+---
+
+## 🧪 CI / 自動化測試 (GitHub Actions)
+
+已將測試整合到 GitHub Actions：工作流程檔案位於 `.github/workflows/ci.yml`。CI 會在 push / pull_request 到 `main` 或 `dev_front_end` 時執行：
+
+- 依序安裝 Python 與 Node 環境
+- 安裝 Python 與 npm 開發套件
+- 執行 `pytest`（產生 `reports/test-report.html` 與 `reports/tests-junit.xml`）
+- 執行 Playwright E2E（產生 `reports/playwright-report`）
+- 上傳 `reports/` 作為工作產物
+
+必要的 GitHub Secret（請在 repo Settings -> Secrets 中設定）：
+
+- `JWT_SECRET`：用來在 CI 中產生本地 admin JWT（`tools/gen_admin_jwt.js` 會從 `backend/.env` 或此 secret 讀取），建議只在 CI 中以 secrets 提供。
+
+如何在 CI 中產生 admin token：
+
+- workflow 內會把 `JWT_SECRET` 寫入 `backend/.env`（當 secret 存在時），然後執行 `node tools/gen_admin_jwt.js` 並把輸出放入 `ADMIN_TOKEN` 環境變數，供 Playwright 與 pytest 使用。
+
+查看報告：
+
+- Playwright HTML report：`reports/playwright-report/index.html`（或在 CI 用 `npx playwright show-report`）
+- pytest HTML report：`reports/test-report.html`
+- JUnit XML：`reports/tests-junit.xml`
+
+本地模擬 CI（單機開發環境）指令：
+
+PowerShell (Windows):
+```powershell
+# 產生 admin token (選填，若使用 backend/.env 的 JWT_SECRET)
+node tools/gen_admin_jwt.js > admin.token
+$env:ADMIN_TOKEN = Get-Content admin.token -Raw
+
+# 安裝（一次）
+python -m pip install --upgrade pip
+pip install -r requirements-dev.txt
+npm ci
+npx playwright install --with-deps
+
+# 執行 pytest
+pytest -q --junitxml=reports/tests-junit.xml --html=reports/test-report.html
+
+# 執行 Playwright
+npx playwright test --reporter=html
+
+# 打開 Playwright report（本機）
+npx playwright show-report
+```
+
+Linux / macOS (bash):
+```bash
+# (同上)
+node tools/gen_admin_jwt.js > admin.token
+export ADMIN_TOKEN=$(cat admin.token)
+python -m pip install --upgrade pip
+pip install -r requirements-dev.txt
+npm ci
+npx playwright install --with-deps
+pytest -q --junitxml=reports/tests-junit.xml --html=reports/test-report.html
+npx playwright test --reporter=html
+npx playwright show-report
+```
+
+安全與 CI 建議：
+
+- 在 CI 中使用 GitHub Secrets 提供 `JWT_SECRET`，請不要把機敏資料直接加入 repo。
+- 若將來要加入真實資料庫測試，請在 CI 使用受控的測試資料庫（或 GitHub Actions 的 ephemeral DB）並把連線字串放入 secrets（例如 `DATABASE_URL`）。
