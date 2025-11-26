@@ -28,7 +28,12 @@ const PORT = process.env.PORT || 3000;
  */
 
 // CORS - 允許跨域請求
-app.use(cors());
+// CORS - 允許跨域請求，並允許帶上 credentials（cookie）
+const corsOptions = {
+    origin: process.env.FRONTEND_URL || true,
+    credentials: true
+};
+app.use(cors(corsOptions));
 
 // Body Parser - 解析請求內容
 app.use(express.json());  // 解析 JSON
@@ -58,18 +63,25 @@ app.use(session({
     // 不要為未登入的使用者建立 session
     saveUninitialized: false,
 
-    // Cookie 設定
-    cookie: {
-        // Cookie 有效期限（7 天）
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        // Cookie 設定
+        cookie: {
+            // Cookie 有效期限（7 天）
+            maxAge: 7 * 24 * 60 * 60 * 1000,
 
-        // HttpOnly: 防止 JavaScript 存取 cookie（防 XSS 攻擊）
-        httpOnly: true,
+            // HttpOnly: 防止 JavaScript 存取 cookie（防 XSS 攻擊）
+            httpOnly: true,
 
-        // Secure: 只在 HTTPS 使用（生產環境應該設為 true）
-        secure: process.env.NODE_ENV === 'production'
-    }
+            // Secure: 只在 HTTPS 使用（生產環境應該設為 true）
+            secure: process.env.NODE_ENV === 'production',
+
+            // sameSite: 在 OAuth callback 時，瀏覽器是否會帶上 cookie
+            // 在 production（跨站重導回）情況下使用 'none' 並搭配 secure=true
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+        }
 }));
+
+    // 當部署在 proxy（如 Railway）時，需要信任 proxy 以正確處理 secure cookie
+    app.set('trust proxy', 1);
 
 /**
  * 🔑 Passport 初始化
