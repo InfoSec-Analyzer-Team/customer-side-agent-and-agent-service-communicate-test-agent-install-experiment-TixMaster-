@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登入 - TixMaster</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+            padding: 50px 40px;
+            text-align: center;
+        }
+
+        .logo h1 {
+            color: #667eea;
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+        }
+
+        .message {
+            color: #333;
+            font-size: 1rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #f9fafb;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .links {
+            margin-top: 30px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .links a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        .spinner {
+            display: none;
+            margin: 20px auto;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .redirecting .spinner {
+            display: block;
+        }
+
+        .redirecting .message {
+            color: #667eea;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>🎫</h1>
+            <p>登入 TixMaster</p>
+        </div>
+
+        <div class="success-message" id="successMessage">
+            ✅ 登入成功！正在導向...
+        </div>
+
+        <div class="message" id="message">
+            點擊下方按鈕使用 Auth0 進行安全登入
+        </div>
+
+        <div class="spinner" id="spinner"></div>
+
+        <button class="btn" id="loginBtn" onclick="startOAuth()">
+            🔐 使用 Auth0 登入
+        </button>
+
+        <button class="btn btn-secondary" onclick="location.href='admin-login.html'">
+            👑 管理員登入
+        </button>
+
+        <div class="links">
+            還沒有帳號？<a href="register.html">立即註冊</a>
+            <br><br>
+            <a href="index.html">← 返回首頁</a>
+        </div>
+    </div>
+
+    <script>
+        // const API_BASE_URL = 'http://localhost:3000';
+
+        function startOAuth() {
+            document.getElementById('message').textContent = '正在導向 Auth0 登入頁面...';
+            document.body.querySelector('.login-container').classList.add('redirecting');
+            document.getElementById('loginBtn').style.display = 'none';
+
+            // 導向到後端 OAuth 登入路由（使用相對路徑，會導向同一個 host）
+            setTimeout(() => {
+                window.location.href = '/auth/login';
+            }, 500);
+        }
+
+        // 檢查 URL fragment 中是否有 token（從 OAuth callback 回來）
+        if (window.location.hash) {
+            const hash = window.location.hash.substring(1);
+            const params = new URLSearchParams(hash);
+            const token = params.get('token');
+
+            if (token) {
+                // 儲存 token（統一使用 'token' key）
+                localStorage.setItem('token', token);
+
+                // 顯示成功訊息
+                document.getElementById('successMessage').classList.add('show');
+                document.getElementById('message').style.display = 'none';
+                document.getElementById('loginBtn').style.display = 'none';
+
+                // 解析 token 獲取用戶資訊（簡單的 base64 decode）
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    localStorage.setItem('currentUser', JSON.stringify({
+                        id: payload.userId,
+                        email: payload.email,
+                        role: payload.role,
+                        token: token
+                    }));
+
+                    // 3 秒後導向首頁
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
+                } catch (e) {
+                    console.error('Token parsing error:', e);
+                    document.getElementById('message').innerHTML = '<span style="color: #ef4444;">登入失敗，請重試</span>';
+                }
+            }
+        }
+
+        // 檢查是否有錯誤參數
+        const urlParams = new URLSearchParams(window.location.search);
+        const error = urlParams.get('error');
+
+        if (error) {
+            let errorMessage = '登入失敗，請重試';
+            if (error === 'oauth_failed') {
+                errorMessage = 'OAuth 認證失敗，請重試';
+            } else if (error === 'server_error') {
+                errorMessage = '伺服器錯誤，請稍後再試';
+            }
+            document.getElementById('message').innerHTML = `<span style="color: #ef4444;">❌ ${errorMessage}</span>`;
+        }
+    </script>
+</body>
+
+</html>

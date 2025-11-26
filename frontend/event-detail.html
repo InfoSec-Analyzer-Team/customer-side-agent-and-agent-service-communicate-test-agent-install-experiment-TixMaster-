@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="eventTitle">活動詳情 - TixMaster</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .hero {
+            position: relative;
+            height: 400px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+            padding: 40px 20px;
+            color: white;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .hero-info {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
+        }
+
+        .section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            margin-bottom: 15px;
+            color: #2563eb;
+        }
+
+        .description {
+            line-height: 1.8;
+            color: #666;
+        }
+
+        .info-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+
+        .info-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-item svg {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            color: #2563eb;
+        }
+
+        .ticket-section {
+            position: sticky;
+            top: 20px;
+        }
+
+        .ticket-box {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .price-large {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2563eb;
+            margin-bottom: 20px;
+        }
+
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .quantity-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: #2563eb;
+            color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .quantity-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .quantity-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .buy-btn {
+            width: 100%;
+            padding: 15px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .buy-btn:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        .total-price {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .viewing-badge {
+            display: inline-flex;
+            align-items: center;
+            background: #fef3c7;
+            color: #92400e;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-top: 10px;
+        }
+
+        .viewing-badge svg {
+            width: 16px;
+            height: 16px;
+            margin-right: 6px;
+        }
+
+        /* Countdown Timer */
+        .countdown-timer {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+
+        .countdown-timer.active {
+            display: block;
+        }
+
+        .countdown-timer .timer-label {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .countdown-timer .timer-value {
+            font-size: 1.5rem;
+            font-family: 'Courier New', monospace;
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .ticket-section {
+                position: static;
+            }
+
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="hero" id="heroImage">
+        <div class="hero-overlay">
+            <h1 id="heroTitle">載入中...</h1>
+            <div class="hero-info" id="heroInfo"></div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="content-grid">
+            <div class="main-content">
+                <div class="section">
+                    <h2>活動資訊</h2>
+                    <div class="info-box">
+                        <div class="info-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span id="infoDate">日期時間</span>
+                        </div>
+                        <div class="info-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                            <span id="infoLocation">地點</span>
+                        </div>
+                    </div>
+                    <div class="viewing-badge" id="viewingBadge" style="display: none;">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                            <path fill-rule="evenodd"
+                                d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        <span id="viewingCount">0</span> 人正在瀏覽
+                    </div>
+
+                    <div class="countdown-timer" id="countdownTimer">
+                        <div class="timer-label">倒數計時</div>
+                        <div class="timer-value" id="timerValue">15:00</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>活動介紹</h2>
+                    <div class="description" id="description">
+                        載入中...
+                    </div>
+                </div>
+            </div>
+
+            <div class="ticket-section">
+                <div class="ticket-box">
+                    <h3 style="margin-bottom: 15px;">購票</h3>
+                    <div class="price-large">NT$ <span id="unitPrice">0</span></div>
+
+                    <div class="quantity-selector">
+                        <button class="quantity-btn" onclick="changeQuantity(-1)">-</button>
+                        <span class="quantity-display" id="quantity">1</span>
+                        <button class="quantity-btn" onclick="changeQuantity(1)">+</button>
+                    </div>
+
+                    <button class="buy-btn" onclick="buyTickets()">立即購票</button>
+
+                    <div class="total-price">
+                        總計：NT$ <span id="totalPrice">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Feature Flags SDK -->
+    <script src="featureFlags.js"></script>
+
+    <script>
+        // 從 URL 獲取活動 ID（這裡先寫死第一個活動）
+        const eventId = new URLSearchParams(window.location.search).get('id') || '1';
+
+        // 活動資料（參照 index.html 的資料）
+        const events = [
+            {
+                id: '1',
+                title: '葬送的你媽可憐',
+                date: '2025-12-15T19:00:00',
+                location: '台北 Cyber Arena',
+                price: 2500,
+                image: 'https://images.unsplash.com/photo-1459749411177-718bf998e889?w=1200',
+                description: '體驗未來音樂的視聽饗宴，葬送的你媽可憐 將帶來前所未有的演出。這是一場結合最新科技與音樂的盛會，絢麗的燈光效果配合震撼的音響系統，將為您帶來難忘的夜晚。'
+            },
+            {
+                id: '2',
+                title: '演唱會二：你媽的裸體視覺饗宴',
+                date: '2025-11-30T09:00:00',
+                location: '台北國際會議中心',
+                price: 1200,
+                image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200',
+                description: '與科技界領袖一同探索創新與未來，為期一天的知識盛宴。'
+            },
+            {
+                id: '3',
+                title: '聖誕脫肛之夜',
+                date: '2025-12-24T20:00:00',
+                location: '國家音樂廳',
+                price: 3000,
+                image: 'https://images.unsplash.com/photo-1465847899078-b413929f7120?w=1200',
+                description: '與國家交響樂團共度浪漫的聖誕夜，感受脫肛的魅力。'
+            }
+        ];
+
+        const event = events.find(e => e.id === eventId) || events[0];
+        let quantity = 1;
+        let countdownInterval = null;
+        let remainingSeconds = 15 * 60; // 15 minutes
+
+        // Initialize page
+        async function initPage() {
+            // Render basic page content
+            document.getElementById('eventTitle').textContent = event.title + ' - TixMaster';
+            document.getElementById('heroImage').style.backgroundImage = `url(${event.image})`;
+            document.getElementById('heroTitle').textContent = event.title;
+            document.getElementById('heroInfo').textContent = `${new Date(event.date).toLocaleDateString('zh-TW')} • ${event.location}`;
+            document.getElementById('infoDate').textContent = new Date(event.date).toLocaleString('zh-TW');
+            document.getElementById('infoLocation').textContent = event.location;
+            document.getElementById('description').textContent = event.description;
+            document.getElementById('unitPrice').textContent = event.price;
+            document.getElementById('totalPrice').textContent = event.price;
+
+            // Initialize feature flags
+            try {
+                await FeatureFlags.init();
+                console.log('[Event Detail] Feature flags loaded');
+
+                // Apply feature flags
+                applyFeatureFlags();
+            } catch (error) {
+                console.error('[Event Detail] Failed to load feature flags:', error);
+                // Fallback: show all features by default
+                showViewingCount();
+            }
+        }
+
+        // 渲染頁面
+        document.getElementById('eventTitle').textContent = event.title + ' - TixMaster';
+        document.getElementById('heroImage').style.backgroundImage = `url(${event.image})`;
+        document.getElementById('heroTitle').textContent = event.title;
+        document.getElementById('heroInfo').textContent = `${new Date(event.date).toLocaleDateString('zh-TW')} • ${event.location}`;
+        document.getElementById('infoDate').textContent = new Date(event.date).toLocaleString('zh-TW');
+        document.getElementById('infoLocation').textContent = event.location;
+        document.getElementById('description').textContent = event.description;
+        document.getElementById('unitPrice').textContent = event.price;
+        document.getElementById('totalPrice').textContent = event.price;
+
+        // Session ID 生成（用於追蹤同一用戶的多個事件）
+        let sessionId = localStorage.getItem('analytics_session_id');
+        if (!sessionId) {
+            sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('analytics_session_id', sessionId);
+        }
+
+        // Analytics 追蹤
+        async function trackAnalytics(eventType, data) {
+            console.log('[Analytics]', eventType, data);
+
+            try {
+                const response = await fetch('/api/analytics/event', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: null,
+                        sessionId: sessionId,
+                        eventType: eventType,
+                        eventData: data,
+                        featureFlagsSnapshot: FeatureFlags.getAll()
+                    })
+                });
+
+                if (response.ok) {
+                    console.log('[Analytics] Event tracked successfully:', eventType);
+                }
+            } catch (error) {
+                console.error('[Analytics] Error tracking event:', error);
+            }
+        }
+
+        // 初始化頁面和 Feature Flags
+        async function initEventDetailPage() {
+            try {
+                await FeatureFlags.init();
+                console.log('[EventDetail] Feature flags initialized');
+
+                // 檢查是否啟用觀看人數顯示（Hypothesis 2: Social Proof）
+                if (FeatureFlags.isEnabled('ENABLE_VIEWING_COUNT')) {
+                    console.log('[EventDetail] Viewing count is ENABLED');
+                    const viewingCount = Math.floor(Math.random() * 150) + 50;
+                    document.getElementById('viewingBadge').style.display = 'inline-flex';
+                    document.getElementById('viewingCount').textContent = viewingCount;
+
+                    // 記錄 Analytics: 用戶看到了觀看人數
+                    await trackAnalytics('viewing_count_shown', {
+                        eventId,
+                        eventTitle: event.title,
+                        viewingCount
+                    });
+                } else {
+                    console.log('[EventDetail] Viewing count is DISABLED');
+                    document.getElementById('viewingBadge').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('[EventDetail] Failed to load feature flags:', error);
+                // 如果 Feature Flags 載入失敗，預設不顯示觀看人數
+                document.getElementById('viewingBadge').style.display = 'none';
+            }
+        }
+
+        // 執行初始化
+        initEventDetailPage();
+
+        // 數量調整
+        function changeQuantity(delta) {
+            const newQuantity = quantity + delta;
+            if (newQuantity >= 1 && newQuantity <= 10) {
+                quantity = newQuantity;
+                document.getElementById('quantity').textContent = quantity;
+                updateTotal();
+            }
+        }
+
+        function updateTotal() {
+            const total = event.price * quantity;
+            document.getElementById('totalPrice').textContent = total;
+        }
+
+        async function buyTickets() {
+            try {
+                // 確保 Feature Flags 已初始化
+                if (!FeatureFlags || typeof FeatureFlags.isEnabled !== 'function') {
+                    console.warn('[BuyTickets] FeatureFlags not initialized, proceeding anyway');
+                    window.location.href = `checkout.html?eventId=${event.id}&quantity=${quantity}`;
+                    return;
+                }
+
+                // 記錄 Analytics: "Buy Now" 點擊 (Hypothesis 2: Social Proof)
+                const hasViewingCount = FeatureFlags.isEnabled('ENABLE_VIEWING_COUNT');
+                console.log('[BuyTickets] Buy button clicked, viewing count enabled:', hasViewingCount);
+
+                // 發送 Analytics 事件
+                await trackAnalytics('buy_now_clicked', {
+                    eventId: event.id,
+                    eventTitle: event.title,
+                    quantity,
+                    viewingCountShown: hasViewingCount
+                });
+
+                // 導向結帳頁面
+                window.location.href = `checkout.html?eventId=${event.id}&quantity=${quantity}`;
+            } catch (error) {
+                console.error('[BuyTickets] Error:', error);
+                // 即使出錯也要導向結帳頁面
+                window.location.href = `checkout.html?eventId=${event.id}&quantity=${quantity}`;
+            }
+        }
+
+        // Initialize page on load
+        initPage();
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            stopCountdownTimer();
+        });
+    </script>
+</body>
+
+</html>

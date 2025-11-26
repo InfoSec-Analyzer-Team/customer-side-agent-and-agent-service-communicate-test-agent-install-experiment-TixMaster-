@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理員後台 - TixMaster</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+
+        /* 頂部導航 */
+        .admin-nav {
+            background: #1f2937;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .admin-nav h1 {
+            font-size: 1.5rem;
+        }
+
+        .admin-nav .logout-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .admin-nav .logout-btn:hover {
+            background: #dc2626;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        /* 統計卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card h3 {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        .stat-card.green .number {
+            color: #10b981;
+        }
+
+        .stat-card.orange .number {
+            color: #f59e0b;
+        }
+
+        .stat-card.purple .number {
+            color: #8b5cf6;
+        }
+
+        /* 資料表格 */
+        .table-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .table-section h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f3f4f6;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        tr:hover {
+            background: #f9fafb;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge.online {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge.offline {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #9ca3af;
+        }
+
+        /* Feature Flags Section */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 26px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #10b981;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+
+        .flag-description {
+            color: #6b7280;
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+
+        .flag-updated {
+            color: #9ca3af;
+            font-size: 0.75rem;
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 頂部導航 -->
+    <div class="admin-nav">
+        <h1>🛡️ TixMaster 管理員後台</h1>
+        <div>
+            <span style="margin-right: 20px;">管理員：<strong id="adminName"></strong></span>
+            <button class="logout-btn" onclick="adminLogout()">登出</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- 統計卡片 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>總註冊人數</h3>
+                <div class="number" id="totalUsers">0</div>
+            </div>
+            <div class="stat-card green">
+                <h3>目前在線人數</h3>
+                <div class="number" id="onlineUsers">0</div>
+            </div>
+            <div class="stat-card orange">
+                <h3>總活動數量</h3>
+                <div class="number" id="totalEvents">3</div>
+            </div>
+            <div class="stat-card purple">
+                <h3>總訂單數量</h3>
+                <div class="number" id="totalOrders">0</div>
+            </div>
+        </div>
+
+        <!-- 在線使用者列表 -->
+        <div class="table-section">
+            <h2>📊 在線使用者</h2>
+            <table id="onlineUsersTable">
+                <thead>
+                    <tr>
+                        <th>使用者ID</th>
+                        <th>姓名</th>
+                        <th>Email</th>
+                        <th>狀態</th>
+                        <th>登入時間</th>
+                    </tr>
+                </thead>
+                <tbody id="onlineUsersBody">
+                    <tr>
+                        <td colspan="5" class="empty-state">目前沒有使用者在線</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 所有註冊使用者 -->
+        <div class="table-section">
+            <h2>👥 所有註冊使用者</h2>
+            <table id="allUsersTable">
+                <thead>
+                    <tr>
+                        <th>使用者ID</th>
+                        <th>姓名</th>
+                        <th>Email</th>
+                        <th>手機</th>
+                        <th>註冊時間</th>
+                        <th>狀態</th>
+                    </tr>
+                </thead>
+                <tbody id="allUsersBody">
+                    <tr>
+                        <td colspan="6" class="empty-state">尚無註冊使用者</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Feature Flags 功能開關管理 -->
+        <div class="table-section">
+            <h2>🚩 功能開關管理 (Feature Flags)</h2>
+            <table id="featureFlagsTable">
+                <thead>
+                    <tr>
+                        <th>功能名稱</th>
+                        <th>功能說明</th>
+                        <th>狀態</th>
+                        <th>更新時間</th>
+                    </tr>
+                </thead>
+                <tbody id="featureFlagsBody">
+                    <tr>
+                        <td colspan="4" class="empty-state">載入中...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Load Feature Flags Service -->
+    <script src="featureFlags.js"></script>
+
+    <script>
+    // Use relative API path so it works both locally and on deployed host
+    const API_BASE_URL = '/api';
+
+        // 檢查管理員登入狀態
+        const adminUser = JSON.parse(localStorage.getItem('adminUser') || 'null');
+
+        if (!adminUser) {
+            alert('請先登入管理員帳號');
+            window.location.href = 'admin-login.html';
+        } else {
+            document.getElementById('adminName').textContent = adminUser.username;
+        }
+
+        // 登出功能
+        function adminLogout() {
+            if (confirm('確定要登出嗎？')) {
+                localStorage.removeItem('adminUser');
+                window.location.href = 'admin-login.html';
+            }
+        }
+
+        // 載入資料
+        function loadDashboardData() {
+            // 取得所有註冊使用者
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+
+            // 更新統計數字
+            document.getElementById('totalUsers').textContent = users.length;
+            document.getElementById('onlineUsers').textContent = currentUser ? 1 : 0;
+            // totalEvents 和 totalOrders 目前是固定值，之後可以動態計算
+
+            // 渲染在線使用者
+            const onlineUsersBody = document.getElementById('onlineUsersBody');
+            if (currentUser) {
+                onlineUsersBody.innerHTML = `
+          <tr>
+            <td>${currentUser.id}</td>
+            <td>${currentUser.name}</td>
+            <td>${currentUser.email}</td>
+            <td><span class="badge online">在線</span></td>
+            <td>${new Date().toLocaleString('zh-TW')}</td>
+          </tr>
+        `;
+            } else {
+                onlineUsersBody.innerHTML = '<tr><td colspan="5" class="empty-state">目前沒有使用者在線</td></tr>';
+            }
+
+            // 渲染所有註冊使用者
+            const allUsersBody = document.getElementById('allUsersBody');
+            if (users.length > 0) {
+                allUsersBody.innerHTML = users.map(user => {
+                    const isOnline = currentUser && currentUser.id === user.id;
+                    return `
+            <tr>
+              <td>${user.id}</td>
+              <td>${user.name}</td>
+              <td>${user.email}</td>
+              <td>${user.phone || '-'}</td>
+              <td>${new Date(user.created_at).toLocaleString('zh-TW')}</td>
+              <td><span class="badge ${isOnline ? 'online' : 'offline'}">${isOnline ? '在線' : '離線'}</span></td>
+            </tr>
+          `;
+                }).join('');
+            } else {
+                allUsersBody.innerHTML = '<tr><td colspan="6" class="empty-state">尚無註冊使用者</td></tr>';
+            }
+        }
+
+        // 載入 Feature Flags
+        async function loadFeatureFlags() {
+            try {
+                await FeatureFlags.init();
+                const flags = FeatureFlags.getAll();
+                console.log('[LoadFlags] Loaded flags:', flags);
+
+                const featureFlagsBody = document.getElementById('featureFlagsBody');
+                const flagKeys = Object.keys(flags);
+
+                if (flagKeys.length === 0) {
+                    featureFlagsBody.innerHTML = '<tr><td colspan="4" class="empty-state">尚無功能開關</td></tr>';
+                    return;
+                }
+
+                featureFlagsBody.innerHTML = flagKeys.map(key => {
+                    const flag = flags[key];
+                    // 確保 enabled 是 boolean
+                    const isEnabled = Boolean(flag.enabled);
+                    const updatedTime = flag.updatedAt ? new Date(flag.updatedAt).toLocaleString('zh-TW') : '-';
+
+                    console.log(`[LoadFlags] ${key}: enabled=${flag.enabled} (type: ${typeof flag.enabled}), isEnabled=${isEnabled}`);
+
+                    return `
+                        <tr>
+                            <td><strong>${key}</strong></td>
+                            <td>
+                                <div>${flag.description || '無說明'}</div>
+                                <div class="flag-updated">最後更新: ${updatedTime}</div>
+                            </td>
+                            <td>
+                                <label class="toggle-switch">
+                                    <input type="checkbox"
+                                           ${isEnabled ? 'checked' : ''}
+                                           onchange="toggleFeatureFlag('${key}', this.checked)">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <span style="margin-left: 10px; font-weight: 600; color: ${isEnabled ? '#10b981' : '#6b7280'}">
+                                    ${isEnabled ? '已啟用' : '已停用'}
+                                </span>
+                            </td>
+                            <td>${updatedTime}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('[LoadFlags] Failed to load feature flags:', error);
+                document.getElementById('featureFlagsBody').innerHTML =
+                    '<tr><td colspan="4" class="empty-state" style="color: #ef4444;">載入失敗：無法連接到後端伺服器</td></tr>';
+            }
+        }
+
+        // 切換 Feature Flag
+        async function toggleFeatureFlag(key, enabled) {
+            console.log(`[Toggle] Attempting to toggle ${key} to ${enabled} (type: ${typeof enabled})`);
+
+            try {
+                // 確保 enabled 是 boolean
+                const booleanEnabled = Boolean(enabled);
+                console.log(`[Toggle] Converted to boolean: ${booleanEnabled}`);
+
+                const result = await FeatureFlags.updateFlag(key, booleanEnabled);
+                console.log(`[Toggle] Update result:`, result);
+
+                // 重新載入 Feature Flags
+                await loadFeatureFlags();
+
+                // 顯示成功訊息
+                alert(`功能開關 "${key}" 已${booleanEnabled ? '啟用' : '停用'}`);
+            } catch (error) {
+                console.error('[Toggle] Failed to update feature flag:', error);
+                alert(`更新失敗: ${error.message}`);
+
+                // 重新載入以恢復原狀
+                await loadFeatureFlags();
+            }
+        }
+
+        // 載入所有資料
+        loadDashboardData();
+        loadFeatureFlags();
+
+        // 每 5 秒自動更新使用者資料
+        setInterval(loadDashboardData, 5000);
+
+        // 每 30 秒自動更新 Feature Flags
+        setInterval(loadFeatureFlags, 30000);
+    </script>
+</body>
+
+</html>

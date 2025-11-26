@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>結帳 - TixMaster</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        /* 頂部導航 */
+        .navbar {
+            background: white;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar h1 {
+            font-size: 1.5rem;
+            color: #2563eb;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* 進度條 */
+        .progress-steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .progress-steps::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #e5e7eb;
+            z-index: 0;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 1;
+            background: #f5f5f5;
+            padding: 0 10px;
+        }
+
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .step.active .step-circle {
+            background: #2563eb;
+            color: white;
+        }
+
+        .step.completed .step-circle {
+            background: #10b981;
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        .step.active .step-label {
+            color: #2563eb;
+            font-weight: 600;
+        }
+
+        /* 倒數計時器 (Feature Toggle) */
+        .countdown-banner {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 30px;
+            display: none;
+            animation: pulse 2s infinite;
+        }
+
+        .countdown-banner.active {
+            display: block;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+        }
+
+        .countdown-banner h2 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .countdown-timer {
+            font-size: 3rem;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+        }
+
+        .countdown-message {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-top: 10px;
+        }
+
+        /* 內容區域 */
+        .checkout-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+        }
+
+        .section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .section h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        /* 訂單摘要 */
+        .order-summary {
+            position: sticky;
+            top: 20px;
+        }
+
+        .event-info {
+            display: flex;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .event-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-right: 15px;
+        }
+
+        .event-details h3 {
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .event-details p {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+
+        .price-breakdown {
+            margin-bottom: 20px;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .price-row.total {
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding-top: 15px;
+            border-top: 2px solid #e5e7eb;
+            color: #2563eb;
+        }
+
+        /* 表單 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        /* 按鈕 */
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1e40af;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #6b7280;
+            border: 1px solid #d1d5db;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #f9fafb;
+        }
+
+        /* 支付方式 */
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .payment-method {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .payment-method:hover {
+            border-color: #2563eb;
+        }
+
+        .payment-method.selected {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+
+        .payment-method img {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .checkout-content {
+                grid-template-columns: 1fr;
+            }
+
+            .countdown-timer {
+                font-size: 2rem;
+            }
+
+            .payment-methods {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 導航列 -->
+    <div class="navbar">
+        <h1>🎫 TixMaster</h1>
+    </div>
+
+    <div class="container">
+        <!-- 進度條 -->
+        <div class="progress-steps">
+            <div class="step completed">
+                <div class="step-circle">1</div>
+                <div class="step-label">選擇票種</div>
+            </div>
+            <div class="step active">
+                <div class="step-circle">2</div>
+                <div class="step-label">填寫資料</div>
+            </div>
+            <div class="step">
+                <div class="step-circle">3</div>
+                <div class="step-label">付款</div>
+            </div>
+            <div class="step">
+                <div class="step-circle">4</div>
+                <div class="step-label">完成</div>
+            </div>
+        </div>
+
+        <!-- 倒數計時器橫幅 (Feature Toggle) -->
+        <div class="countdown-banner" id="countdownBanner">
+            <h2>⏰ 請在時間內完成結帳</h2>
+            <div class="countdown-timer" id="countdownTimer">15:00</div>
+            <div class="countdown-message">時間到期後，您選擇的票券將被釋放</div>
+        </div>
+
+        <!-- 結帳內容 -->
+        <div class="checkout-content">
+            <!-- 左側：表單 -->
+            <div class="main-form">
+                <!-- 購買人資訊 -->
+                <div class="section">
+                    <h2>購買人資訊</h2>
+                    <div class="form-group">
+                        <label>姓名 *</label>
+                        <input type="text" id="buyerName" placeholder="請輸入姓名" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Email *</label>
+                            <input type="email" id="buyerEmail" placeholder="example@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>手機 *</label>
+                            <input type="tel" id="buyerPhone" placeholder="0912345678" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 支付方式 -->
+                <div class="section">
+                    <h2>選擇付款方式</h2>
+                    <div class="payment-methods">
+                        <div class="payment-method selected" data-method="credit_card">
+                            <div>💳</div>
+                            <div>信用卡</div>
+                        </div>
+                        <div class="payment-method" data-method="atm">
+                            <div>🏦</div>
+                            <div>ATM 轉帳</div>
+                        </div>
+                        <div class="payment-method" data-method="line_pay">
+                            <div>💚</div>
+                            <div>LINE Pay</div>
+                        </div>
+                    </div>
+
+                    <!-- 信用卡資訊 -->
+                    <div id="creditCardForm">
+                        <div class="form-group">
+                            <label>卡號 *</label>
+                            <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>有效期限 *</label>
+                                <input type="text" id="cardExpiry" placeholder="MM/YY" maxlength="5">
+                            </div>
+                            <div class="form-group">
+                                <label>CVV *</label>
+                                <input type="text" id="cardCvv" placeholder="123" maxlength="3">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右側：訂單摘要 -->
+            <div class="order-summary section">
+                <h2>訂單摘要</h2>
+                <div class="event-info">
+                    <img src="https://images.unsplash.com/photo-1459749411177-718bf998e889?w=200"
+                         alt="Event" class="event-image" id="orderEventImage">
+                    <div class="event-details">
+                        <h3 id="orderEventTitle">活動名稱</h3>
+                        <p id="orderEventDate">活動日期</p>
+                        <p id="orderEventLocation">活動地點</p>
+                    </div>
+                </div>
+
+                <div class="price-breakdown">
+                    <div class="price-row">
+                        <span>票券類型</span>
+                        <span id="orderTicketType">一般票</span>
+                    </div>
+                    <div class="price-row">
+                        <span>票券數量</span>
+                        <span id="orderQuantity">1</span>
+                    </div>
+                    <div class="price-row">
+                        <span>單價</span>
+                        <span id="orderUnitPrice">NT$ 0</span>
+                    </div>
+                    <div class="price-row total">
+                        <span>總計</span>
+                        <span id="orderTotal">NT$ 0</span>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" onclick="processPayment()">
+                    確認付款
+                </button>
+                <button class="btn btn-secondary" onclick="goBack()">
+                    返回活動頁
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Feature Flags SDK -->
+    <script src="featureFlags.js"></script>
+
+    <script>
+        // 從 URL 獲取訂單參數
+        const urlParams = new URLSearchParams(window.location.search);
+        const eventId = urlParams.get('eventId') || '1';
+        const quantity = parseInt(urlParams.get('quantity')) || 1;
+
+        // 模擬活動資料
+        const events = {
+            '1': {
+                title: '葬送的你媽可憐',
+                date: '2025-12-15T19:00:00',
+                location: '台北 Cyber Arena',
+                price: 2500,
+                image: 'https://images.unsplash.com/photo-1459749411177-718bf998e889?w=200'
+            },
+            '2': {
+                title: '演唱會二：你媽的裸體視覺饗宴',
+                date: '2025-11-30T09:00:00',
+                location: '台北國際會議中心',
+                price: 1200,
+                image: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=200'
+            },
+            '3': {
+                title: '聖誕脫肛之夜',
+                date: '2025-12-24T20:00:00',
+                location: '國家音樂廳',
+                price: 3000,
+                image: 'https://images.unsplash.com/photo-1465847899078-b413929f7120?w=200'
+            }
+        };
+
+        const event = events[eventId] || events['1'];
+        const totalAmount = event.price * quantity;
+
+        // 倒數計時器
+        let remainingSeconds = 15 * 60; // 15 分鐘
+        let countdownInterval = null;
+
+        // 初始化頁面
+        async function initCheckoutPage() {
+            // 顯示訂單資訊
+            document.getElementById('orderEventTitle').textContent = event.title;
+            document.getElementById('orderEventDate').textContent = new Date(event.date).toLocaleString('zh-TW');
+            document.getElementById('orderEventLocation').textContent = event.location;
+            document.getElementById('orderEventImage').src = event.image;
+            document.getElementById('orderQuantity').textContent = quantity;
+            document.getElementById('orderUnitPrice').textContent = `NT$ ${event.price}`;
+            document.getElementById('orderTotal').textContent = `NT$ ${totalAmount}`;
+
+            // 初始化 Feature Flags
+            try {
+                await FeatureFlags.init();
+                console.log('[Checkout] Feature flags initialized');
+
+                // 檢查是否啟用倒數計時器
+                if (FeatureFlags.isEnabled('ENABLE_CHECKOUT_TIMER')) {
+                    console.log('[Checkout] Countdown timer is ENABLED');
+                    startCountdownTimer();
+
+                    // 記錄 Analytics: 用戶看到了倒數計時器
+                    trackAnalytics('checkout_timer_shown', {
+                        eventId,
+                        quantity,
+                        totalAmount
+                    });
+                } else {
+                    console.log('[Checkout] Countdown timer is DISABLED');
+                }
+            } catch (error) {
+                console.error('[Checkout] Failed to load feature flags:', error);
+            }
+
+            // 從 localStorage 讀取用戶資料（如果有登入）
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+            if (currentUser) {
+                document.getElementById('buyerName').value = currentUser.name || '';
+                document.getElementById('buyerEmail').value = currentUser.email || '';
+                document.getElementById('buyerPhone').value = currentUser.phone || '';
+            }
+        }
+
+        // 啟動倒數計時器
+        function startCountdownTimer() {
+            const banner = document.getElementById('countdownBanner');
+            banner.classList.add('active');
+
+            countdownInterval = setInterval(() => {
+                remainingSeconds--;
+
+                if (remainingSeconds <= 0) {
+                    clearInterval(countdownInterval);
+                    handleTimeout();
+                    return;
+                }
+
+                updateTimerDisplay();
+
+                // 最後一分鐘閃爍警告
+                if (remainingSeconds <= 60 && remainingSeconds % 2 === 0) {
+                    banner.style.opacity = remainingSeconds % 4 === 0 ? '0.8' : '1';
+                }
+            }, 1000);
+        }
+
+        // 更新計時器顯示
+        function updateTimerDisplay() {
+            const minutes = Math.floor(remainingSeconds / 60);
+            const seconds = remainingSeconds % 60;
+            document.getElementById('countdownTimer').textContent =
+                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        // 處理逾時
+        function handleTimeout() {
+            document.getElementById('countdownTimer').textContent = '00:00';
+
+            // 記錄 Analytics: 用戶結帳逾時
+            trackAnalytics('checkout_timeout', {
+                eventId,
+                quantity,
+                totalAmount,
+                timeSpent: 15 * 60
+            });
+
+            alert('結帳時間已到期！您的票券已被釋放，請重新選購。');
+            window.location.href = `event-detail.html?id=${eventId}`;
+        }
+
+        // 處理付款
+        async function processPayment() {
+            // 驗證表單
+            const name = document.getElementById('buyerName').value.trim();
+            const email = document.getElementById('buyerEmail').value.trim();
+            const phone = document.getElementById('buyerPhone').value.trim();
+
+            if (!name || !email || !phone) {
+                alert('請填寫所有必填欄位！');
+                return;
+            }
+
+            // 記錄 Analytics: 用戶點擊付款按鈕
+            const timeSpent = (15 * 60) - remainingSeconds;
+            trackAnalytics('payment_attempted', {
+                eventId,
+                quantity,
+                totalAmount,
+                timeSpent,
+                hasTimer: FeatureFlags.isEnabled('ENABLE_CHECKOUT_TIMER')
+            });
+
+            // 模擬付款處理
+            const processingTime = Math.random() * 2000 + 1000; // 1-3秒
+
+            const btn = event.target || document.querySelector('.btn-primary');
+            btn.disabled = true;
+            btn.textContent = '處理中...';
+
+            setTimeout(() => {
+                // 停止倒數計時
+                if (countdownInterval) {
+                    clearInterval(countdownInterval);
+                }
+
+                // 記錄 Analytics: 付款完成 (Payment Completion Rate)
+                trackAnalytics('payment_completed', {
+                    eventId,
+                    quantity,
+                    totalAmount,
+                    timeSpent,
+                    hasTimer: FeatureFlags.isEnabled('ENABLE_CHECKOUT_TIMER'),
+                    paymentMethod: document.querySelector('.payment-method.selected').dataset.method
+                });
+
+                alert('付款成功！您將收到確認信件。');
+                window.location.href = 'index.html';
+            }, processingTime);
+        }
+
+        // 返回活動頁
+        function goBack() {
+            if (confirm('確定要離開結帳頁面嗎？您選擇的票券將被釋放。')) {
+                // 記錄 Analytics: 用戶放棄結帳
+                const timeSpent = (15 * 60) - remainingSeconds;
+                trackAnalytics('checkout_abandoned', {
+                    eventId,
+                    quantity,
+                    totalAmount,
+                    timeSpent,
+                    hasTimer: FeatureFlags.isEnabled('ENABLE_CHECKOUT_TIMER')
+                });
+
+                if (countdownInterval) {
+                    clearInterval(countdownInterval);
+                }
+                window.location.href = `event-detail.html?id=${eventId}`;
+            }
+        }
+
+        // Session ID 生成（用於追蹤同一用戶的多個事件）
+        let sessionId = localStorage.getItem('analytics_session_id');
+        if (!sessionId) {
+            sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('analytics_session_id', sessionId);
+        }
+
+        // Analytics 追蹤
+        async function trackAnalytics(eventType, data) {
+            console.log('[Analytics]', eventType, data);
+
+            try {
+                // 發送到後端 API
+                const response = await fetch('/api/analytics/event', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: null, // 如果有登入系統可以加上
+                        sessionId: sessionId,
+                        eventType: eventType,
+                        eventData: data,
+                        featureFlagsSnapshot: FeatureFlags.getAll()
+                    })
+                });
+
+                if (response.ok) {
+                    console.log('[Analytics] Event tracked successfully:', eventType);
+                } else {
+                    console.error('[Analytics] Failed to track event:', response.status);
+                }
+            } catch (error) {
+                console.error('[Analytics] Error tracking event:', error);
+                // 即使追蹤失敗也不影響用戶體驗
+            }
+        }
+
+        // 支付方式選擇
+        document.querySelectorAll('.payment-method').forEach(method => {
+            method.addEventListener('click', () => {
+                document.querySelectorAll('.payment-method').forEach(m =>
+                    m.classList.remove('selected'));
+                method.classList.add('selected');
+
+                // 只有信用卡需要顯示卡號表單
+                const creditCardForm = document.getElementById('creditCardForm');
+                if (method.dataset.method === 'credit_card') {
+                    creditCardForm.style.display = 'block';
+                } else {
+                    creditCardForm.style.display = 'none';
+                }
+            });
+        });
+
+        // 信用卡號格式化
+        document.getElementById('cardNumber')?.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\s/g, '');
+            let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
+            e.target.value = formattedValue;
+        });
+
+        // 有效期限格式化
+        document.getElementById('cardExpiry')?.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.slice(0, 2) + '/' + value.slice(2, 4);
+            }
+            e.target.value = value;
+        });
+
+        // 頁面載入時初始化
+        initCheckoutPage();
+
+        // 頁面關閉前清理
+        window.addEventListener('beforeunload', () => {
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+        });
+    </script>
+</body>
+
+</html>
