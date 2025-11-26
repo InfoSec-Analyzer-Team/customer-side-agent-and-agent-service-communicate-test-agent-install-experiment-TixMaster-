@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理員登入 - TixMaster</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #434343 0%, #000000 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .admin-login-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #ff4444;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #434343;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #434343 0%, #000000 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .back-link a {
+            color: #434343;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-login-container">
+        <h1>🔐 管理員登入</h1>
+        <p class="subtitle">⚠️ 僅限管理員使用</p>
+
+        <form id="adminLoginForm">
+            <div class="form-group">
+                <label for="username">Email</label>
+                <input type="email" id="username" name="username" required placeholder="請輸入管理員 Email">
+            </div>
+
+            <div class="form-group">
+                <label for="password">密碼</label>
+                <input type="password" id="password" name="password" required placeholder="請輸入密碼">
+            </div>
+
+            <button type="submit" class="btn">登入管理後台</button>
+        </form>
+
+        <div class="back-link">
+            <a href="index.html">← 返回首頁</a>
+        </div>
+    </div>
+
+    <script>
+    const API_BASE_URL = '/api';
+
+        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                // 調用後端 API 登入
+                const response = await fetch(`${API_BASE_URL}/users/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || '登入失敗');
+                }
+
+                const data = await response.json();
+
+                // 檢查是否為管理員
+                if (data.user.role !== 'admin') {
+                    alert('此帳號沒有管理員權限');
+                    return;
+                }
+
+                // 儲存管理員登入狀態和 token
+                localStorage.setItem('adminUser', JSON.stringify({
+                    username: data.user.name,
+                    email: data.user.email,
+                    token: data.token,
+                    role: data.user.role,
+                    loginTime: new Date().toISOString()
+                }));
+
+                alert('登入成功！');
+                window.location.href = 'admin-dashboard.html';
+            } catch (error) {
+                console.error('登入錯誤:', error);
+                alert(`登入失敗: ${error.message}`);
+            }
+        });
+    </script>
+</body>
+
+</html>
