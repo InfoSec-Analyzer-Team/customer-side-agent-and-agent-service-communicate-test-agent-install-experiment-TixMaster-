@@ -1,0 +1,10 @@
+node_modules
+.git
+.env
+.env.*
+*.log
+dist
+coverage
+.DS_Store
+package-lock.json
+backend/node_modules

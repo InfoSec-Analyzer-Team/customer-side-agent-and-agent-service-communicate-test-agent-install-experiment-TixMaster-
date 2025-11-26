@@ -157,14 +157,19 @@ app.use('/api/analytics', analyticsRouter);
 // Try to locate a static directory that contains index.html. Different
 // deployment environments (Railway/Render/Docker) may place the repo at
 // different working directories, so probe several likely candidates.
+// Prefer a dedicated frontend folder if present. This makes the repo
+// layout explicit and easier to maintain. Non-destructive: server will
+// still probe other legacy locations.
 const candidates = [
-    path.join(__dirname, '..'),           // repo root relative to backend
-    path.join(__dirname, '..', 'public'), // repo root / public
-    path.join(__dirname, 'public'),       // backend/public
-    path.join(process.cwd(), '..'),       // parent of current cwd
-    path.join(process.cwd(), '.'),        // current working dir
-    path.resolve('/workspace'),           // some CI use /workspace
-    path.resolve('/')                     // fallback to root
+    path.join(__dirname, '..', 'frontend'),      // repo root/frontend (preferred)
+    path.join(__dirname, '..', 'frontend', 'public'),
+    path.join(__dirname, '..'),                   // repo root relative to backend
+    path.join(__dirname, '..', 'public'),        // repo root / public
+    path.join(__dirname, 'public'),              // backend/public
+    path.join(process.cwd(), '..'),              // parent of current cwd
+    path.join(process.cwd(), '.'),               // current working dir
+    path.resolve('/workspace'),                  // some CI use /workspace
+    path.resolve('/')                            // fallback to root
 ];
 
 let chosenStatic = null;
