@@ -29,8 +29,7 @@ const { ROLES } = require('../config/roles');
 // 開始 Auth0 登入流程
 router.get('/login',
     passport.authenticate('auth0', {
-        scope: ['openid', 'profile', 'email'],
-        session: false
+        scope: ['openid', 'profile', 'email']
     })
 );
 
@@ -38,7 +37,6 @@ router.get('/login',
 router.get('/signup',
     passport.authenticate('auth0', {
         scope: ['openid', 'profile', 'email'],
-        session: false,
         authParams: { screen_hint: 'signup' }
     })
 );
@@ -69,7 +67,7 @@ router.get('/callback',
     },
     // 使用 custom callback 以便在失敗時記錄更詳細資訊
     (req, res, next) => {
-        passport.authenticate('auth0', { session: false }, (err, user, info) => {
+        passport.authenticate('auth0', { }, (err, user, info) => {
             if (err) {
                 console.error('❌ passport authenticate error:', err, info);
                 return res.redirect('/login.html?error=oauth_failed');
