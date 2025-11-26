@@ -6,7 +6,7 @@
 
 ```env
 # === 現有設定（保留）===
-DATABASE_URL=postgresql://tixmasterdb_z9al_user:q1zbOtrE5KJ577iSubPI9kXNTluwMfpu@dpg-d4i2t9fdiees73btdfs0-a.singapore-postgres.render.com/tixmasterdb_z9al
+DATABASE_URL=Exteral PostgreSQL database URL
 JWT_SECRET=tixmaster-super-secret-key-change-in-production-2024
 PORT=3000
 
