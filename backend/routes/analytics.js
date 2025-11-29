@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
+const logger = require('../config/logger');
 
 // POST /api/analytics/event - 記錄分析事件
 router.post('/event', async (req, res, next) => {
@@ -60,7 +61,7 @@ router.get('/metrics', async (req, res, next) => {
     try {
         const { start_date, end_date } = req.query;
 
-        console.log('[Analytics Metrics] Calculating metrics...', { start_date, end_date });
+        req.logger.info('[Analytics Metrics] Calculating metrics', { start_date, end_date });
 
         // Hypothesis 1: Payment Completion Rate
         const h1Query = `
@@ -140,8 +141,8 @@ router.get('/metrics', async (req, res, next) => {
 
         const h2Result = await db.query(h2Query, params);
 
-        console.log('[Analytics Metrics] H1 Results:', h1Result.rows);
-        console.log('[Analytics Metrics] H2 Results:', h2Result.rows);
+        req.logger.info('[Analytics Metrics] H1 Results', { h1Count: h1Result.rows.length });
+        req.logger.info('[Analytics Metrics] H2 Results', { h2Count: h2Result.rows.length });
 
         res.json({
             hypothesis1: {
@@ -157,7 +158,7 @@ router.get('/metrics', async (req, res, next) => {
         });
 
     } catch (err) {
-        console.error('[Analytics Metrics] Error:', err);
+        req.logger.error('[Analytics Metrics] Error', { error: err.message, stack: err.stack });
         next(err);
     }
 });

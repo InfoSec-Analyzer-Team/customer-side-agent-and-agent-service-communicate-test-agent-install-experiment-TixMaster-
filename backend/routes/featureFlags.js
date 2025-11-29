@@ -4,6 +4,7 @@ const db = require('../config/database');
 const authenticateToken = require('../middleware/auth');
 const { checkPermission } = require('../middleware/rbac');
 const { PERMISSIONS } = require('../config/roles');
+const logger = require('../config/logger');
 
 // GET /api/feature-flags - 取得所有功能開關
 router.get('/', async (req, res, next) => {
@@ -62,12 +63,10 @@ router.put('/:key', authenticateToken, checkPermission(PERMISSIONS.MANAGE_FEATUR
         const { key } = req.params;
         const { enabled } = req.body;
 
-        console.log(`[FeatureFlags API] PUT /${key}`);
-        console.log(`[FeatureFlags API] Request body:`, req.body);
-        console.log(`[FeatureFlags API] enabled value: ${enabled} (type: ${typeof enabled})`);
+        req.logger.info(`[FeatureFlags API] PUT /${key}`, { key, enabled, type: typeof enabled });
 
         if (typeof enabled !== 'boolean') {
-            console.error(`[FeatureFlags API] Invalid type for enabled: ${typeof enabled}`);
+            req.logger.error(`[FeatureFlags API] Invalid type for enabled`, { key, type: typeof enabled, value: enabled });
             return res.status(400).json({
                 error: 'enabled must be a boolean value',
                 received: typeof enabled,
@@ -75,7 +74,7 @@ router.put('/:key', authenticateToken, checkPermission(PERMISSIONS.MANAGE_FEATUR
             });
         }
 
-        console.log(`[FeatureFlags API] Updating ${key} to ${enabled} in database`);
+        req.logger.info(`[FeatureFlags API] Updating ${key} to ${enabled} in database`, { key, enabled });
 
         const result = await db.query(
             'UPDATE feature_flags SET flag_value = $1, updated_at = CURRENT_TIMESTAMP WHERE flag_key = $2 RETURNING *',
@@ -83,7 +82,7 @@ router.put('/:key', authenticateToken, checkPermission(PERMISSIONS.MANAGE_FEATUR
         );
 
         if (result.rows.length === 0) {
-            console.error(`[FeatureFlags API] Flag not found: ${key}`);
+            req.logger.error(`[FeatureFlags API] Flag not found`, { key });
             return res.status(404).json({ error: 'Feature flag not found' });
         }
 
@@ -96,11 +95,11 @@ router.put('/:key', authenticateToken, checkPermission(PERMISSIONS.MANAGE_FEATUR
             }
         };
 
-        console.log(`[FeatureFlags API] Successfully updated ${key}:`, updatedFlag);
+        req.logger.info(`[FeatureFlags API] Successfully updated`, { key, updatedFlag });
 
         res.json(updatedFlag);
     } catch (err) {
-        console.error(`[FeatureFlags API] Error:`, err);
+        req.logger.error(`[FeatureFlags API] Error`, { error: err.message, stack: err.stack });
         next(err);
     }
 });

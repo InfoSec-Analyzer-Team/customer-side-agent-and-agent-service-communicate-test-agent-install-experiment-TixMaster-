@@ -3,6 +3,7 @@ const router = express.Router();
 const passport = require('../config/passport');
 const jwt = require('jsonwebtoken');
 const { ROLES } = require('../config/roles');
+const logger = require('../config/logger');
 
 /**
  * 🚀 OAuth 路由檔案
@@ -62,18 +63,18 @@ router.get('/signup',
 router.get('/callback',
     // 先印出 callback 收到的 query（Auth0 會傳回 code / error / state）
     (req, res, next) => {
-        console.log('[Auth0] /auth/callback query =', req.query);
+        req.logger.info('[Auth0] /auth/callback query', { query: req.query });
         next();
     },
     // 使用 custom callback 以便在失敗時記錄更詳細資訊
     (req, res, next) => {
         passport.authenticate('auth0', { }, (err, user, info) => {
             if (err) {
-                console.error('❌ passport authenticate error:', err, info);
+                req.logger.error('❌ passport authenticate error', { error: err.message, info });
                 return res.redirect('/login.html?error=oauth_failed');
             }
             if (!user) {
-                console.error('❌ passport authenticate failed, info:', info);
+                req.logger.error('❌ passport authenticate failed', { info });
                 return res.redirect('/login.html?error=oauth_failed');
             }
             // 將 user 掛回 req，進入下一個處理器
@@ -85,7 +86,7 @@ router.get('/callback',
     async (req, res) => {
         try {
             const user = req.user;
-            console.log('✅ Auth0 登入成功:', user && user.email);
+            req.logger.info('✅ Auth0 登入成功', { email: user && user.email, userId: user && user.id });
 
             const token = jwt.sign(
                 {
@@ -102,7 +103,7 @@ router.get('/callback',
             res.redirect(`/login.html#token=${token}`);
 
         } catch (error) {
-            console.error('❌ 回調處理錯誤:', error);
+            req.logger.error('❌ 回調處理錯誤', { error: error.message, stack: error.stack });
             res.redirect('/login.html?error=server_error');
         }
     }
@@ -119,11 +120,11 @@ router.get('/logout', (req, res) => {
     // 如果使用 Passport session
     req.logout((err) => {
         if (err) {
-            console.error('❌ 登出錯誤:', err);
+            req.logger.error('❌ 登出錯誤', { error: err.message, stack: err.stack });
             return res.status(500).json({ error: 'Logout failed' });
         }
 
-        console.log('👋 使用者登出');
+        req.logger.info('👋 使用者登出');
         res.json({ message: 'Logged out successfully' });
     });
 });

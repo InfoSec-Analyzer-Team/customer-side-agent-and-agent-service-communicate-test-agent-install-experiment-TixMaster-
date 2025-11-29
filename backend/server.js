@@ -4,6 +4,7 @@ const cors = require('cors');
 const session = require('express-session');  // NEW - Session 管理
 require('dotenv').config();
 const passport = require('./config/passport');  // NEW - Passport 設定
+const logger = require('./config/logger');  // NEW - Logger 配置
 
 const errorHandler = require('./middleware/errorHandler');
 const featureFlagsMiddleware = require('./middleware/featureFlags');
@@ -92,6 +93,14 @@ app.use(passport.initialize());  // 初始化 Passport
 app.use(passport.session());     // 讓 Passport 使用 session
 
 /**
+ * 📝 Logger Middleware
+ *
+ * 為每個請求添加日誌記錄與 correlation ID
+ * 必須在所有路由之前使用
+ */
+app.use(logger.middleware);
+
+/**
  * 🚩 Feature Flags Middleware
  *
  * 如果沒有設定 DATABASE_URL 或明確要求跳過 DB（SKIP_DB=true），
@@ -99,7 +108,7 @@ app.use(passport.session());     // 讓 Passport 使用 session
  */
 const skipDb = process.env.SKIP_DB === 'true' || !process.env.DATABASE_URL;
 if (skipDb) {
-    console.warn('[FeatureFlags] DATABASE_URL not set or SKIP_DB=true — using dummy feature flags');
+    logger.warn('[FeatureFlags] DATABASE_URL not set or SKIP_DB=true — using dummy feature flags');
     // stub attachFeatureFlags
     featureFlagsMiddleware.attachFeatureFlags = (req, res, next) => {
         req.featureFlags = {
@@ -110,7 +119,7 @@ if (skipDb) {
     };
     // stub initialize to a no-op
     featureFlagsMiddleware.initialize = async () => {
-        console.log('[FeatureFlags] initialize skipped (no DATABASE_URL)');
+        logger.info('[FeatureFlags] initialize skipped (no DATABASE_URL)');
     };
 }
 
@@ -129,7 +138,7 @@ app.get('/health', (req, res) => {
 
 /**
  * 🌐 路由註冊
- * 
+ *
  * 注意：OAuth 路由使用 /auth，不是 /api/auth
  * 這樣 Google 的重導向 URL 才會正確
  */
@@ -144,6 +153,33 @@ app.use('/api/tickets', ticketsRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/feature-flags', featureFlagsRouter);
 app.use('/api/analytics', analyticsRouter);
+
+/**
+ * 💥 Crash API - 用於測試監控系統
+ *
+ * 這個端點會故意讓伺服器當機，用來測試：
+ * - 日誌系統是否正確記錄錯誤
+ * - 監控系統是否能偵測到伺服器掛掉
+ * - 警報系統是否會觸發
+ */
+app.post('/api/crash', (req, res) => {
+    logger.error('💥 CRASH API called - Server will crash intentionally', {
+        endpoint: '/api/crash',
+        method: 'POST',
+        timestamp: new Date().toISOString()
+    });
+
+    // 延遲 100ms 讓 log 能寫入
+    setTimeout(() => {
+        process.exit(1);  // 強制退出程式
+    }, 100);
+
+    // 回應訊息（可能來不及送出）
+    res.status(200).json({
+        message: 'Server crashing...',
+        note: 'This is intentional for monitoring testing'
+    });
+});
 
 /**
  * 📄 靜態檔案服務
@@ -178,7 +214,7 @@ for (const c of candidates) {
         const idx = path.join(c, 'index.html');
         if (fs.existsSync(idx)) {
             chosenStatic = c;
-            console.log(`[static] Found index.html in ${c}`);
+            logger.info(`[static] Found index.html in ${c}`);
             break;
         }
     } catch (e) {
@@ -187,11 +223,11 @@ for (const c of candidates) {
 }
 
 if (chosenStatic) {
-    console.log(`[static] Serving static files from ${chosenStatic}`);
+    logger.info(`[static] Serving static files from ${chosenStatic}`);
     app.use(express.static(chosenStatic));
 } else {
-    console.warn('[static] Warning: could not locate index.html in any candidate paths.');
-    console.warn('[static] Candidates checked:', candidates.join(', '));
+    logger.warn('[static] Warning: could not locate index.html in any candidate paths.');
+    logger.warn('[static] Candidates checked:', { candidates: candidates.join(', ') });
 }
 
 // Fallback: for non-API and non-auth routes, serve index.html if present in chosenStatic
@@ -225,19 +261,20 @@ app.use(errorHandler);
  * 🚀 啟動伺服器
  */
 app.listen(PORT, async () => {
-    console.log(`🚀 TixMaster API server running on http://localhost:${PORT}`);
-    console.log(`📊 Health check: http://localhost:${PORT}/health`);
-    console.log(`🔐 OAuth routes:`);
-    console.log(`   - Google login: http://localhost:${PORT}/auth/google`);
-    console.log(`   - Callback: http://localhost:${PORT}/auth/google/callback`);
-    console.log(`🚩 Feature flags: http://localhost:${PORT}/api/feature-flags`);
+    logger.info(`🚀 TixMaster API server running on http://localhost:${PORT}`);
+    logger.info(`📊 Health check: http://localhost:${PORT}/health`);
+    logger.info(`🔐 OAuth routes:`);
+    logger.info(`   - Google login: http://localhost:${PORT}/auth/google`);
+    logger.info(`   - Callback: http://localhost:${PORT}/auth/google/callback`);
+    logger.info(`🚩 Feature flags: http://localhost:${PORT}/api/feature-flags`);
+    logger.info(`💥 Crash API: http://localhost:${PORT}/api/crash (POST)`);
 
     // Initialize feature flags
     try {
         await featureFlagsMiddleware.initialize();
-        console.log(`✅ Feature flags initialized`);
+        logger.info(`✅ Feature flags initialized`);
     } catch (error) {
-        console.error(`❌ Failed to initialize feature flags:`, error);
+        logger.error(`❌ Failed to initialize feature flags:`, { error: error.message, stack: error.stack });
     }
 });
 
