@@ -142,6 +142,15 @@
             document.body.querySelector('.register-container').classList.add('redirecting');
             document.getElementById('registerBtn').style.display = 'none';
 
+            // 檢查是否有返回 URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const returnUrl = urlParams.get('returnUrl') || localStorage.getItem('loginReturnUrl');
+
+            // 將返回 URL 儲存到 localStorage（OAuth 回調後會需要）
+            if (returnUrl) {
+                localStorage.setItem('loginReturnUrl', returnUrl);
+            }
+
             // 導向到後端 OAuth 註冊路由（相對路徑）
             setTimeout(() => {
                 window.location.href = '/auth/signup';

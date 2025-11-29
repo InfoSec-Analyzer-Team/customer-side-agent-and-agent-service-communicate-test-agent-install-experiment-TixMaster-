@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>需要登入 - TixMaster</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 90%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 50px 40px;
+            text-align: center;
+        }
+
+        .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: #2563eb;
+            margin-bottom: 15px;
+        }
+
+        .message {
+            font-size: 1.1rem;
+            color: #6b7280;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .info-box {
+            background: #eff6ff;
+            border-left: 4px solid #2563eb;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: left;
+            border-radius: 5px;
+        }
+
+        .info-box h3 {
+            color: #1e40af;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .info-box p {
+            color: #3b82f6;
+            font-size: 0.95rem;
+            margin-bottom: 5px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 40px;
+            margin: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1e40af;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            color: #9ca3af;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .divider span {
+            padding: 0 10px;
+            font-size: 0.9rem;
+        }
+
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            color: #9ca3af;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 40px 30px;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .message {
+                font-size: 1rem;
+            }
+
+            .btn {
+                display: block;
+                width: 100%;
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="icon">🔐</div>
+        <h1>需要登入才能購票</h1>
+        <p class="message">
+            為了保護您的購票資訊和訂單安全，請先登入您的帳號。
+        </p>
+
+        <div class="info-box">
+            <h3>為什麼需要登入？</h3>
+            <p>✓ 保護您的訂單和個人資料</p>
+            <p>✓ 追蹤您的購票紀錄</p>
+            <p>✓ 接收電子票券和訂單通知</p>
+            <p>✓ 享受會員專屬優惠</p>
+        </div>
+
+        <a href="login.html" class="btn btn-primary" id="loginBtn">
+            立即登入
+        </a>
+
+        <div class="divider">
+            <span>或</span>
+        </div>
+
+        <a href="register.html" class="btn btn-success" id="registerBtn">
+            註冊新帳號
+        </a>
+
+        <a href="index.html" class="btn btn-secondary">
+            返回首頁
+        </a>
+
+        <div class="footer">
+            登入後，系統會自動返回您剛才的購票頁面
+        </div>
+    </div>
+
+    <script>
+        // 儲存使用者想要前往的頁面（購票頁面）
+        const urlParams = new URLSearchParams(window.location.search);
+        const returnUrl = urlParams.get('returnUrl');
+
+        if (returnUrl) {
+            // 將返回 URL 儲存到 localStorage
+            localStorage.setItem('loginReturnUrl', returnUrl);
+        }
+
+        // 為登入和註冊按鈕添加返回 URL
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+
+        if (returnUrl) {
+            loginBtn.href = `login.html?returnUrl=${encodeURIComponent(returnUrl)}`;
+            registerBtn.href = `register.html?returnUrl=${encodeURIComponent(returnUrl)}`;
+        }
+
+        // 檢查使用者是否已經登入
+        const token = localStorage.getItem('token');
+        const currentUser = localStorage.getItem('currentUser');
+
+        if (token && currentUser) {
+            // 如果已經登入，直接跳轉
+            if (returnUrl) {
+                window.location.href = decodeURIComponent(returnUrl);
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+
+</html>

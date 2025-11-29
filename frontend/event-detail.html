@@ -323,12 +323,12 @@
         const events = [
             {
                 id: '1',
-                title: '葬送的你媽可憐',
+                title: '演唱會一',
                 date: '2025-12-15T19:00:00',
                 location: '台北 Cyber Arena',
                 price: 2500,
                 image: 'https://images.unsplash.com/photo-1459749411177-718bf998e889?w=1200',
-                description: '體驗未來音樂的視聽饗宴，葬送的你媽可憐 將帶來前所未有的演出。這是一場結合最新科技與音樂的盛會，絢麗的燈光效果配合震撼的音響系統，將為您帶來難忘的夜晚。'
+                description: '體驗未來音樂的視聽饗宴 將帶來前所未有的演出。這是一場結合最新科技與音樂的盛會，絢麗的燈光效果配合震撼的音響系統，將為您帶來難忘的夜晚。'
             },
             {
                 id: '2',
@@ -474,6 +474,17 @@
         }
 
         async function buyTickets() {
+            // 檢查使用者是否已登入
+            const token = localStorage.getItem('token');
+            const currentUser = localStorage.getItem('currentUser');
+
+            if (!token || !currentUser) {
+                // 未登入，重定向到登入提示頁面
+                const checkoutUrl = `checkout.html?eventId=${event.id}&quantity=${quantity}`;
+                window.location.href = `login-required.html?returnUrl=${encodeURIComponent(checkoutUrl)}`;
+                return;
+            }
+
             try {
                 // 確保 Feature Flags 已初始化
                 if (!FeatureFlags || typeof FeatureFlags.isEnabled !== 'function') {

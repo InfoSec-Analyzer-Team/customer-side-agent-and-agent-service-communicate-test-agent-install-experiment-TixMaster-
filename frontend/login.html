@@ -208,9 +208,20 @@
                         token: token
                     }));
 
-                    // 3 秒後導向首頁
+                    // 檢查是否有返回 URL
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const returnUrl = urlParams.get('returnUrl') || localStorage.getItem('loginReturnUrl');
+
+                    // 清除暫存的返回 URL
+                    localStorage.removeItem('loginReturnUrl');
+
+                    // 2 秒後導向指定頁面或首頁
                     setTimeout(() => {
-                        window.location.href = 'index.html';
+                        if (returnUrl) {
+                            window.location.href = decodeURIComponent(returnUrl);
+                        } else {
+                            window.location.href = 'index.html';
+                        }
                     }, 2000);
                 } catch (e) {
                     console.error('Token parsing error:', e);

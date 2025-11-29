@@ -472,7 +472,7 @@
         // 模擬活動資料
         const events = {
             '1': {
-                title: '葬送的你媽可憐',
+                title: '演唱會一',
                 date: '2025-12-15T19:00:00',
                 location: '台北 Cyber Arena',
                 price: 2500,
@@ -503,6 +503,17 @@
 
         // 初始化頁面
         async function initCheckoutPage() {
+            // 檢查使用者是否已登入
+            const token = localStorage.getItem('token');
+            const currentUser = localStorage.getItem('currentUser');
+
+            if (!token || !currentUser) {
+                // 未登入，重定向到登入提示頁面
+                const currentUrl = window.location.href;
+                window.location.href = `login-required.html?returnUrl=${encodeURIComponent(currentUrl)}`;
+                return;
+            }
+
             // 顯示訂單資訊
             document.getElementById('orderEventTitle').textContent = event.title;
             document.getElementById('orderEventDate').textContent = new Date(event.date).toLocaleString('zh-TW');
@@ -536,11 +547,11 @@
             }
 
             // 從 localStorage 讀取用戶資料（如果有登入）
-            const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
-            if (currentUser) {
-                document.getElementById('buyerName').value = currentUser.name || '';
-                document.getElementById('buyerEmail').value = currentUser.email || '';
-                document.getElementById('buyerPhone').value = currentUser.phone || '';
+            const userData = JSON.parse(localStorage.getItem('currentUser') || 'null');
+            if (userData) {
+                document.getElementById('buyerName').value = userData.name || '';
+                document.getElementById('buyerEmail').value = userData.email || '';
+                document.getElementById('buyerPhone').value = userData.phone || '';
             }
         }
 
@@ -593,6 +604,14 @@
 
         // 處理付款
         async function processPayment() {
+            // 再次檢查登入狀態
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('您的登入狀態已過期，請重新登入');
+                window.location.href = `login-required.html?returnUrl=${encodeURIComponent(window.location.href)}`;
+                return;
+            }
+
             // 驗證表單
             const name = document.getElementById('buyerName').value.trim();
             const email = document.getElementById('buyerEmail').value.trim();
@@ -602,6 +621,10 @@
                 alert('請填寫所有必填欄位！');
                 return;
             }
+
+            // 取得選中的付款方式
+            const selectedPaymentMethod = document.querySelector('.payment-method.selected');
+            const paymentMethod = selectedPaymentMethod ? selectedPaymentMethod.dataset.method : 'credit_card';
 
             // 記錄 Analytics: 用戶點擊付款按鈕
             const timeSpent = (15 * 60) - remainingSeconds;
@@ -613,14 +636,46 @@
                 hasTimer: FeatureFlags.isEnabled('ENABLE_CHECKOUT_TIMER')
             });
 
-            // 模擬付款處理
-            const processingTime = Math.random() * 2000 + 1000; // 1-3秒
-
-            const btn = event.target || document.querySelector('.btn-primary');
+            const btn = document.querySelector('.btn-primary');
             btn.disabled = true;
             btn.textContent = '處理中...';
 
-            setTimeout(() => {
+            try {
+                // 從 URL 取得 ticketId
+                const ticketId = urlParams.get('ticketId') || '1';
+
+                // 發送訂單到後端
+                const response = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        eventId: parseInt(eventId),
+                        ticketId: parseInt(ticketId),
+                        quantity: quantity,
+                        paymentMethod: paymentMethod
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+
+                    // 如果是認證錯誤
+                    if (response.status === 401 || response.status === 403) {
+                        alert('您的登入狀態已過期，請重新登入');
+                        localStorage.removeItem('token');
+                        localStorage.removeItem('currentUser');
+                        window.location.href = `login-required.html?returnUrl=${encodeURIComponent(window.location.href)}`;
+                        return;
+                    }
+
+                    throw new Error(errorData.error || '建立訂單失敗');
+                }
+
+                const data = await response.json();
+
                 // 停止倒數計時
                 if (countdownInterval) {
                     clearInterval(countdownInterval);
@@ -633,12 +688,19 @@
                     totalAmount,
                     timeSpent,
                     hasTimer: FeatureFlags.isEnabled('ENABLE_CHECKOUT_TIMER'),
-                    paymentMethod: document.querySelector('.payment-method.selected').dataset.method
+                    paymentMethod: paymentMethod,
+                    orderNumber: data.order.order_number
                 });
 
-                alert('付款成功！您將收到確認信件。');
+                alert(`訂單建立成功！\n訂單編號：${data.order.order_number}\n您將收到確認信件。`);
                 window.location.href = 'index.html';
-            }, processingTime);
+
+            } catch (error) {
+                console.error('Payment error:', error);
+                alert(`付款失敗：${error.message}`);
+                btn.disabled = false;
+                btn.textContent = '確認付款';
+            }
         }
 
         // 返回活動頁
