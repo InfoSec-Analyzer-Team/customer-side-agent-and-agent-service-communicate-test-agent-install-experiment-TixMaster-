@@ -16,6 +16,8 @@ services:
     volumes:
       # 掛載配置檔
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      # 掛載警報規則
+      - ./prometheus_rules.yml:/etc/prometheus/prometheus_rules.yml
       # 掛載數據目錄（持久化）
       - prometheus-data:/prometheus
     command:
@@ -56,6 +58,20 @@ services:
       - monitoring
     depends_on:
       - prometheus
+
+  # Alertmanager - 警報通知
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: tixmaster-alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager/config.yml:/etc/alertmanager/config.yml
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+    restart: unless-stopped
+    networks:
+      - monitoring
 
 # 定義網路
 networks:

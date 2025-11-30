@@ -208,6 +208,30 @@ app.post('/api/crash', (req, res) => {
 });
 
 /**
+ * 🐢 Slow API - 用於測試高延遲監控
+ *
+ * 這個端點會故意延遲回應，用來測試：
+ * - 監控系統是否能偵測到高延遲
+ * - HighLatency 警報是否會觸發
+ */
+app.get('/api/slow', (req, res) => {
+    const delay = parseInt(req.query.delay) || 6000; // 預設延遲 6 秒 (超過警報閾值 5 秒)
+    
+    logger.warn(`🐢 SLOW API called - Delaying response for ${delay}ms`, {
+        endpoint: '/api/slow',
+        method: 'GET',
+        delay: delay
+    });
+
+    setTimeout(() => {
+        res.json({
+            message: 'Sorry for the delay!',
+            delay: delay
+        });
+    }, delay);
+});
+
+/**
  * 📄 靜態檔案服務
  *
  * 原本程式使用相對路徑 express.static('../')，在不同平台或
@@ -295,6 +319,7 @@ app.listen(PORT, async () => {
     logger.info(`   - Callback: http://localhost:${PORT}/auth/google/callback`);
     logger.info(`🚩 Feature flags: http://localhost:${PORT}/api/feature-flags`);
     logger.info(`💥 Crash API: http://localhost:${PORT}/api/crash (POST)`);
+    logger.info(`🐢 Slow API: http://localhost:${PORT}/api/slow (GET)`);
 
     // Initialize feature flags
     try {

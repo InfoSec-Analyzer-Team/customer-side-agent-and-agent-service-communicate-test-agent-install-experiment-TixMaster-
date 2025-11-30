@@ -1,0 +1,38 @@
+global:
+  resolve_timeout: 5m
+  # SMTP 配置 (請替換為您的實際 SMTP 伺服器資訊)
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'your@gmail.com'
+  smtp_auth_username: 'your@gmail.com'
+  smtp_auth_password: '' # Google App Password
+  smtp_require_tls: true
+
+route:
+  group_by: ['alertname']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'email-notifications'
+
+receivers:
+- name: 'email-notifications'
+  email_configs:
+  - to: 'your@gmail.com' # 接收警報的 Email
+    send_resolved: true
+    headers:
+      Subject: '{{ .Status | toUpper }} - {{ .CommonLabels.alertname }}'
+    html: '
+      <h3>{{ .Status | toUpper }} - {{ .CommonLabels.alertname }}</h3>
+      <p><strong>Summary:</strong> {{ .CommonAnnotations.summary }}</p>
+      <p><strong>Description:</strong> {{ .CommonAnnotations.description }}</p>
+      <p><strong>Details:</strong></p>
+      <ul>
+        {{ range .Alerts }}
+          <li>
+            <strong>Instance:</strong> {{ .Labels.instance }}<br>
+            <strong>Severity:</strong> {{ .Labels.severity }}<br>
+            <strong>Value:</strong> {{ .Annotations.value }}
+          </li>
+        {{ end }}
+      </ul>
+    '

@@ -3,6 +3,7 @@ const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
 const db = require('../config/database');
 const authenticateToken = require('../middleware/auth');
+const { metrics } = require('../config/metrics'); // Import metrics
 
 // POST /api/orders - 建立訂單 (需認證)
 router.post('/', authenticateToken, async (req, res, next) => {
@@ -73,6 +74,12 @@ router.post('/', authenticateToken, async (req, res, next) => {
         }
 
         await client.query('COMMIT');
+
+        // 記錄訂單 Metrics
+        metrics.ordersTotal.inc({
+            event_id: eventId,
+            payment_method: paymentMethod
+        });
 
         res.status(201).json({
             message: 'Order created successfully',

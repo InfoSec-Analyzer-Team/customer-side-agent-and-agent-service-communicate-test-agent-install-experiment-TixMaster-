@@ -12,6 +12,17 @@ global:
   external_labels:
     monitor: 'tixmaster-monitor'
 
+# 警報規則檔案
+rule_files:
+  - "prometheus_rules.yml"
+
+# Alertmanager 配置
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets:
+      - alertmanager:9093
+
 # 抓取配置
 scrape_configs:
   # TixMaster Backend API
