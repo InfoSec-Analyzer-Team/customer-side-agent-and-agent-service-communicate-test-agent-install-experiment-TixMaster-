@@ -1,48 +1,48 @@
 @echo off
 REM ====================================================
-REM TixMaster 監控系統啟動腳本 (Windows)
+REM TixMaster Monitoring System Startup Script (Windows)
 REM ====================================================
 
 echo.
 echo ========================================
-echo   TixMaster 監控系統啟動
+echo   TixMaster Monitoring System Startup
 echo ========================================
 echo.
 
-REM 檢查 Docker 是否運行
-echo [1/3] 檢查 Docker 狀態...
+REM Check if Docker is running
+echo [1/3] Checking Docker status...
 docker ps >nul 2>&1
 if %errorlevel% neq 0 (
-    echo ❌ Docker 未運行！請先啟動 Docker Desktop
+    echo ❌ Docker is not running! Please start Docker Desktop first
     echo.
     pause
     exit /b 1
 )
-echo ✅ Docker 正在運行
+echo ✅ Docker is running
 
 echo.
-echo [2/3] 啟動 Prometheus 和 Grafana...
+echo [2/3] Starting Prometheus and Grafana...
 docker-compose -f docker-compose.monitoring.yml up -d
 if %errorlevel% neq 0 (
-    echo ❌ 監控系統啟動失敗
+    echo ❌ Monitoring system failed to start
     pause
     exit /b 1
 )
 
 echo.
-echo [3/3] 等待服務啟動...
+echo [3/3] Waiting for services to start...
 timeout /t 5 /nobreak >nul
 
 echo.
 echo ========================================
-echo   ✅ 監控系統已啟動！
+echo   ✅ Monitoring System Started!
 echo ========================================
 echo.
 echo 📊 Prometheus: http://localhost:9091
 echo 📈 Grafana:    http://localhost:3001
-echo    帳號: admin / admin
+echo    Credentials: admin / admin
 echo.
-echo 💡 提示: 請確保 Backend 在 http://localhost:3000 運行
+echo 💡 Tip: Make sure Backend is running at http://localhost:3000
 echo.
-echo 按任意鍵繼續...
+echo Press any key to continue...
 pause >nul
