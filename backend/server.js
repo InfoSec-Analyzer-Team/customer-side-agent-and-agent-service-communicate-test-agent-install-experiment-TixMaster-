@@ -8,6 +8,8 @@ const logger = require('./config/logger');  // NEW - Logger 配置
 
 const errorHandler = require('./middleware/errorHandler');
 const featureFlagsMiddleware = require('./middleware/featureFlags');
+const metricsMiddleware = require('./middleware/metricsMiddleware');  // NEW - Metrics tracking
+const { register } = require('./config/metrics');  // NEW - Prometheus registry
 const path = require('path');
 const fs = require('fs');
 
@@ -101,6 +103,14 @@ app.use(passport.session());     // 讓 Passport 使用 session
 app.use(logger.middleware);
 
 /**
+ * 📊 Metrics Middleware
+ *
+ * 自動追蹤所有 HTTP 請求的 metrics
+ * 必須在 logger 之後、路由之前使用
+ */
+app.use(metricsMiddleware);
+
+/**
  * 🚩 Feature Flags Middleware
  *
  * 如果沒有設定 DATABASE_URL 或明確要求跳過 DB（SKIP_DB=true），
@@ -134,6 +144,22 @@ app.get('/health', (req, res) => {
         message: 'TixMaster API is running',
         oauth: 'enabled'  // 標記 OAuth 已啟用
     });
+});
+
+/**
+ * 📊 Metrics endpoint (Prometheus format)
+ *
+ * 這個端點提供 Prometheus 格式的 metrics
+ * Prometheus 會定期抓取這個端點來收集數據
+ */
+app.get('/metrics', async (req, res) => {
+    try {
+        res.set('Content-Type', register.contentType);
+        res.end(await register.metrics());
+    } catch (error) {
+        logger.error('Error generating metrics', { error: error.message });
+        res.status(500).end(error.message);
+    }
 });
 
 /**
@@ -263,6 +289,7 @@ app.use(errorHandler);
 app.listen(PORT, async () => {
     logger.info(`🚀 TixMaster API server running on http://localhost:${PORT}`);
     logger.info(`📊 Health check: http://localhost:${PORT}/health`);
+    logger.info(`📈 Metrics (Prometheus): http://localhost:${PORT}/metrics`);
     logger.info(`🔐 OAuth routes:`);
     logger.info(`   - Google login: http://localhost:${PORT}/auth/google`);
     logger.info(`   - Callback: http://localhost:${PORT}/auth/google/callback`);

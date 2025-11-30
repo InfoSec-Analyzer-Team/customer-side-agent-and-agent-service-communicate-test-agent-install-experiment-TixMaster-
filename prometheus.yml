@@ -1,0 +1,41 @@
+# Prometheus 配置檔案
+# 這個檔案定義了 Prometheus 如何收集 metrics
+
+global:
+  # 預設抓取間隔（每 15 秒抓取一次）
+  scrape_interval: 15s
+
+  # 評估規則的間隔
+  evaluation_interval: 15s
+
+  # 添加到所有時間序列的標籤
+  external_labels:
+    monitor: 'tixmaster-monitor'
+
+# 抓取配置
+scrape_configs:
+  # TixMaster Backend API
+  - job_name: 'tixmaster-backend'
+
+    # 覆寫全域設定，每 10 秒抓取一次
+    scrape_interval: 10s
+
+    # 抓取超時時間
+    scrape_timeout: 5s
+
+    # Metrics 路徑
+    metrics_path: '/metrics'
+
+    # 目標清單
+    static_configs:
+      - targets: ['host.docker.internal:3000']
+        labels:
+          service: 'backend'
+          environment: 'development'
+
+  # Prometheus 自己的 metrics
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'

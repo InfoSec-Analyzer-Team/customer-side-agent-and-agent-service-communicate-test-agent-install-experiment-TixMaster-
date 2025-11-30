@@ -1,0 +1,68 @@
+# Docker Compose 配置檔 - 監控系統
+# 啟動 Prometheus 和 Grafana (task1 pharse3
+#
+# 使用方式：
+# docker-compose -f docker-compose.monitoring.yml up -d
+
+version: '3.8'
+
+services:
+  # Prometheus - Metrics 收集與儲存
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: tixmaster-prometheus
+    ports:
+      - "9091:9090"
+    volumes:
+      # 掛載配置檔
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      # 掛載數據目錄（持久化）
+      - prometheus-data:/prometheus
+    command:
+      # 指定配置檔位置
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      # 數據儲存路徑
+      - '--storage.tsdb.path=/prometheus'
+      # 數據保留時間（15 天）
+      - '--storage.tsdb.retention.time=15d'
+      # 啟用生命週期 API（用於熱重載配置）
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - monitoring
+
+  # Grafana - 視覺化儀表板
+  grafana:
+    image: grafana/grafana:latest
+    container_name: tixmaster-grafana
+    ports:
+      - "3001:3000"  # 避免與 backend 的 3000 port 衝突
+    volumes:
+      # 掛載數據目錄（持久化儀表板和設定）
+      - grafana-data:/var/lib/grafana
+      # 掛載 provisioning 配置（自動配置數據源）
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      # 管理員密碼（請在生產環境改用強密碼！）
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      # 允許匿名存取（開發環境方便測試）
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      # 預設組織
+      - GF_USERS_DEFAULT_THEME=dark
+    restart: unless-stopped
+    networks:
+      - monitoring
+    depends_on:
+      - prometheus
+
+# 定義網路
+networks:
+  monitoring:
+    driver: bridge
+
+# 定義資料卷（持久化數據）
+volumes:
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
