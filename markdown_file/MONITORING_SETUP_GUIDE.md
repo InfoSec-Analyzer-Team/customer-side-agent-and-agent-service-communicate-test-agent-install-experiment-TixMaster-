@@ -102,7 +102,7 @@ docker ps
 - URL: http://localhost:3001
 - Username: `admin`
 - Password: `admin`
-
+![alt text](image-6.png)
 ---
 
 ## 🎨 儀表板設計說明
