@@ -10,38 +10,31 @@
 
 ## 🛠️ 設定步驟
 
-### 1. 設定 Email 通知 (Alertmanager)
+### 1. 設定 Email 通知 (使用 .env)
 
-為了讓 Alertmanager 能寄信，您需要設定 SMTP 資訊。
+為了安全起見，我們將 Email 和密碼設定在 `.env` 檔案中，而不是直接寫在設定檔裡。
 
-1. 開啟 `alertmanager/config.yml`。
-2. 修改 `global` 區塊中的 SMTP 設定：
+1. **編輯 `.env` 檔案**：
+   在 `alertmanager` 資料夾中建立或編輯 `.env` 檔案 (`alertmanager/.env`)，填入您的 Gmail 資訊：
 
-```yaml
-global:
-  resolve_timeout: 5m
-  smtp_smarthost: 'smtp.gmail.com:587'      # SMTP 伺服器
-  smtp_from: 'your-email@gmail.com'         # 寄件者 Email
-  smtp_auth_username: 'your-email@gmail.com' # 帳號
-  smtp_auth_password: 'your-app-password'    # 密碼 (Gmail 請使用應用程式密碼)
-  smtp_require_tls: true
-```
+   ```env
+   SMTP_EMAIL=your-email@gmail.com
+   SMTP_PASSWORD=your-app-password
+   ```
 
-> **💡 如何取得 Google 應用程式密碼？**
-> 1. 前往 [Google 帳戶安全性](https://myaccount.google.com/security)。
-> 2. 確保已開啟 **「兩步驟驗證」**。
-> 3. 在搜尋欄搜尋 **「應用程式密碼」** (App passwords)。
-> 4. 建立新密碼：應用程式選「郵件」，裝置選「其他 (自訂名稱)」，輸入 `TixMaster`。
-> 5. 複製產生的 16 位數密碼（移除空格），填入上方的 `smtp_auth_password`。
+   > **💡 如何取得 Google 應用程式密碼？**
+   > 1. 前往 [Google 帳戶安全性](https://myaccount.google.com/security)。
+   > 2. 確保已開啟 **「兩步驟驗證」**。
+   > 3. 在搜尋欄搜尋 **「應用程式密碼」** (App passwords)。
+   > 4. 建立新密碼：應用程式選「郵件」，裝置選「其他 (自訂名稱)」，輸入 `TixMaster`。
+   > 5. 複製產生的 16 位數密碼（移除空格），填入上方的 `smtp_auth_password`。
 
-3. 修改 `receivers` 區塊中的收件者 Email：
+2. **產生設定檔**：
+   執行以下 PowerShell 指令，它會讀取 `.env` 並產生 `alertmanager/config.yml`：
 
-```yaml
-receivers:
-- name: 'email-notifications'
-  email_configs:
-  - to: 'admin@example.com' # 修改為您的 Email
-```
+   ```powershell
+   .\generate_alert_config.ps1
+   ```
 
 ### 2. 啟動監控系統
 
@@ -61,7 +54,7 @@ docker-compose -f docker-compose.monitoring.yml up -d
 目前的警報規則定義在 `prometheus_rules.yml`：
 
 1. **InstanceDown**: 當 Backend 無法連線 (`up == 0`) 超過 1 分鐘。
-2. **HighErrorRate**: 當 5xx 錯誤率 (`status_code=5xx`) 超過 0 (即發生任何 500 錯誤) 持續 1 分鐘。
+2. **HighErrorRate**: 當 4xx 錯誤率 (`status_code=4xx`) 超過 0 (即發生任何 500 錯誤) 持續 1 分鐘。
 3. **HighLatency**: 當 95% 的請求回應時間超過 5 秒持續 1 分鐘。
 
 ## 🧪 測試警報

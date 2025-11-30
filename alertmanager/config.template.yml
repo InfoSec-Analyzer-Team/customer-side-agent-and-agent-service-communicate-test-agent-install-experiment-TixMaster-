@@ -1,10 +1,10 @@
-﻿global:
+global:
   resolve_timeout: 5m
-  # SMTP ?蔭 (??generate_alert_config.ps1 ?芸??Ｙ?)
+  # SMTP 配置 (由 generate_alert_config.ps1 自動產生)
   smtp_smarthost: 'smtp.gmail.com:587'
-  smtp_from: ''
-  smtp_auth_username: ''
-  smtp_auth_password: ''
+  smtp_from: '${SMTP_EMAIL}'
+  smtp_auth_username: '${SMTP_EMAIL}'
+  smtp_auth_password: '${SMTP_PASSWORD}'
   smtp_require_tls: true
 
 route:
@@ -17,7 +17,7 @@ route:
 receivers:
 - name: 'email-notifications'
   email_configs:
-  - to: '' # ?身撖策?芸楛
+  - to: '${SMTP_EMAIL}' # 預設寄給自己
     send_resolved: true
     headers:
       Subject: '{{ .Status | toUpper }} - {{ .CommonLabels.alertname }}'
@@ -36,4 +36,3 @@ receivers:
         {{ end }}
       </ul>
     '
-
