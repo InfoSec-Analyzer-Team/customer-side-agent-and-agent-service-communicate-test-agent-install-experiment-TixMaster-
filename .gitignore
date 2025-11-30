@@ -27,3 +27,6 @@ Thumbs.db
 
 # Playwright reports (CI artifacts)
 reports/
+
+#secret md files
+secret.md

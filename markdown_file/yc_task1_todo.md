@@ -56,24 +56,39 @@
 ![alt text](image-1.png)
 ![alt text](<螢幕擷取畫面 2025-11-30 041811.png>)
 ### Phase 3: Metrics 收集
-- [ ] 安裝 Prometheus client 套件
-- [ ] 建立 `/metrics` 端點
-- [ ] 實作以下 metrics:
-  - [ ] HTTP 請求總數（counter）
-  - [ ] HTTP 請求延遲（histogram）
-  - [ ] 活躍請求數（gauge）
-  - [ ] 錯誤率（counter）
+- [x] 安裝 Prometheus client 套件
+- [x] 建立 `/metrics` 端點
+- [x] 實作以下 metrics:
+  - [x] HTTP 請求總數（counter）
+  - [x] HTTP 請求延遲（histogram）
+  - [x] 活躍請求數（gauge）
+  - [x] 錯誤率（counter）
+---
+test API requests to generate metrics
+
+![alt text](image-2.png)
+
+Check HTTP metrics after requests
+
+![alt text](image-3.png)
+
+HTTP 請求總數：
+/metrics - 200 狀態碼
+/health - 200 狀態碼
+/api/events/ - 200 狀態碼
+/api/users/:id - 404 狀態碼（注意 ID 999 被自動轉換為 :id）
+
 
 ### Phase 4: 監控系統設定
-- [ ] 安裝 Prometheus
-- [ ] 設定 Prometheus scrape targets
-- [ ] 安裝 Grafana
-- [ ] 建立 Grafana dashboard
-  - [ ] CPU 使用率
-  - [ ] 記憶體使用率
-  - [ ] HTTP 請求率
-  - [ ] 回應時間
-  - [ ] 錯誤率
+- [x] 安裝 Prometheus
+- [x] 設定 Prometheus scrape targets
+- [x] 安裝 Grafana
+- [x] 建立 Grafana dashboard
+  - [x] CPU 使用率
+  - [x] 記憶體使用率
+  - [x] HTTP 請求率
+  - [x] 回應時間
+  - [x] 錯誤率
 
 ### Phase 5: 儀表板設計
 - [ ] 規劃 Grafana 儀表板排版
