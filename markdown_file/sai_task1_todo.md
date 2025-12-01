@@ -2,7 +2,8 @@
 
 @賽冠恩
 
-- 設定一個警報：當網站掛掉（回傳 `500` 或發生 Timeout）時，自動寄 Email（例如使用 Prometheus + Alertmanager 或 Grafana Alerting）。
+- [x] 設定一個警報：當網站掛掉（回傳 `500` 或發生 Timeout）時，自動寄 Email（已使用 Prometheus + Alertmanager 完成）。
+- [ ] 設定 Grafana Alerting：處理與業務邏輯相關、需要看圖調整閾值的警報（如：訂單量異常下跌、API 回應時間變慢）。
 - 寫下 SOP 的具體指令（步驟要可操作、可複製）。例如：
   1. 檢查 Log：
      - 如果在本機或 VM：`tail -n 200 backend/logs/*.log` 或 `Get-Content .\\backend\\logs\\app.log -Tail 200`（PowerShell）
