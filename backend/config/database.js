@@ -12,11 +12,10 @@ if (process.env.SKIP_DB === 'true' || !process.env.DATABASE_URL) {
         pool: null
     };
 } else {
+    const useSsl = process.env.DATABASE_SSL === 'true' || process.env.NODE_ENV === 'production';
     const pool = new Pool({
         connectionString: process.env.DATABASE_URL,
-        ssl: {
-            rejectUnauthorized: false // Required for Render.com
-        }
+        ...(useSsl ? { ssl: { rejectUnauthorized: false } } : {})
     });
 
     // Test connection
