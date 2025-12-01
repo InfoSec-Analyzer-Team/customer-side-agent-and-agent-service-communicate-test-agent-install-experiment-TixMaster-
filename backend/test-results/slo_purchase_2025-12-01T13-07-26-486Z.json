@@ -1,0 +1,18 @@
+{
+  "type": "SLO_CONCURRENCY_PURCHASE",
+  "status": "Passed",
+  "threshold": "errorRate <= 1%",
+  "summary": {
+    "total": 100,
+    "success": 100,
+    "errorCount": 0,
+    "errorRate": 0,
+    "errors": []
+  },
+  "meta": {
+    "baseUrl": "http://127.0.0.1:3000",
+    "concurrency": 100,
+    "eventId": 2,
+    "ticketId": 3
+  }
+}

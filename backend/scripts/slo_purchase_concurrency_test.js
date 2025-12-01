@@ -9,6 +9,9 @@ SLO Test: 100 concurrent purchase attempts, error rate must be <= 1%
   5) Exit code 0 when errorRate <= 1%, otherwise exit 1
 */
 
+// Load env vars from backend/.env so DATABASE_URL, SKIP_DB, etc. are available
+require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
+
 const fs = require('fs');
 const path = require('path');
 const axios = require('axios');

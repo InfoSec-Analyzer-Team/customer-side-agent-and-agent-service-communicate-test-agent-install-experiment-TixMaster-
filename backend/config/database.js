@@ -15,7 +15,7 @@ if (process.env.SKIP_DB === 'true' || !process.env.DATABASE_URL) {
     const useSsl = process.env.DATABASE_SSL === 'true' || process.env.NODE_ENV === 'production';
     const pool = new Pool({
         connectionString: process.env.DATABASE_URL,
-        ...(useSsl ? { ssl: { rejectUnauthorized: false } } : {})
+        ...(useSsl ? { ssl: { rejectUnauthorized: false } } : { ssl: false })
     });
 
     // Test connection
