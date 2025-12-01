@@ -40,5 +40,6 @@ $content = $content.Replace('${SMTP_PASSWORD}', $Script:SMTP_PASSWORD)
 
 # 寫入設定檔
 $content | Set-Content $configPath -Encoding UTF8
-Write-Host "✅ Successfully generated from the sample $configPath" -ForegroundColor Green
-Write-Host "📧 Email: $Script:SMTP_EMAIL"
+Write-Host "Successfully generated from the sample $configPath" -ForegroundColor Green
+Write-Host "Email: $Script:SMTP_EMAIL" -ForegroundColor Cyan
+Write-Host "Password: $Script:SMTP_PASSWORD" -ForegroundColor Cyan
