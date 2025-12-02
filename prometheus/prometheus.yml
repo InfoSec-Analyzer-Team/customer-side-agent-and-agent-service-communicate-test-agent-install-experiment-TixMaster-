@@ -1,0 +1,23 @@
+# Prometheus config for Railway deployment
+# Replace <BACKEND_HOST> with your backend service host (e.g. my-backend.up.railway.app)
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'tixmaster-backend'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    metrics_path: '/metrics'
+    scheme: https
+    static_configs:
+      - targets: ['tixmaster-production.up.railway.app']
+        labels:
+          service: 'backend'
+          environment: 'railway'
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
