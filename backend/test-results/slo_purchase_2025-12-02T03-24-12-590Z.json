@@ -1,0 +1,23 @@
+{
+  "type": "SLO_CONCURRENCY_PURCHASE",
+  "status": "Failed",
+  "threshold": "errorRate <= 1%",
+  "summary": {
+    "total": 0,
+    "success": 0,
+    "errorCount": 1,
+    "errorRate": 1,
+    "errors": [
+      {
+        "code": 500,
+        "detail": "Request failed with status code 500"
+      }
+    ]
+  },
+  "meta": {
+    "baseUrl": "http://127.0.0.1:3000",
+    "concurrency": 500,
+    "eventId": "N/A",
+    "ticketId": "N/A"
+  }
+}

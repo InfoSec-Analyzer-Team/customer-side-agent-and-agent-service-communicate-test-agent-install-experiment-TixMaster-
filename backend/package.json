@@ -7,7 +7,8 @@
         "start": "node server.js",
         "dev": "nodemon server.js",
         "slo:test:purchase": "node scripts/slo_purchase_concurrency_test.js",
-        "fault:server": "node scripts/fault_injection_server.js"
+        "fault:server": "node scripts/fault_injection_server.js",
+        "fault-server": "npm run fault:server"
     },
     "keywords": [
         "ticketing",

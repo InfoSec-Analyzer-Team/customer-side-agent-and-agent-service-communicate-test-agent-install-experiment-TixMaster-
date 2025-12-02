@@ -21,6 +21,8 @@ const ordersRouter = require('./routes/orders');
 const featureFlagsRouter = require('./routes/featureFlags');
 const analyticsRouter = require('./routes/analytics');
 const oauthRouter = require('./routes/oauth');  // NEW - OAuth routes
+// Fault injection router (integrated into main API)
+const faultRouter = require('./routes/fault');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -179,6 +181,8 @@ app.use('/api/tickets', ticketsRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/feature-flags', featureFlagsRouter);
 app.use('/api/analytics', analyticsRouter);
+// Fault endpoints mounted under main API (guarded by ENABLE_FAULT_ENDPOINTS)
+app.use('/api/fault', faultRouter);
 
 /**
  * 💥 Crash API - 用於測試監控系統
