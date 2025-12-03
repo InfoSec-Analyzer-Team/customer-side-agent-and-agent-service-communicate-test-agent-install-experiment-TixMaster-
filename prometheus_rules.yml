@@ -1,0 +1,34 @@
+groups:
+  - name: tixmaster_alerts
+    rules:
+      # 1. 網站掛掉警報 (Instance Down)
+      # 當目標無法抓取 (up == 0) 持續 1 分鐘時觸發
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance {{ $labels.instance }} down"
+          description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 1 minute."
+
+      # 2. 高錯誤率警報 (High Error Rate - 400 Errors)
+      # 當 4xx 錯誤率在 1 分鐘內大於 0 時觸發
+      - alert: HighErrorRate
+        expr: rate(http_errors_total{status_code=~"4.."}[1m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate on {{ $labels.instance }}"
+          description: "{{ $labels.instance }} is returning 4xx errors. Rate: {{ $value }}"
+      # 3. 高延遲警報 (High Latency / Timeout)
+      # 當 95% 的請求回應時間超過 5000ms (5秒) 時觸發
+      - alert: HighLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_ms_bucket[5m])) > 5000
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High latency on {{ $labels.instance }}"
+          description: "95% of requests on {{ $labels.instance }} are taking longer than 5 seconds."
