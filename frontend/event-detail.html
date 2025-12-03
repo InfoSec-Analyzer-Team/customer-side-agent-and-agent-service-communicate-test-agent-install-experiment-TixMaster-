@@ -350,6 +350,7 @@
         const events = [
             {
                 id: '1',
+                ticketId: '1',
                 title: '演唱會一',
                 date: '2025-12-15T19:00:00',
                 location: '台北 Cyber Arena',
@@ -359,6 +360,7 @@
             },
             {
                 id: '2',
+                ticketId: '2',
                 title: '演唱會二：你媽的裸體視覺饗宴',
                 date: '2025-11-30T09:00:00',
                 location: '台北國際會議中心',
@@ -368,6 +370,7 @@
             },
             {
                 id: '3',
+                ticketId: '3',
                 title: '聖誕脫肛之夜',
                 date: '2025-12-24T20:00:00',
                 location: '國家音樂廳',
@@ -507,7 +510,7 @@
 
             if (!token || !currentUser) {
                 // 未登入，重定向到登入提示頁面
-                const checkoutUrl = `checkout.html?eventId=${event.id}&quantity=${quantity}`;
+                const checkoutUrl = `checkout.html?eventId=${event.id}&ticketId=${event.ticketId}&quantity=${quantity}`;
                 window.location.href = `login-required.html?returnUrl=${encodeURIComponent(checkoutUrl)}`;
                 return;
             }
@@ -516,7 +519,7 @@
                 // 確保 Feature Flags 已初始化
                 if (!FeatureFlags || typeof FeatureFlags.isEnabled !== 'function') {
                     console.warn('[BuyTickets] FeatureFlags not initialized, proceeding anyway');
-                    window.location.href = `checkout.html?eventId=${event.id}&quantity=${quantity}`;
+                    window.location.href = `checkout.html?eventId=${event.id}&ticketId=${event.ticketId}&quantity=${quantity}`;
                     return;
                 }
 
@@ -533,11 +536,11 @@
                 });
 
                 // 導向結帳頁面
-                window.location.href = `checkout.html?eventId=${event.id}&quantity=${quantity}`;
+                window.location.href = `checkout.html?eventId=${event.id}&ticketId=${event.ticketId}&quantity=${quantity}`;
             } catch (error) {
                 console.error('[BuyTickets] Error:', error);
                 // 即使出錯也要導向結帳頁面
-                window.location.href = `checkout.html?eventId=${event.id}&quantity=${quantity}`;
+                window.location.href = `checkout.html?eventId=${event.id}&ticketId=${event.ticketId}&quantity=${quantity}`;
             }
         }
 

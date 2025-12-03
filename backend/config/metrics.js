@@ -95,6 +95,19 @@ const dbQueryDuration = new client.Histogram({
     registers: [register]
 });
 
+/**
+ * 🎫 訂單總數 (Counter)
+ *
+ * 記錄建立的訂單總數
+ * Labels: event_id, payment_method
+ */
+const ordersTotal = new client.Counter({
+    name: 'orders_total',
+    help: 'Total number of orders created',
+    labelNames: ['event_id', 'payment_method'],
+    registers: [register]
+});
+
 module.exports = {
     register,
     metrics: {
@@ -103,6 +116,7 @@ module.exports = {
         activeRequests,
         httpErrorsTotal,
         dbQueriesTotal,
-        dbQueryDuration
+        dbQueryDuration,
+        ordersTotal
     }
 };

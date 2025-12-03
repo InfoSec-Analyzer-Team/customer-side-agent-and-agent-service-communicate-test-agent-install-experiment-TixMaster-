@@ -1,0 +1,113 @@
+apiVersion: 1
+
+groups:
+  - orgId: 1
+    name: 'TixMaster Business Alerts'
+    folder: 'TixMaster Alerts'
+    interval: 1m
+    rules:
+      - uid: 'low_order_volume'
+        title: 'Low Order Volume'
+        condition: 'B'
+        data:
+          - refId: 'A'
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: 'prometheus'
+            model:
+              editorMode: 'code'
+              expr: 'sum(rate(orders_total[5m])) or on() vector(0)'
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: 'A'
+          - refId: 'B'
+            datasourceUid: '__expr__'
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 0.01
+                    type: 'lt'
+                  operator:
+                    type: 'and'
+                  query:
+                    params:
+                      - 'B'
+                  reducer:
+                    params: []
+                    type: 'last'
+                  type: 'query'
+              datasource:
+                type: '__expr__'
+                uid: '__expr__'
+              expression: 'A'
+              intervalMs: 1000
+              maxDataPoints: 43200
+              reducer: 'last'
+              refId: 'B'
+              type: 'reduce'
+        dashboardUid: ''
+        panelId: 0
+        noDataState: 'OK'
+        execErrState: 'Error'
+        for: 5m
+        annotations:
+          summary: '訂單量異常低'
+          description: '過去 5 分鐘內訂單量低於預期 (每秒 < 0.01)，請檢查結帳流程。'
+        labels:
+          severity: 'critical'
+          team: 'business'
+
+      - uid: 'api_slow_response'
+        title: 'API Slow Response'
+        condition: 'B'
+        data:
+          - refId: 'A'
+            relativeTimeRange:
+              from: 300
+              to: 0
+            datasourceUid: 'prometheus'
+            model:
+              editorMode: 'code'
+              expr: 'histogram_quantile(0.95, sum(rate(http_request_duration_ms_bucket[5m])) by (le))'
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: 'A'
+          - refId: 'B'
+            datasourceUid: '__expr__'
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 2000
+                    type: 'gt'
+                  operator:
+                    type: 'and'
+                  query:
+                    params:
+                      - 'B'
+                  reducer:
+                    params: []
+                    type: 'last'
+                  type: 'query'
+              datasource:
+                type: '__expr__'
+                uid: '__expr__'
+              expression: 'A'
+              intervalMs: 1000
+              maxDataPoints: 43200
+              reducer: 'last'
+              refId: 'B'
+              type: 'reduce'
+        dashboardUid: ''
+        panelId: 0
+        noDataState: 'OK'
+        execErrState: 'Error'
+        for: 2m
+        annotations:
+          summary: 'API 回應速度變慢'
+          description: 'P95 延遲超過 2 秒。'
+        labels:
+          severity: 'warning'
+          team: 'backend'
