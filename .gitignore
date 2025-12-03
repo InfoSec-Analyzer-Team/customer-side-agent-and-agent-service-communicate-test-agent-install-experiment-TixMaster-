@@ -27,6 +27,16 @@ Thumbs.db
 
 # Playwright reports (CI artifacts)
 reports/
+playwright-report/
+test-results/
+
+# Python cache
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
 
 #secret md files
 secret.md
