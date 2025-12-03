@@ -1,5 +1,7 @@
 FROM prom/prometheus:latest
 COPY prometheus.yml /etc/prometheus/prometheus.yml
+COPY rules /etc/prometheus/rules
+COPY prometheus_rules.yml /etc/prometheus/rules/prometheus_rules.yml
 
 # Railway expects the container to listen on the platform-provided PORT env var.
 # The official Prometheus image sets an ENTRYPOINT to the prometheus binary.
