@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TixMaster Final Team Presentation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+/* 1. CORE SETUP */
+:root {
+    --bg-color: #0f172a;       /* Slate 900 */
+    --card-bg: #1e293b;        /* Slate 800 */
+    --text-main: #f8fafc;      /* Slate 50 */
+    --text-muted: #94a3b8;     /* Slate 400 */
+    --accent-pm: #a78bfa;      /* Purple (PM) */
+    --accent-dev: #60a5fa;     /* Blue (Dev) */
+    --accent-db: #34d399;      /* Emerald (DB/Des) */
+    --accent-test: #f87171;    /* Red (Tester) */
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background-color: #000;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px;
+    gap: 40px;
+}
+
+/* 2. SLIDE CONTAINER */
+.slide {
+    width: 1280px;
+    height: 720px;
+    background-color: var(--bg-color);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 60px;
+    box-shadow: 0 0 50px rgba(0,0,0,0.5);
+    border: 1px solid #334155;
+    page-break-after: always;
+}
+
+/* Background Decoration */
+.slide::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.03) 0%, transparent 60%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.slide > * { position: relative; z-index: 1; }
+
+/* 3. TYPOGRAPHY */
+h1 { font-size: 64px; font-weight: 800; line-height: 1.1; margin-bottom: 20px; }
+h2 { font-size: 42px; font-weight: 700; margin-bottom: 30px; border-bottom: 2px solid #475569; padding-bottom: 15px; display: inline-block; width: 100%; }
+h3 { font-size: 24px; font-weight: 600; margin-bottom: 15px; }
+p, li { font-size: 20px; color: var(--text-muted); line-height: 1.6; margin-bottom: 12px; }
+ul { padding-left: 25px; }
+
+/* 4. LAYOUTS */
+.content { display: flex; gap: 50px; height: 100%; }
+.col-left { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.col-right { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+
+/* 5. COMPONENTS */
+.role-badge {
+    position: absolute;
+    top: 60px;
+    right: 60px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    background: rgba(255,255,255,0.1);
+}
+
+.placeholder {
+    width: 100%;
+    height: 100%;
+    min-height: 350px;
+    background: rgba(0,0,0,0.3);
+    border: 2px dashed var(--text-muted);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+/* Tech Stack Cards */
+.tech-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+.tech-card {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid var(--accent-dev);
+}
+.tech-title { font-weight: 700; color: #fff; margin-bottom: 5px; }
+.tech-desc { font-size: 16px; margin: 0; }
+
+/* Code Block */
+.code-block {
+    background: #000;
+    padding: 20px;
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: #e2e8f0;
+    border: 1px solid #334155;
+    margin-top: 15px;
+}
+
+/* Print Settings */
+@media print {
+    body { padding: 0; background: none; }
+    .slide { box-shadow: none; border: none; margin: 0; }
+}
+    </style>
+</head>
+<body>
+
+    <!-- SLIDE 1: Title Slide -->
+    <div class="slide">
+        <div class="content" style="flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+            <h1 style="font-size: 80px;">TixMaster <span style="color: #38bdf8;">Final Report</span></h1>
+            <p style="font-size: 28px; max-width: 900px; margin-top: 20px;">
+                A Comprehensive DevSecOps Journey:<br>From Monolith to Resilient Microservices
+            </p>
+            
+            <div style="margin-top: 80px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 30px; width: 100%;">
+                <div style="border-top: 3px solid var(--accent-pm); padding-top: 15px;">
+                    <p style="color: var(--accent-pm); font-weight: 700; font-size: 14px; margin:0;">PROJECT MANAGER</p>
+                    <p style="color: #fff; font-weight: 600; margin: 5px 0;">B11209025_廖浚喆</p>
+                </div>
+                <div style="border-top: 3px solid var(--accent-dev); padding-top: 15px;">
+                    <p style="color: var(--accent-dev); font-weight: 700; font-size: 14px; margin:0;">DEVELOPER</p>
+                    <p style="color: #fff; font-weight: 600; margin: 5px 0;">B11209041_蕭昱辰</p>
+                </div>
+                <div style="border-top: 3px solid var(--accent-db); padding-top: 15px;">
+                    <p style="color: var(--accent-db); font-weight: 700; font-size: 14px; margin:0;">DB MGR</p>
+                    <p style="color: #fff; font-weight: 600; margin: 5px 0;">B11209023_賽冠恩</p>
+                </div>
+                <div style="border-top: 3px solid var(--accent-test); padding-top: 15px;">
+                    <p style="color: var(--accent-test); font-weight: 700; font-size: 14px; margin:0;">TESTER</p>
+                    <p style="color: #fff; font-weight: 600; margin: 5px 0;">B11209023_許又升</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SECTION 1: PROJECT MANAGER ==================== -->
+
+    <!-- SLIDE 2: PM Strategy -->
+    <div class="slide">
+        <div class="role-badge" style="color: var(--accent-pm); border: 1px solid var(--accent-pm);">Project Manager</div>
+        <h2 style="border-color: var(--accent-pm);">Governance & Strategy</h2>
+        <div class="content">
+            <div class="col-left">
+                <h3 style="color: var(--accent-pm);">From Chaos to Order</h3>
+                <p>As Project Manager, I focused on establishing a DevSecOps culture and hypothesis-driven workflows.</p>
+                <ul>
+                    <li><strong>Security First:</strong> Enforced A&A protocols and SCA scanning (Shift Left).</li>
+                    <li><strong>Data Driven:</strong> Designed A/B tests using Feature Toggles to validate business hypotheses.</li>
+                    <li><strong>Agile Management:</strong> Managed 45+ Tasks using Jira Kanban boards to align Dev and Ops.</li>
+                </ul>
+            </div>
+            <div class="col-right">
+                <div class="placeholder">
+                    <i class="fa-brands fa-jira" style="font-size: 60px; margin-bottom: 15px; color: var(--accent-pm);"></i>
+                    <p>📸 [Paste Jira Board / HDD Data Screenshot Here]</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 3: PM Infra & Deployment (Added as requested) -->
+    <div class="slide">
+        <div class="role-badge" style="color: var(--accent-pm); border: 1px solid var(--accent-pm);">Project Manager</div>
+        <h2 style="border-color: var(--accent-pm);">Infrastructure & Deployment Management</h2>
+        <div class="content">
+            <div class="col-left">
+                <div class="placeholder">
+                    <i class="fa-solid fa-server" style="font-size: 60px; margin-bottom: 15px; color: var(--accent-pm);"></i>
+                    <p>📸 [Paste Railway Dashboard / GitHub Settings Screenshot]</p>
+                </div>
+            </div>
+            <div class="col-right">
+                <h3 style="color: var(--accent-pm);">GitHub Governance</h3>
+                <ul>
+                    <li><strong>Repository Setup:</strong> Initialized the repo with `.gitignore` and security templates.</li>
+                    <li><strong>Branch Protection:</strong> Enforced rules on `main` branch to require PR reviews before merging.</li>
+                </ul>
+                <h3 style="color: var(--accent-pm); margin-top: 30px;">Railway Deployment</h3>
+                <ul>
+                    <li><strong>Live Environment:</strong> Deployed the full stack to Railway for real-world testing.</li>
+                    <li><strong>Secret Management:</strong> Managed production environment variables securely in Railway dashboard.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SECTION 2: DEVELOPER ==================== -->
+
+    <!-- SLIDE 4: Tech Stack -->
+    <div class="slide">
+        <div class="role-badge" style="color: var(--accent-dev); border: 1px solid var(--accent-dev);">Developer</div>
+        <h2 style="border-color: var(--accent-dev);">Backend Technology Stack</h2>
+        <div class="content">
+            <div class="col-left">
+                <div class="tech-grid">
+                    <div class="tech-card">
+                        <div class="tech-title">Node.js + Express</div>
+                        <p class="tech-desc">Non-blocking I/O, optimized for high-concurrency ticketing.</p>
+                    </div>
+                    <div class="tech-card">
+                        <div class="tech-title">JWT (jsonwebtoken)</div>
+                        <p class="tech-desc">Stateless auth to reduce server memory overhead.</p>
+                    </div>
+                    <div class="tech-card">
+                        <div class="tech-title">OAuth (Auth0)</div>
+                        <p class="tech-desc">Secure delegation, mitigating password storage risks.</p>
+                    </div>
+                    <div class="tech-card">
+                        <div class="tech-title">Axios & CORS</div>
+                        <p class="tech-desc">Unified HTTP client & secure Cross-Origin resource sharing.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-right">
+                <h3 style="color: var(--accent-dev);">Security Implementation</h3>
+                <p>Removed local encryption (bcrypt) in favor of Auth0 and implemented Dotenv for 12-factor compliance.</p>
+                <div class="code-block">
+                    // Secure Practice (.env)<br>
+                    require('dotenv').config();<br>
+                    const SECRET = process.env.JWT_SECRET;<br>
+                    <br>
+                    // Middleware Architecture<br>
+                    app.use(cors(corsOptions));<br>
+                    app.use(express.json());
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 5: Branching & Toggles -->
+    <div class="slide">
+        <div class="role-badge" style="color: var(--accent-dev); border: 1px solid var(--accent-dev);">Developer</div>
+        <h2 style="border-color: var(--accent-dev);">CI/CD & Feature Toggles</h2>
+        <div class="content">
+            <div class="col-left">
+                <h3 style="color: var(--accent-dev);">Workflow Strategy</h3>
+                <p>Established a structured development workflow:</p>
+                <ul>
+                    <li><strong>Main:</strong> Protected production branch.</li>
+                    <li><strong>Feature:</strong> `feature/db-setup`, `feature/test`.</li>
+                    <li><strong>Automation:</strong> GitHub Actions pipeline runs tests on every push.</li>
+                </ul>
+                <h3 style="color: var(--accent-dev); margin-top: 30px;">Feature Toggle Logic</h3>
+                <p>Decoupling deployment from feature release.</p>
+                <div class="code-block">
+                    if (FeatureFlags.isEnabled('ENABLE_TIMER')) {<br>
+                    &nbsp;&nbsp;console.log('Countdown ENABLED');<br>
+                    &nbsp;&nbsp;startCountdownTimer();<br>
+                    &nbsp;&nbsp;trackAnalytics('timer_shown');<br>
+                    } else {<br>
+                    &nbsp;&nbsp;console.log('Countdown DISABLED');<br>
+                    }
+                </div>
+            </div>
+            <div class="col-right">
+                <div class="placeholder">
+                    <i class="fa-brands fa-github" style="font-size: 60px; margin-bottom: 15px; color: var(--accent-dev);"></i>
+                    <p>📸 [Paste GitHub Actions / Pipeline Screenshot Here]</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SECTION 3: DB MANAGER / DESIGNER ==================== -->
+
+    <!-- SLIDE 6: Architecture -->
+    <div class="slide">
+        <div class="role-badge" style="color: var(--accent-db); border: 1px solid var(--accent-db);">DB Mgr</div>
+        <h2 style="border-color: var(--accent-db);">System Architecture</h2>
+        <div class="content">
+            <div class="col-left">
+                <div class="placeholder">
+                    <i class="fa-solid fa-sitemap" style="font-size: 60px; margin-bottom: 15px; color: var(--accent-db);"></i>
+                    <p>📸 [Paste Architecture Diagram / Data Flow Here]</p>
+                </div>
+            </div>
+            <div class="col-right">
+                <h3 style="color: var(--accent-db);">Microservices Design</h3>
+                <ul>
+                    <li><strong>Frontend:</strong> Next.js (Static Assets).</li>
+                    <li><strong>Backend:</strong> Node.js API (Business Logic).</li>
+                    <li><strong>Database:</strong> PostgreSQL / MongoDB Atlas (Auto-Scaling).</li>
+                    <li><strong>Auth:</strong> Auth0 Identity Provider (Security).</li>
+                </ul>
+                <p style="margin-top: 20px;"><strong>Key Decision:</strong> Separation of Concerns. UI is distinct from Logic, and Data integrity is ensured by ACID compliant databases.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 7: UX Strategy -->
+    <div class="slide">
+        <div class="role-badge" style="color: var(--accent-db); border: 1px solid var(--accent-db);">DB Mgr</div>
+        <h2 style="border-color: var(--accent-db);">UX Strategy & HDD</h2>
+        <div class="content">
+            <div class="col-left">
+                <h3 style="color: var(--accent-db);">Creating Urgency</h3>
+                <p>Designed UI elements controlled by Feature Flags to test user behavior hypotheses.</p>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 20px; color: var(--text-muted);">
+                    <tr style="border-bottom: 1px solid #475569;">
+                        <th style="text-align:left; padding: 10px; color: #fff;">Feature</th>
+                        <th style="text-align:left; padding: 10px; color: #fff;">Flag ON Behavior</th>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #334155;">
+                        <td style="padding: 10px;">Countdown</td>
+                        <td style="padding: 10px;">Shows "15:00" red timer</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid #334155;">
+                        <td style="padding: 10px;">Social Proof</td>
+                        <td style="padding: 10px;">Shows "84 people viewing"</td>
+                    </tr>
+                </table>
+                <p style="margin-top: 20px;"><strong>Psychology:</strong> Scarcity + FOMO = Higher Conversion.</p>
+            </div>
+            <div class="col-right">
+                <div class="placeholder">
+                    <i class="fa-solid fa-stopwatch" style="font-size: 60px; margin-bottom: 15px; color: var(--accent-db);"></i>
+                    <p>📸 [Paste UI Screenshot: Countdown / Viewing Count]</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SECTION 4: TESTER ==================== -->
+
+    <!-- SLIDE 8: Reliability Testing -->
+    <div class="slide">
+        <div class="role-badge" style="color: var(--accent-test); border: 1px solid var(--accent-test);">Tester</div>
+        <h2 style="border-color: var(--accent-test);">Reliability & SLA Verification</h2>
+        <div class="content">
+            <div class="col-left">
+                <div class="placeholder">
+                    <i class="fa-solid fa-check-double" style="font-size: 60px; margin-bottom: 15px; color: var(--accent-test);"></i>
+                    <p>📸 [Paste Stress Test Results / Matrix Screenshot]</p>
+                </div>
+            </div>
+            <div class="col-right">
+                <h3 style="color: var(--accent-test);">Stress Test Results</h3>
+                <p>Verified system stability under high concurrency.</p>
+                <div style="background: var(--card-bg); padding: 20px; border-radius: 8px; margin-top: 15px;">
+                    <div style="display:flex; justify-content:space-between; border-bottom:1px solid #333; padding-bottom:10px; margin-bottom:10px;">
+                        <span>SLA Test (100 users)</span>
+                        <span style="color: var(--accent-db);">Latency < 800ms</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span>Toughness (500 users)</span>
+                        <span style="color: var(--accent-db);">0.00% Error Rate</span>
+                    </div>
+                </div>
+                <h3 style="color: var(--accent-test); margin-top: 20px;">Testing Strategy</h3>
+                <ul>
+                    <li><strong>Feature Toggle Matrix:</strong> Verified Lifecycle, Invalid Payload, and Integration.</li>
+                    <li><strong>E2E:</strong> Used Playwright to verify the full user journey.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 9: Chaos Engineering -->
+    <div class="slide">
+        <div class="role-badge" style="color: var(--accent-test); border: 1px solid var(--accent-test);">Tester</div>
+        <h2 style="border-color: var(--accent-test);">Chaos & Observability</h2>
+        <div class="content">
+            <div class="col-left">
+                <h3 style="color: var(--accent-test);">Chaos Experiment</h3>
+                <p>Simulating failure to verify auto-healing capabilities.</p>
+                <ul>
+                    <li><strong>Injection:</strong> <code>curl /api/fault/dropped-connection</code></li>
+                    <li><strong>Observation:</strong>
+                        <ul style="margin-top:5px;">
+                            <li>Logs: <code>[error]: [fault] dropped-connection</code></li>
+                            <li>Alerts: Triggered within 1 minute.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Recovery:</strong> System auto-restarted in < 30s.</li>
+                </ul>
+            </div>
+            <div class="col-right">
+                <div class="placeholder">
+                    <i class="fa-solid fa-heart-pulse" style="font-size: 60px; margin-bottom: 15px; color: var(--accent-test);"></i>
+                    <p>📸 [Paste Better Stack Monitor / Chaos Logs Screenshot]</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 10: Conclusion -->
+    <div class="slide">
+        <div class="role-badge" style="color: #fff; border: 1px solid #fff;">Final Reflection</div>
+        <h2 style="border-color: #fff;">Conclusion</h2>
+        <div class="content" style="flex-direction: column; justify-content: center; text-align: center;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+                <div style="background: var(--card-bg); padding: 40px; border-radius: 12px; border-top: 4px solid var(--accent-pm);">
+                    <h3 style="color: #fff;">What We Achieved</h3>
+                    <p>Successfully integrated Dev, Sec, and Ops. The true value lies not in features, but in a system that is <strong>Observable, Testable, and Recoverable</strong>.</p>
+                </div>
+                <div style="background: var(--card-bg); padding: 40px; border-radius: 12px; border-top: 4px solid var(--accent-dev);">
+                    <h3 style="color: #fff;">Future Roadmap</h3>
+                    <p>Plan to introduce <strong>Load Balancers</strong> to solve transient downtime during restarts, and implement <strong>Terraform (IaC)</strong> for infrastructure management.</p>
+                </div>
+            </div>
+            
+            <p style="margin-top: 60px; font-size: 24px; font-style: italic; color: #94a3b8;">
+                "DevSecOps is a journey, not a destination."
+            </p>
+        </div>
+    </div>
+
+</body>
+</html>
