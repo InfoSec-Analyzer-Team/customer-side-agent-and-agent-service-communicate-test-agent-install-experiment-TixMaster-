@@ -296,60 +296,135 @@ ul { padding-left: 25px; }
         </div>
     </div>
 
-    <!-- ==================== SECTION 3: DB MANAGER / DESIGNER ==================== -->
+    <!-- ==================== SECTION 3: DB MANAGER ==================== -->
 
-    <!-- SLIDE 6: Architecture -->
+    <!-- SLIDE 6: DB Architecture -->
     <div class="slide">
         <div class="role-badge" style="color: var(--accent-db); border: 1px solid var(--accent-db);">DB Mgr</div>
-        <h2 style="border-color: var(--accent-db);">System Architecture</h2>
+        <h2 style="border-color: var(--accent-db);">Database Architecture & Integrity</h2>
         <div class="content">
             <div class="col-left">
-                <div class="placeholder">
-                    <i class="fa-solid fa-sitemap" style="font-size: 60px; margin-bottom: 15px; color: var(--accent-db);"></i>
-                    <p>📸 [Paste Architecture Diagram / Data Flow Here]</p>
-                </div>
+                <h3 style="color: var(--accent-db);">PostgreSQL Implementation</h3>
+                <p>Chosen for strict ACID compliance to ensure transactional integrity in ticket sales.</p>
+                <ul>
+                    <li><strong>Relational Schema:</strong> Normalized structure (Users, Events, Tickets, Orders) to reduce redundancy.</li>
+                    <li><strong>Concurrency Control:</strong> Row-level locking prevents double-booking during high traffic.</li>
+                    <li><strong>Data Types:</strong> Utilized JSONB for flexible event metadata storage.</li>
+                </ul>
             </div>
             <div class="col-right">
-                <h3 style="color: var(--accent-db);">Microservices Design</h3>
-                <ul>
-                    <li><strong>Frontend:</strong> Next.js (Static Assets).</li>
-                    <li><strong>Backend:</strong> Node.js API (Business Logic).</li>
-                    <li><strong>Database:</strong> PostgreSQL / MongoDB Atlas (Auto-Scaling).</li>
-                    <li><strong>Auth:</strong> Auth0 Identity Provider (Security).</li>
-                </ul>
-                <p style="margin-top: 20px;"><strong>Key Decision:</strong> Separation of Concerns. UI is distinct from Logic, and Data integrity is ensured by ACID compliant databases.</p>
+                <img src="./images/er-diagram.png" style="width: 100%; height: 100%; object-fit: contain; border-radius: 12px; border: 2px solid #334155;">
             </div>
         </div>
     </div>
 
-    <!-- SLIDE 7: UX Strategy -->
+    <!-- SLIDE 7: DB Operations -->
     <div class="slide">
         <div class="role-badge" style="color: var(--accent-db); border: 1px solid var(--accent-db);">DB Mgr</div>
-        <h2 style="border-color: var(--accent-db);">UX Strategy & HDD</h2>
+        <h2 style="border-color: var(--accent-db);">Security & Operations</h2>
         <div class="content">
             <div class="col-left">
-                <h3 style="color: var(--accent-db);">Creating Urgency</h3>
-                <p>Designed UI elements controlled by Feature Flags to test user behavior hypotheses.</p>
+                <div class="placeholder">
+                    <img src="./images/rbac.png" style="width: 100%; height: 70%; object-fit: contain; border-radius: 12px; border: 2px solid #334155;">
+                    <img src="./images/rbac-table.png" style="width: 100%; height: 100%; object-fit: contain; border-radius: 12px; border: 2px solid #334155;">
+                </div>
+            </div>
+            <div class="col-right">
+                <h3 style="color: var(--accent-db);">RBAC & Migrations</h3>
+                <ul>
+                    <li><strong>Role-Based Access Control:</strong> Enforced at the database level. Admins have full CRUD; Users are restricted to `SELECT` and `INSERT` on orders.</li>
+                    <li><strong>Automated Migrations:</strong> Version-controlled SQL scripts ensure consistent schema across Dev, Test, and Prod environments.</li>
+                </ul>
+                <div class="code-block">
+                    -- Secure Role Setup<br>
+                    CREATE ROLE app_user;<br>
+                    GRANT SELECT ON events TO app_user;<br>
+                    GRANT INSERT ON orders TO app_user;<br>
+                    -- Migration Tracking<br>
+                    INSERT INTO schema_migrations (version) VALUES ('20251209_init');
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SECTION 4: DESIGNER ==================== -->
+
+    <!-- SLIDE 8: Designer UX Strategy -->
+    <div class="slide">
+        <div class="role-badge" style="color: var(--accent-db); border: 1px solid var(--accent-db);">Designer</div>
+        <h2 style="border-color: var(--accent-db);">UX Strategy & Psychology</h2>
+        <div class="content">
+            <div class="col-left">
+                <h3 style="color: var(--accent-db);">Driving Conversion with Urgency</h3>
+                <p>Leveraged Cialdini’s Principles of Persuasion to reduce cart abandonment.</p>
                 <table style="width: 100%; border-collapse: collapse; margin-top: 20px; color: var(--text-muted);">
                     <tr style="border-bottom: 1px solid #475569;">
-                        <th style="text-align:left; padding: 10px; color: #fff;">Feature</th>
-                        <th style="text-align:left; padding: 10px; color: #fff;">Flag ON Behavior</th>
+                        <th style="text-align:left; padding: 10px; color: #fff;">Feature Flag</th>
+                        <th style="text-align:left; padding: 10px; color: #fff;">UI Behavior</th>
                     </tr>
                     <tr style="border-bottom: 1px solid #334155;">
-                        <td style="padding: 10px;">Countdown</td>
-                        <td style="padding: 10px;">Shows "15:00" red timer</td>
+                        <td style="padding: 10px;">ENABLE_VIEWING_COUNT</td>
+                        <td style="padding: 10px;">Shows "👁️ 84 people viewing" (Social Proof)</td>
                     </tr>
                     <tr style="border-bottom: 1px solid #334155;">
-                        <td style="padding: 10px;">Social Proof</td>
-                        <td style="padding: 10px;">Shows "84 people viewing"</td>
+                        <td style="padding: 10px;">ENABLE_TIMER</td>
+                        <td style="padding: 10px;">Shows "⏰ 15:00" Countdown (Scarcity)</td>
                     </tr>
                 </table>
-                <p style="margin-top: 20px;"><strong>Psychology:</strong> Scarcity + FOMO = Higher Conversion.</p>
             </div>
             <div class="col-right">
                 <div class="placeholder">
-                    <i class="fa-solid fa-stopwatch" style="font-size: 60px; margin-bottom: 15px; color: var(--accent-db);"></i>
-                    <p>📸 [Paste UI Screenshot: Countdown / Viewing Count]</p>
+                    <img src="./images/image.png" style="width: 100%; height: 100%; object-fit: contain; border-radius: 12px; border: 2px solid #334155;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 9: Designer Architecture Viz -->
+    <div class="slide">
+        <div class="role-badge" style="color: var(--accent-db); border: 1px solid var(--accent-db);">Designer</div>
+        <h2 style="border-color: var(--accent-db);">Visualizing System Architecture</h2>
+        <div class="content">
+            <div class="col-left">
+                <div class="placeholder">
+                    <img src="./images/arch.png" style="width: 100%; height: 100%; object-fit: contain; border-radius: 12px; border: 2px solid #334155;">
+
+                </div>
+            </div>
+            <div class="col-right">
+                <h3 style="color: var(--accent-db);">Clear Data Flow</h3>
+                <p>Designed the system visualization to ensure all stakeholders understand the data journey.</p>
+                <ul>
+                    <li><strong>Decoupled Auth:</strong> Visualized the redirect flow to Auth0/Google to clarify security boundaries.</li>
+                    <li><strong>Modular Design:</strong> Distinct separation between Frontend (Next.js) and Backend (Express) allows for independent scaling and design iteration.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 10: Designer Observability -->
+    <div class="slide">
+        <div class="role-badge" style="color: var(--accent-db); border: 1px solid var(--accent-db);">Designer</div>
+        <h2 style="border-color: var(--accent-db);">Designing for Observability</h2>
+        <div class="content">
+            <div class="col-left">
+                <h3 style="color: var(--accent-db);">Dashboard Strategy</h3>
+                <p>Designed monitoring views based on user persona and context.</p>
+                <div style="background: var(--card-bg); padding: 20px; border-radius: 8px; margin-top: 15px;">
+                    <div style="margin-bottom: 15px;">
+                        <strong style="color: #fff;">1. External (Better Stack)</strong><br>
+                        <span style="font-size: 16px;">"Is the site up?" - Simple Status Page for End Users.</span>
+                    </div>
+                    <div>
+                        <strong style="color: #fff;">2. Internal (Grafana)</strong><br>
+                        <span style="font-size: 16px;">"How is it performing?" - Detailed Metrics (CPU, Latency) for DevOps.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-right">
+                <div class="placeholder">
+                    <img src="./images/bs.png" style="width: 95%; height: 100%; object-fit: contain; border-radius: 12px; border: 2px solid #334155;">
+                    <img src="./images/grafana.png" style="width: 95%; height: 100%; object-fit: contain; border-radius: 12px; border: 2px solid #334155;"> 
                 </div>
             </div>
         </div>
