@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend 技術簡報</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft JhengHei', 'Segoe UI', Arial, sans-serif;
+            overflow: hidden;
+            background: #1a1a2e;
+        }
+
+        /* 簡報容器 */
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* 投影片 */
+        .slide {
+            width: 100%;
+            height: 100%;
+            display: none;
+            padding: 60px 80px;
+            color: white;
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        .slide h1 {
+            font-size: 3.5rem;
+            margin-bottom: 40px;
+            color: #00d4ff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .slide h2 {
+            font-size: 2.5rem;
+            margin: 30px 0 20px 0;
+            color: #ffd700;
+        }
+
+        .slide p {
+            font-size: 1.3rem;
+            line-height: 1.8;
+            margin: 15px 0;
+        }
+
+        .slide ul {
+            margin: 20px 0 20px 40px;
+            font-size: 1.2rem;
+            line-height: 1.8;
+        }
+
+        .slide li {
+            margin: 10px 0;
+        }
+
+        /* 圖片樣式 */
+        .slide-image {
+            max-width: 100%;
+            height: auto;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .image-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .image-row {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+
+        .image-row img {
+            flex: 1;
+            max-width: 45%;
+            min-width: 300px;
+        }
+
+        /* 程式碼區塊 */
+        .code-block {
+            background: #2d2d44;
+            border-left: 4px solid #00d4ff;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+
+        /* 亮點標籤 */
+        .highlight {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        /* 版本標籤 */
+        .version {
+            display: inline-block;
+            background: #00d4ff;
+            color: #1a1a2e;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        /* 備註區 */
+        .notes {
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid #ffd700;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 6px;
+            font-style: italic;
+        }
+
+        /* 子母畫面影片 */
+        .video-pip {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 400px;
+            height: 225px;
+            z-index: 9999;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            transition: all 0.3s ease;
+            background: #000;
+            cursor: grab; /* 加入這行 */
+        }
+
+        .video-pip:hover {
+
+            box-shadow: 0 12px 48px rgba(0,0,0,0.8);
+        }
+
+        .video-pip video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* 影片載入提示 */
+        .video-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #2d2d44;
+            color: white;
+            font-size: 1rem;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* 導航按鈕 */
+        .nav-buttons {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: rgba(0, 212, 255, 0.2);
+            border: 2px solid #00d4ff;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 212, 255, 0.4);
+            transform: scale(1.1);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* 頁碼指示器 */
+        .page-indicator {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            color: white;
+            font-size: 1.2rem;
+            background: rgba(0, 212, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 2px solid #00d4ff;
+            z-index: 1000;
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .video-pip {
+                width: 280px;
+                height: 157px;
+                bottom: 20px;
+                right: 20px;
+            }
+
+            .slide {
+                padding: 40px 30px;
+            }
+
+            .slide h1 {
+                font-size: 2.5rem;
+            }
+
+            .slide h2 {
+                font-size: 2rem;
+            }
+
+            .slide p, .slide ul {
+                font-size: 1.1rem;
+            }
+
+            .nav-btn {
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+
+            .image-row img {
+                max-width: 100%;
+            }
+        }
+
+        /* 滾動條樣式 */
+        .slide::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .slide::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .slide::-webkit-scrollbar-thumb {
+            background: #00d4ff;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- 投影片 1: Backend -->
+        <div class="slide active">
+            <h1>Backend</h1>
+            <div class="image-container">
+                <img src="images/slide1_img3.png" class="slide-image" alt="Node.js Logo">
+            </div>
+            <h2>Node.js + Express.js</h2>
+            <span class="version">Version: Node.js 18+ | Express.js 4.18.2</span>
+            
+            <p><strong>Why Choose:</strong></p>
+            <div class="code-block">// Advantages
+- Blocking non-I/O, suitable for high-concurrency ticketing scenarios
+- JavaScript is consistent across all platforms, reducing the learning curve
+- Large npm ecosystem with abundant packages
+- Lightweight, quick start-up</div>
+
+            <div class="image-container">
+                <img src="images/slide1_img4.png" class="slide-image" alt="Express.js">
+            </div>
+
+            <p><strong>Use Cases:</strong></p>
+            <ul>
+                <li>RESTful API server</li>
+                <li>Middleware architecture</li>
+                <li>Request routing and processing</li>
+            </ul>
+        </div>
+
+        <!-- 投影片 2 -->
+        <div class="slide">
+            <h1>backend/server.js:25)</h1>
+            <div class="image-container">
+                <img src="images/slide2_img3.png" class="slide-image" alt="Server Code">
+            </div>
+        </div>
+
+        <!-- 投影片 3: JWT -->
+        <div class="slide">
+            <h1>JWT (jsonwebtoken)</h1>
+            <span class="version">Version: 9.0.2</span>
+            
+            <p><strong>Why using:</strong></p>
+            <div class="code-block">// ✅ JWT Advantages
+- Stateless authentication, suitable for distributed systems
+- No need for session storage, reducing server memory burden
+- CORS-friendly
+- Can carry user role and permission information</div>
+
+            <p><strong>Use Cases:</strong></p>
+            <ul>
+                <li>Generating tokens after user login</li>
+                <li>API request verification</li>
+                <li>Administrator permission verification</li>
+            </ul>
+        </div>
+
+        <!-- 投影片 4 -->
+        <div class="slide">
+            <div class="image-container">
+                <img src="images/slide4_img3.png" class="slide-image" alt="JWT Flow">
+            </div>
+        </div>
+
+        <!-- 投影片 5: Bcrypt -->
+        <div class="slide">
+            <h1>Bcrypt (But we remove it.)</h1>
+            <div class="image-container">
+                <img src="images/slide5_img4.png" class="slide-image" alt="Bcrypt">
+            </div>
+            <div class="image-container">
+                <img src="images/slide5_img3.png" class="slide-image" alt="Bcrypt Details">
+            </div>
+            <div class="notes">
+                <p><strong>Note:</strong> Cause for the clearly structure. We remove it in the current version</p>
+            </div>
+        </div>
+
+        <!-- 投影片 6: OAuth -->
+        <div class="slide">
+            <h1>OAuth</h1>
+            <div class="image-container">
+                <img src="images/slide6_img3.png" class="slide-image" alt="OAuth Flow">
+            </div>
+            <div class="notes">
+                <p><strong>Note:</strong> Then, we use open authorization to replace our native custom login system</p>
+            </div>
+        </div>
+
+        <!-- 投影片 7: CORS -->
+        <div class="slide">
+            <h1>CORS (cors)</h1>
+            <span class="version">Version: 2.8.5</span>
+            
+            <p><strong>Why Choose:</strong></p>
+            <div class="code-block">// Problem: Frontend is at localhost:5500, backend is at localhost:3000
+
+
+// Browsers will block cross-origin requests (Same-Origin Policy)
+// Solution: CORS middleware
+const corsOptions = {
+    origin: process.env.FRONTEND_URL || true,
+    credentials: true // Allow cookies
+};
+app.use(cors(corsOptions));</div>
+
+            <div class="notes">
+                <p><strong>Use Cases:</strong></p>
+                <ul>
+                    <li>Allow frontends to make cross-domain requests to backend APIs</li>
+                    <li>Control which domains can access the API</li>
+                    <li>Handle preflight requests (OPTIONS)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 投影片 8: uuidv4 -->
+        <div class="slide">
+            <h1>uuidv4</h1>
+            
+            <p><strong>Advantages:</strong></p>
+            <ul>
+                <li>Globally unique (extremely low probability of collision)</li>
+                <li>Unpredictable (security)</li>
+                <li>Decentralized system friendly (no central ID generator required)</li>
+            </ul>
+
+            <p><strong>Use Cases:</strong></p>
+            <ul>
+                <li>Order number</li>
+                <li>Correlation ID (request tracking)</li>
+                <li>Session Token</li>
+            </ul>
+
+            <div class="image-container">
+                <img src="images/slide8_img3.png" class="slide-image" alt="UUID Example">
+            </div>
+        </div>
+
+        <!-- 投影片 9: Axios -->
+        <div class="slide">
+            <h1>Axios</h1>
+            <span class="version">Version: 1.7.9</span>
+            
+            <p>Axios is a Promise-based HTTP client used to send HTTP requests in browsers and Node.js. Simply put, Axios is a tool for communicating with backend APIs.</p>
+            
+            <p><strong>Why Choose:</strong></p>
+            <div class="code-block">// ✅ Advantages of axios
+- Supports Promise (async/await)
+- Automatic JSON conversion
+- Interceptor functionality
+- Compatible with browsers and Node.js
+- Request/response transformation
+- Improved error handling</div>
+
+            <div class="image-container">
+                <img src="images/slide9_img3.png" class="slide-image" alt="Axios">
+            </div>
+        </div>
+
+        <!-- 投影片 10: dotenv -->
+        <div class="slide">
+            <h1>dotenv</h1>
+            <span class="version">Version: 16.3.1</span>
+            
+            <p><strong>Why Choose:</strong></p>
+            <div class="code-block">// ❌ Incorrect Practice (Hardcoding Confidential Information)
+const JWT_SECRET = "my-super-secret-key"; // Commit to Git!
+
+// ✅ Correct Practice (Using Environment Variables)
+require('dotenv').config();
+const JWT_SECRET = process.env.JWT_SECRET;</div>
+
+            <p><strong>Advantages:</strong></p>
+            <ul>
+                <li>12-Factor App Standard Practice</li>
+                <li>Separate Environment Configuration (dev/staging/prod)</li>
+                <li>Prevent Confidential Information Leakage</li>
+                <li>Deployment Platform Friendly</li>
+            </ul>
+
+            <p><strong>Use Cases:</strong></p>
+            <ul>
+                <li>Repository Connection Strings</li>
+                <li>JWT Keys</li>
+                <li>OAuth Credentials</li>
+                <li>Third-Party API Keys</li>
+            </ul>
+        </div>
+
+        <!-- 投影片 11: Branch -->
+        <div class="slide">
+            <h1>Branch</h1>
+            <p style="font-size: 1.4rem; line-height: 2; margin-bottom: 30px;">
+                Due to a lack of experience, our branching strategy was quite chaotic. However, we will still protect the main branch, doing development on the dev branch and testing on the test branch.
+            </p>
+            <div class="image-container">
+                <img src="images/slide11_img3.png" class="slide-image" alt="Git Branch Strategy">
+            </div>
+        </div>
+
+        <!-- 投影片 12: Toggle -->
+        <div class="slide">
+            <h1>Toggle</h1>
+            <div class="image-container">
+                <img src="images/slide12_img3.png" class="slide-image" alt="Feature Toggle">
+            </div>
+        </div>
+
+        <!-- 投影片 13 -->
+        <div class="slide">
+            <div class="image-container">
+                <img src="images/slide13_img2.png" class="slide-image" alt="Toggle Implementation">
+            </div>
+        </div>
+
+        <!-- 投影片 14: Toggle Details -->
+        <div class="slide">
+            <h1>Toggle</h1>
+            
+            <p><strong>Integration method:</strong></p>
+            <p>When the event details page (event-detail.html) is loaded, the front end will first check the status of the Feature Flag and then decide which UI element to render.</p>
+            
+            <div class="code-block">ENABLE_CHECKOUT_TIMER = ON (顯示 15:00 倒數紅條)
+
+觀看人數 UI 證據：
+ENABLE_VIEWING_COUNT = ON (顯示「84 人正在瀏覽」)
+ENABLE_VIEWING_COUNT = OFF (無觀看人數提示)</div>
+
+            <div class="image-row">
+                <img src="images/slide14_img3.png" class="slide-image" alt="Toggle Example 1">
+                <img src="images/slide14_img5.png" class="slide-image" alt="Toggle Example 2">
+            </div>
+
+            <div class="image-row">
+                <img src="images/slide14_img8.png" class="slide-image" alt="Toggle Example 3">
+                <img src="images/slide14_img9.png" class="slide-image" alt="Toggle Example 4">
+            </div>
+        </div>
+        <div class="slide">
+            <div class="role-badge" style="color: var(--accent-dev); border: 1px solid var(--accent-dev);">Developer</div>
+            <h2 style="border-color: var(--accent-dev);">Go back Go back</h2>
+            <a href="../../index.html" style="color: var(--accent-dev); font-size: 20px; font-weight: 600; text-decoration: none; border: 2px solid var(--accent-dev); padding: 10px 20px; border-radius: 8px; display: inline-block; transition: all 0.3s;">
+                📖 View Complete Developer Presentation
+            </a>
+            
+        </div>
+        <!-- 子母畫面影片 -->
+        <div class="video-pip">
+            <div class="video-placeholder">
+                <div>
+                    <p>📹 將 MP4 影片放在與 HTML 同資料夾</p>
+                    <p style="margin-top: 5px; font-size: 0.9rem;">檔名: <span class="highlight">video.mp4</span></p>
+                </div>
+            </div>
+            <video id="pipVideo" loop muted autoplay style="display: none;">
+                <source src="video.mp4" type="video/mp4">
+                您的瀏覽器不支援 video 標籤。
+            </video>
+        </div>
+
+        <!-- 導航按鈕 -->
+        <div class="nav-buttons">
+            <button class="nav-btn" id="prevBtn" onclick="previousSlide()">← 上一頁</button>
+            <button class="nav-btn" id="nextBtn" onclick="nextSlide()">下一頁 →</button>
+        </div>
+
+        <!-- 頁碼指示器 -->
+        <div class="page-indicator">
+            <span id="currentPage">1</span> / <span id="totalPages">14</span>
+        </div>
+    </div>
+
+    <script>
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    
+    // 更新頁碼
+    document.getElementById('totalPages').textContent = totalSlides;
+
+    // 影片處理
+    const video = document.getElementById('pipVideo');
+    const placeholder = document.querySelector('.video-placeholder');
+    
+    // 檢查影片是否可以載入
+    video.addEventListener('loadeddata', function() {
+        placeholder.style.display = 'none';
+        video.style.display = 'block';
+        video.play().catch(e => console.log('自動播放失敗，請點擊影片開始播放'));
+    });
+
+    video.addEventListener('error', function() {
+        console.log('影片載入失敗，請確認檔案路徑正確');
+    });
+
+    function showSlide(n) {
+        // 確保在有效範圍內
+        if (n >= totalSlides) currentSlide = totalSlides - 1;
+        if (n < 0) currentSlide = 0;
+        else currentSlide = n;
+
+        // 隱藏所有投影片
+        slides.forEach(slide => slide.classList.remove('active'));
+        
+        // 顯示當前投影片
+        slides[currentSlide].classList.add('active');
+        
+        // 更新頁碼
+        document.getElementById('currentPage').textContent = currentSlide + 1;
+        
+        // 更新按鈕狀態
+        document.getElementById('prevBtn').disabled = currentSlide === 0;
+        document.getElementById('nextBtn').disabled = currentSlide === totalSlides - 1;
+    }
+
+    function nextSlide() {
+        showSlide(currentSlide + 1);
+    }
+
+    function previousSlide() {
+        showSlide(currentSlide - 1);
+    }
+
+    // 鍵盤控制
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowLeft') {
+            previousSlide();
+        } else if (e.key === 'ArrowRight') {
+            nextSlide();
+        } else if (e.key === ' ') {
+            e.preventDefault();
+            nextSlide();
+        }
+    });
+
+    // 初始化
+    showSlide(0);
+
+    // 嘗試自動播放影片
+    setTimeout(() => {
+        video.play().catch(e => {
+            console.log('需要用戶互動才能播放影片');
+        });
+    }, 500);
+
+    // ========== 影片拖拽功能 ==========
+    const videoPip = document.querySelector('.video-pip');
+    let isDragging = false;
+    let currentX;
+    let currentY;
+    let initialX;
+    let initialY;
+    let xOffset = 0;
+    let yOffset = 0;
+
+    videoPip.addEventListener('mousedown', dragStart);
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', dragEnd);
+
+    // 觸控支援
+    videoPip.addEventListener('touchstart', dragStart);
+    document.addEventListener('touchmove', drag);
+    document.addEventListener('touchend', dragEnd);
+
+    function dragStart(e) {
+        if (e.type === 'touchstart') {
+            initialX = e.touches[0].clientX - xOffset;
+            initialY = e.touches[0].clientY - yOffset;
+        } else {
+            initialX = e.clientX - xOffset;
+            initialY = e.clientY - yOffset;
+        }
+
+        if (e.target === videoPip || videoPip.contains(e.target)) {
+            isDragging = true;
+            videoPip.style.cursor = 'grabbing';
+        }
+    }
+
+    function drag(e) {
+        if (isDragging) {
+            e.preventDefault();
+            
+            if (e.type === 'touchmove') {
+                currentX = e.touches[0].clientX - initialX;
+                currentY = e.touches[0].clientY - initialY;
+            } else {
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+            }
+
+            xOffset = currentX;
+            yOffset = currentY;
+
+            setTranslate(currentX, currentY, videoPip);
+        }
+    }
+
+    function dragEnd(e) {
+        if (isDragging) {
+            initialX = currentX;
+            initialY = currentY;
+            isDragging = false;
+            videoPip.style.cursor = 'grab';
+        }
+    }
+
+    function setTranslate(xPos, yPos, el) {
+        el.style.transform = `translate(${xPos}px, ${yPos}px)`;
+    }
+
+    // 設定初始游標樣式
+    videoPip.style.cursor = 'grab';
+</script> 
+</body>
+</html>

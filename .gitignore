@@ -40,3 +40,4 @@ __pycache__/
 
 #secret md files
 secret.md
+*.mp4
