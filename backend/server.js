@@ -21,7 +21,11 @@ const ticketsRouter = require('./routes/tickets');
 const ordersRouter = require('./routes/orders');
 const featureFlagsRouter = require('./routes/featureFlags');
 const analyticsRouter = require('./routes/analytics');
-const oauthRouter = require('./routes/oauth');  // NEW - OAuth routes
+// OAuth routes - 只在有 Auth0 設定時載入
+const auth0Enabled = process.env.AUTH0_DOMAIN &&
+                     process.env.AUTH0_CLIENT_ID &&
+                     process.env.AUTH0_CLIENT_SECRET;
+const oauthRouter = auth0Enabled ? require('./routes/oauth') : null;
 // Fault injection router (integrated into main API)
 const faultRouter = require('./routes/fault');
 
@@ -182,8 +186,10 @@ app.get('/metrics', async (req, res) => {
  * 這樣 Google 的重導向 URL 才會正確
  */
 
-// OAuth 認證路由（新增！）
-app.use('/auth', oauthRouter);
+// OAuth 認證路由（只在有 Auth0 設定時啟用）
+if (oauthRouter) {
+    app.use('/auth', oauthRouter);
+}
 
 // 原有的 API 路由
 app.use('/api/users', usersRouter);

@@ -1,10 +1,9 @@
 const passport = require('passport');
-const Auth0Strategy = require('passport-auth0');
 const db = require('./database');
 
 /**
  * 🔍 Passport.js 設定檔
- * 
+ *
  * Passport 是一個認證中介軟體，它的工作流程：
  * 1. 使用者點擊「Google 登入」
  * 2. Passport 帶使用者去 Google 登入頁面
@@ -13,91 +12,102 @@ const db = require('./database');
  * 5. 我們在 callback 中處理使用者資料（存入資料庫）
  */
 
-// 設定 Auth0 OAuth 策略
-passport.use(new Auth0Strategy({
-    domain: process.env.AUTH0_DOMAIN,
-    clientID: process.env.AUTH0_CLIENT_ID,
-    clientSecret: process.env.AUTH0_CLIENT_SECRET,
-    callbackURL: process.env.AUTH0_CALLBACK_URL || "http://localhost:3000/auth/callback",
-    scope: 'openid profile email'
-},
+// 只有在有 Auth0 設定時才啟用 OAuth
+const auth0Enabled = process.env.AUTH0_DOMAIN &&
+                     process.env.AUTH0_CLIENT_ID &&
+                     process.env.AUTH0_CLIENT_SECRET;
 
-    async function (accessToken, refreshToken, extraParams, profile, done) {
-        try {
-            console.log('📧 Auth0 OAuth - 收到使用者資料:', profile.displayName || profile.username);
+if (auth0Enabled) {
+    const Auth0Strategy = require('passport-auth0');
 
-            const providerId = profile.id;
+    // 設定 Auth0 OAuth 策略
+    passport.use(new Auth0Strategy({
+        domain: process.env.AUTH0_DOMAIN,
+        clientID: process.env.AUTH0_CLIENT_ID,
+        clientSecret: process.env.AUTH0_CLIENT_SECRET,
+        callbackURL: process.env.AUTH0_CALLBACK_URL || "http://localhost:3000/auth/callback",
+        scope: 'openid profile email'
+    },
 
-            // Step 1: 檢查這個 Auth0 帳號是否已經註冊過
-            const oauthCheck = await db.query(
-                'SELECT * FROM oauth_accounts WHERE provider = $1 AND provider_user_id = $2',
-                ['auth0', providerId]
-            );
+        async function (accessToken, refreshToken, extraParams, profile, done) {
+            try {
+                console.log('📧 Auth0 OAuth - 收到使用者資料:', profile.displayName || profile.username);
 
-            let user;
+                const providerId = profile.id;
 
-            if (oauthCheck.rows.length > 0) {
-                console.log('✅ 使用者已存在，直接登入');
-                const oauthAccount = oauthCheck.rows[0];
-
-                const userResult = await db.query(
-                    'SELECT id, email, name, phone, role FROM users WHERE id = $1',
-                    [oauthAccount.user_id]
+                // Step 1: 檢查這個 Auth0 帳號是否已經註冊過
+                const oauthCheck = await db.query(
+                    'SELECT * FROM oauth_accounts WHERE provider = $1 AND provider_user_id = $2',
+                    ['auth0', providerId]
                 );
 
-                user = userResult.rows[0];
+                let user;
 
-                // 更新 token
-                await db.query(
-                    `UPDATE oauth_accounts 
-           SET access_token = $1, 
-               refresh_token = $2, 
-               token_expires_at = NOW() + INTERVAL '1 hour',
-               updated_at = NOW()
-           WHERE id = $3`,
-                    [accessToken, refreshToken, oauthAccount.id]
-                );
+                if (oauthCheck.rows.length > 0) {
+                    console.log('✅ 使用者已存在，直接登入');
+                    const oauthAccount = oauthCheck.rows[0];
 
-            } else {
-                console.log('🆕 新使用者或連結現有帳號');
-
-                const email = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
-                const name = profile.displayName || profile.username || 'Auth0 User';
-
-                // 如果此 email 已存在，將 OAuth 帳號連結到現有使用者
-                const existingUser = email ? await db.query('SELECT * FROM users WHERE email = $1', [email]) : { rows: [] };
-
-                if (existingUser.rows.length > 0) {
-                    user = existingUser.rows[0];
-                } else {
                     const userResult = await db.query(
-                        `INSERT INTO users (email, name, password_hash, created_at) 
-             VALUES ($1, $2, NULL, NOW()) 
-             RETURNING id, email, name, phone, role`,
-                        [email, name]
+                        'SELECT id, email, name, phone, role FROM users WHERE id = $1',
+                        [oauthAccount.user_id]
                     );
+
                     user = userResult.rows[0];
+
+                    // 更新 token
+                    await db.query(
+                        `UPDATE oauth_accounts
+               SET access_token = $1,
+                   refresh_token = $2,
+                   token_expires_at = NOW() + INTERVAL '1 hour',
+                   updated_at = NOW()
+               WHERE id = $3`,
+                        [accessToken, refreshToken, oauthAccount.id]
+                    );
+
+                } else {
+                    console.log('🆕 新使用者或連結現有帳號');
+
+                    const email = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
+                    const name = profile.displayName || profile.username || 'Auth0 User';
+
+                    // 如果此 email 已存在，將 OAuth 帳號連結到現有使用者
+                    const existingUser = email ? await db.query('SELECT * FROM users WHERE email = $1', [email]) : { rows: [] };
+
+                    if (existingUser.rows.length > 0) {
+                        user = existingUser.rows[0];
+                    } else {
+                        const userResult = await db.query(
+                            `INSERT INTO users (email, name, password_hash, created_at)
+                 VALUES ($1, $2, NULL, NOW())
+                 RETURNING id, email, name, phone, role`,
+                            [email, name]
+                        );
+                        user = userResult.rows[0];
+                    }
+
+                    await db.query(
+                        `INSERT INTO oauth_accounts
+               (user_id, provider, provider_user_id, access_token, refresh_token, token_expires_at, created_at)
+               VALUES ($1, $2, $3, $4, $5, NOW() + INTERVAL '1 hour', NOW())`,
+                        [user.id, 'auth0', providerId, accessToken, refreshToken]
+                    );
                 }
 
-                await db.query(
-                    `INSERT INTO oauth_accounts 
-           (user_id, provider, provider_user_id, access_token, refresh_token, token_expires_at, created_at)
-           VALUES ($1, $2, $3, $4, $5, NOW() + INTERVAL '1 hour', NOW())`,
-                    [user.id, 'auth0', providerId, accessToken, refreshToken]
-                );
+                done(null, user);
+
+            } catch (error) {
+                console.error('❌ Auth0 OAuth 錯誤:', error);
+                done(error, null);
             }
-
-            done(null, user);
-
-        } catch (error) {
-            console.error('❌ Auth0 OAuth 錯誤:', error);
-            done(error, null);
         }
-    }
-));
-    
-// 印出當前使用的 callback URL（方便部署時快速確認）
-console.log('[Auth0] Using callback URL =', process.env.AUTH0_CALLBACK_URL || 'http://localhost:3000/auth/callback');
+    ));
+
+    // 印出當前使用的 callback URL（方便部署時快速確認）
+    console.log('[Auth0] Using callback URL =', process.env.AUTH0_CALLBACK_URL || 'http://localhost:3000/auth/callback');
+} else {
+    console.log('[Auth0] ⚠️ Auth0 未設定，OAuth 功能已停用');
+}
 
 /**
  * 🔐 serializeUser - 決定要在 session 中儲存什麼
