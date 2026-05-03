@@ -1,0 +1,36 @@
+# XDR Agent Configuration
+# Copy to config.yaml and fill in your values.
+
+tenant_id: "tenant-demo-001"
+gateway_url: "http://localhost:80"
+
+# Phase 2 (leave blank for now)
+# api_key: ""
+
+sources:
+  - type: file
+    path: /var/log/nginx/access.log
+    format: nginx_combined
+  # - type: file
+  #   path: /var/log/apache2/access.log
+  #   format: apache_combined
+
+batch:
+  flush_interval_sec: 180   # flush every 3 minutes
+  chunk_size: 5000          # max events per POST; auto-splits if exceeded
+
+buffer:
+  path: /var/lib/xdr-agent/buffer.db
+  max_size_mb: 200
+
+retry:
+  max_attempts: 10
+  base_delay_sec: 1
+  max_delay_sec: 60
+
+checkpoint:
+  path: /var/lib/xdr-agent/checkpoint.json
+
+logging:
+  level: INFO   # DEBUG / INFO / WARNING / ERROR
+  path: /var/log/xdr-agent/agent.log
