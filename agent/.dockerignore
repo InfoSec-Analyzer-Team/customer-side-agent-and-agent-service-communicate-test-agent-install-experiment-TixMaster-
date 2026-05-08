@@ -1,0 +1,23 @@
+# Development and test files — not needed in the image
+__pycache__/
+*.pyc
+*.pyo
+test_*.py
+smoke_test.md
+*.md
+
+# Config examples and local configs — injected at runtime via bind-mount
+config.yaml
+config.yaml.example
+
+# SQLite runtime files — also injected via volume
+*.db
+*.db-wal
+*.db-shm
+
+# Checkpoint state
+*.json
+
+# Systemd / install scripts — irrelevant inside the container
+*.service
+install.sh

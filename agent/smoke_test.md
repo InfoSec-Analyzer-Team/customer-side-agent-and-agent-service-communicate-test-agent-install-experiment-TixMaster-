@@ -265,8 +265,269 @@ collector opened /tmp/xdr-test/access.log (inode=<新號> offset=0)
 
 ---
 
+---
+
+## Test 5 — Buffer 單元測試
+
+驗證 LocalBuffer (SQLite WAL) 的 push / peek / delete / 斷電重啟 / overflow eviction。
+
+```bash
+cd agent
+python3 test_buffer.py
+```
+
+**覆蓋的 case：**
+
+| Case | 驗證內容 |
+|------|---------|
+| A | push 5 筆 → count=5；peek(3) 回 3 筆；delete 2 → count=3 |
+| B | peek 之後 delete，剩下的 events 仍然按 id 排序（oldest-first） |
+| C | `delete([])` 不拋例外 |
+| D | close + 重新 open：events 存活（WAL 持久化） |
+| E | 超過 max_size_mb 後，eviction 自動丟最舊資料，count 降低 |
+
+**預期輸出：**
+
+```
+[PASS] push 5: count == 5
+[PASS] peek(3): returns 3 rows
+[PASS] peek: oldest first (id ascending)
+[PASS] peek: event data round-trips correctly
+[PASS] delete 2: count == 3
+[PASS] peek after delete: 3 rows remain
+[PASS] peek after delete: correct first event
+[PASS] delete []: no exception
+[PASS] reopen: event persisted across close/open
+[PASS] reopen: event data intact
+[PASS] overflow: eviction ran (count < total pushed)
+[PASS] overflow: some events still in buffer
+
+12 passed, 0 failed
+```
+
+---
+
+## Test 6 — Sender + Mock Gateway 測試
+
+用 in-process mock HTTP server 驗證 BatchSender 的 retry 邏輯，**不需要真實 Gateway**。
+
+```bash
+cd agent
+python3 test_sender.py
+```
+
+**覆蓋的 case：**
+
+| Case | Gateway 回傳 | 預期 agent 行為 |
+|------|-------------|----------------|
+| A | `200` | buffer 清空，gateway 收到 1 次 POST |
+| B | `400` | events 丟棄（buffer 清空），**不重試**（只 1 次 POST） |
+| C | `503` 第 1 次 → `200` 第 2 次 | 重試成功，buffer 清空，共 2 次 POST |
+| D | 連續 `503`（超過 max\_attempts） | events 留在 buffer，共 3 次 POST（max\_attempts） |
+| E | chunk\_size=3，7 筆 events | 自動切成 3 次 POST（3+3+1） |
+
+**預期輸出：**
+
+```
+[PASS] 200: buffer emptied after send
+[PASS] 200: gateway received 1 POST
+[PASS] 200: gateway saw 2 events
+[PASS] 400: buffer emptied (discard, no retry)
+[PASS] 400: only 1 POST sent (no retry)
+[PASS] 503→200: buffer emptied after retry
+[PASS] 503→200: gateway received exactly 2 POSTs
+[PASS] 503 exhausted: events still in buffer
+[PASS] 503 exhausted: exactly max_attempts POSTs sent
+[PASS] chunking: buffer empty after 3 POSTs
+[PASS] chunking: 3 POST requests made
+[PASS] chunking: first chunk has 3 events
+[PASS] chunking: last chunk has 1 event
+
+13 passed, 0 failed
+```
+
+---
+
+---
+
+## Test 7 — Docker 容器部署測試
+
+### 7-1 Build image
+
+```bash
+cd agent
+docker build -t xdr-agent:local .
+```
+
+**預期：** build 成功，無 error。
+
+```bash
+# 確認 image 大小（應 < 200 MB）
+docker images xdr-agent:local
+```
+
+### 7-2 準備測試設定與假 log
+
+```bash
+mkdir -p /tmp/xdr-docker-test/{config,data,log,nginx-log}
+
+cat > /tmp/xdr-docker-test/config/config.yaml << 'EOF'
+tenant_id: "tenant-demo-001"
+gateway_url: "http://host.docker.internal:80"   # Mac/Windows 用 host.docker.internal
+                                                 # Linux 用 host 實際 IP 或 172.17.0.1
+sources:
+  - type: file
+    path: /var/log/nginx/access.log
+    format: nginx_combined
+batch:
+  flush_interval_sec: 180
+  chunk_size: 5000
+buffer:
+  path: /var/lib/xdr-agent/buffer.db
+  max_size_mb: 200
+checkpoint:
+  path: /var/lib/xdr-agent/checkpoint.json
+logging:
+  level: INFO
+  path: /var/log/xdr-agent/agent.log
+EOF
+
+# 寫入假 log
+printf '1.2.3.4 - - [04/May/2026:10:00:00 +0000] "GET / HTTP/1.1" 200 512 "-" "curl/7.68.0"\n' \
+  > /tmp/xdr-docker-test/nginx-log/access.log
+```
+
+### 7-3 執行容器（dry-run 驗證 parse）
+
+```bash
+docker run --rm \
+  -v /tmp/xdr-docker-test/config:/etc/xdr-agent:ro \
+  -v /tmp/xdr-docker-test/data:/var/lib/xdr-agent \
+  -v /tmp/xdr-docker-test/log:/var/log/xdr-agent \
+  -v /tmp/xdr-docker-test/nginx-log:/var/log/nginx:ro \
+  xdr-agent:local \
+  --config /etc/xdr-agent/config.yaml \
+  --dry-run \
+  --from-beginning &
+
+CONTAINER_PID=$!
+sleep 2
+kill $CONTAINER_PID 2>/dev/null
+```
+
+**預期 stdout：**
+```
+... INFO agent XDR Agent v0.1.0 ...
+{"tenant_id": "tenant-demo-001", "source_ip": "1.2.3.4", ...}
+```
+
+### 7-4 驗證非 root 執行
+
+```bash
+docker run --rm \
+  -v /tmp/xdr-docker-test/config:/etc/xdr-agent:ro \
+  -v /tmp/xdr-docker-test/data:/var/lib/xdr-agent \
+  -v /tmp/xdr-docker-test/log:/var/log/xdr-agent \
+  -v /tmp/xdr-docker-test/nginx-log:/var/log/nginx:ro \
+  --entrypoint id \
+  xdr-agent:local
+```
+
+**預期：** 輸出 `uid=...（xdr-agent）`，**不是** `uid=0(root)`。
+
+### 7-5 清理
+
+```bash
+rm -rf /tmp/xdr-docker-test
+docker rmi xdr-agent:local
+```
+
+---
+
+## Test 8 — Systemd Service 安裝測試（Linux only）
+
+> 這個測試只在 Linux 上有效（macOS 無 systemd）。
+
+### 8-1 安裝
+
+```bash
+cd agent
+sudo bash install.sh
+```
+
+**預期輸出（最後幾行）：**
+```
+=== 安裝完成 ===
+
+下一步：
+  1. 編輯設定檔：sudo nano /etc/xdr-agent/config.yaml
+  ...
+```
+
+### 8-2 編輯 config 並啟動
+
+```bash
+sudo nano /etc/xdr-agent/config.yaml
+# 填入：
+#   tenant_id: "tenant-demo-001"
+#   gateway_url: "http://<gateway_host>"
+#   sources[0].path: /var/log/nginx/access.log
+
+sudo systemctl start xdr-agent
+sudo systemctl status xdr-agent
+```
+
+**預期：** `Active: active (running)`。
+
+### 8-3 即時查看 log
+
+```bash
+sudo journalctl -u xdr-agent -f
+```
+
+**預期看到：**
+```
+xdr-agent[PID]: ... INFO agent XDR Agent v0.1.0 ...
+xdr-agent[PID]: ... INFO source[/var/log/nginx/access.log] starting ...
+```
+
+### 8-4 驗證重啟後 buffer 續傳
+
+```bash
+# 停止服務，追加一筆 log，重啟
+sudo systemctl stop xdr-agent
+echo '5.5.5.5 - - [04/May/2026:11:00:00 +0000] "GET /after-restart HTTP/1.1" 200 100 "-" "-"' \
+  >> /var/log/nginx/access.log
+sudo systemctl start xdr-agent
+sudo journalctl -u xdr-agent -f
+```
+
+**預期：** agent 重啟後從 checkpoint 繼續，只送 `/after-restart` 這筆（不重送之前的 log）。
+
+### 8-5 移除服務
+
+```bash
+sudo systemctl disable --now xdr-agent
+sudo rm /etc/systemd/system/xdr-agent.service
+sudo systemctl daemon-reload
+sudo userdel xdr-agent && sudo groupdel xdr-agent
+sudo rm -rf /opt/xdr-agent /etc/xdr-agent /var/lib/xdr-agent /var/log/xdr-agent
+```
+
+---
+
+## 一鍵跑全部測試
+
+```bash
+cd agent
+python3 test_parser.py && python3 test_buffer.py && python3 test_sender.py
+echo "=== all smoke tests passed ==="
+```
+
+---
+
 ## 清理測試資料
 
 ```bash
-rm -rf /tmp/xdr-test
+rm -rf /tmp/xdr-test /tmp/xdr-buf-unit.db* /tmp/xdr-sender-test.db* /tmp/xdr-sender-ckpt.json
 ```

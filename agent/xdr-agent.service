@@ -1,0 +1,51 @@
+[Unit]
+Description=XDR Customer Agent — 將 web server log 轉送至 XDR 平台
+# 等網路介面拿到 IP 之後再啟動（network-online.target 比 network.target 更嚴格）
+# sender 需要 TCP 才能連上 Gateway，所以必須等網路就緒
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=xdr-agent
+Group=xdr-agent
+
+ExecStart=/opt/xdr-agent/venv/bin/python3 -u \
+    /opt/xdr-agent/agent.py \
+    --config /etc/xdr-agent/config.yaml
+
+# 非正常退出（crash、OOM 等）自動重啟，正常 exit(0) 不重啟
+# RestartSec=5s 避免 config 壞掉時瘋狂重啟刷滿 log
+Restart=on-failure
+RestartSec=5s
+# 60 秒內連續重啟超過 3 次就放棄，防止無限重試耗盡資源
+# 排除故障後執行 `systemctl reset-failed xdr-agent` 重置計數器
+StartLimitInterval=60s
+StartLimitBurst=3
+
+# stdout/stderr 進 journald（看 log 用 journalctl -u xdr-agent -f）
+# agent 本身也會寫 /var/log/xdr-agent/agent.log（由 config.yaml 設定）
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=xdr-agent
+
+# ── 安全加固 ──────────────────────────────────────────────────────────────────
+# 禁止透過 setuid binary 進行 privilege escalation
+NoNewPrivileges=yes
+
+# 把 / 和 /usr 掛載為 read-only；agent 只需要寫少數幾個路徑
+ProtectSystem=strict
+
+# 明確允許 agent 在 runtime 需要寫入的路徑
+ReadWritePaths=/var/lib/xdr-agent /var/log/xdr-agent
+
+# 禁止存取 /home 和 /root，agent 完全不需要
+ProtectHome=yes
+
+# ── Phase 2 預留 ──────────────────────────────────────────────────────────────
+# 加入 API key 認證後取消以下註解，將 key 存成 XDR_API_KEY=<value>
+# config.py 再從 os.environ 讀取覆蓋
+# EnvironmentFile=/etc/xdr-agent/secrets.env
+
+[Install]
+WantedBy=multi-user.target
