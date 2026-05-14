@@ -7,10 +7,11 @@
  *   agentCollector.start();
  *
  * 環境變數：
- *   AGENT_ID          - Agent 識別碼 (預設: 自動生成)
- *   AGENT_SERVER_URL  - Agent Service URL (預設: https://localhost:5000)
- *   AGENT_HEARTBEAT   - 心跳間隔 ms (預設: 30000)
- *   AGENT_BATCH_SIZE  - 批次發送數量 (預設: 50)
+ *   AGENT_ID            - Agent 識別碼 (預設: 自動生成)
+ *   AGENT_GATEWAY_URL   - Gateway URL (預設: http://localhost:80)
+ *   AGENT_TENANT_ID     - 租戶識別碼 (預設: tixmaster-001)
+ *   AGENT_HEARTBEAT     - 心跳間隔 ms (預設: 30000)
+ *   AGENT_BATCH_SIZE    - 批次發送數量 (預設: 50)
  *   AGENT_SEND_INTERVAL - 發送間隔 ms (預設: 5000)
  */
 
@@ -22,12 +23,15 @@ const { URL } = require('url');
 // ============ 設定 ============
 const CONFIG = {
   AGENT_ID: process.env.AGENT_ID || `agent-${os.hostname()}-${process.pid}`,
-  SERVER_URL: process.env.AGENT_SERVER_URL || 'https://localhost:5000',
+  GATEWAY_URL: process.env.AGENT_GATEWAY_URL || 'http://localhost:80',
+  TENANT_ID: process.env.AGENT_TENANT_ID || 'tixmaster-001',
   HEARTBEAT_INTERVAL: parseInt(process.env.AGENT_HEARTBEAT) || 30000,
   BATCH_SIZE: parseInt(process.env.AGENT_BATCH_SIZE) || 50,
   SEND_INTERVAL: parseInt(process.env.AGENT_SEND_INTERVAL) || 5000,
-  REJECT_UNAUTHORIZED: process.env.NODE_ENV === 'production' // 正式環境驗證憑證
+  REJECT_UNAUTHORIZED: process.env.NODE_ENV === 'production'
 };
+
+const BATCH_URL = CONFIG.GATEWAY_URL.replace(/\/$/, '') + '/api/v1/ingest/batch';
 
 // ============ 狀態 ============
 const state = {
@@ -45,14 +49,12 @@ const state = {
 
 // ============ 工具函數 ============
 
-/**
- * 發送 HTTP 請求 (支援 http/https)
- */
 function sendRequest(url, data) {
   return new Promise((resolve, reject) => {
     const parsedUrl = new URL(url);
     const isHttps = parsedUrl.protocol === 'https:';
     const lib = isHttps ? https : http;
+    const body = JSON.stringify(data);
 
     const options = {
       hostname: parsedUrl.hostname,
@@ -61,19 +63,20 @@ function sendRequest(url, data) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body),
         'X-Agent-ID': CONFIG.AGENT_ID
       },
       rejectUnauthorized: CONFIG.REJECT_UNAUTHORIZED
     };
 
     const req = lib.request(options, (res) => {
-      let body = '';
-      res.on('data', chunk => body += chunk);
+      let responseBody = '';
+      res.on('data', chunk => responseBody += chunk);
       res.on('end', () => {
         if (res.statusCode >= 200 && res.statusCode < 300) {
-          resolve({ statusCode: res.statusCode, body });
+          resolve({ statusCode: res.statusCode, body: responseBody });
         } else {
-          reject(new Error(`HTTP ${res.statusCode}: ${body}`));
+          reject(new Error(`HTTP ${res.statusCode}: ${responseBody}`));
         }
       });
     });
@@ -84,14 +87,11 @@ function sendRequest(url, data) {
       reject(new Error('Request timeout'));
     });
 
-    req.write(JSON.stringify(data));
+    req.write(body);
     req.end();
   });
 }
 
-/**
- * 取得客戶端 IP
- */
 function getClientIP(req) {
   return req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
          req.headers['x-real-ip'] ||
@@ -100,9 +100,39 @@ function getClientIP(req) {
          'unknown';
 }
 
-/**
- * 格式化 log entry
- */
+const _MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function toRawPayload(log) {
+  const d = new Date(log.timestamp);
+  const pad = n => String(n).padStart(2, '0');
+  const dateStr = `${pad(d.getUTCDate())}/${_MONTHS[d.getUTCMonth()]}/${d.getUTCFullYear()}:` +
+                  `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}:${pad(d.getUTCSeconds())} +0000`;
+  const referer = log.referer || '-';
+  const ua = log.userAgent || '-';
+  const size = log.contentLength || 0;
+  return `${log.ip} - - [${dateStr}] "${log.method} ${log.url} HTTP/1.1" ${log.statusCode} ${size} "${referer}" "${ua}"`;
+}
+
+function logEntryToEvent(log) {
+  return {
+    tenant_id: CONFIG.TENANT_ID,
+    timestamp: new Date(log.timestamp).toISOString(),
+    source_ip: log.ip,
+    event_type: 'web_access',
+    user_agent: log.userAgent || null,
+    payload: {
+      method: log.method,
+      url: log.url,
+      status: log.statusCode,
+      size: parseInt(log.contentLength) || 0,
+      duration_ms: log.duration,
+      referer: log.referer || null,
+      query: log.query || {}
+    },
+    raw_payload: toRawPayload(log)
+  };
+}
+
 function formatLogEntry(req, res, duration) {
   return {
     timestamp: Date.now(),
@@ -110,52 +140,34 @@ function formatLogEntry(req, res, duration) {
     url: req.originalUrl || req.url,
     path: req.path || req.url.split('?')[0],
     statusCode: res.statusCode,
-    duration: duration,
+    duration,
     ip: getClientIP(req),
     userAgent: req.headers['user-agent'] || 'unknown',
     contentLength: res.get?.('content-length') || res.getHeader?.('content-length') || 0,
     referer: req.headers['referer'] || req.headers['referrer'] || null,
-    query: req.query || {},
-    // 可選：請求 body (注意敏感資料)
-    // body: req.body
+    query: req.query || {}
   };
 }
 
 // ============ 核心功能 ============
 
-/**
- * Express/Connect Middleware
- * 攔截所有 HTTP 請求並記錄
- */
 function middleware(options = {}) {
-  const {
-    skip = () => false,  // 跳過某些路徑
-    onLog = null         // 自訂 log 處理
-  } = options;
+  const { skip = () => false, onLog = null } = options;
 
   return (req, res, next) => {
-    // 跳過不需要記錄的路徑
-    if (skip(req)) {
-      return next();
-    }
+    if (skip(req)) return next();
 
     const startTime = Date.now();
 
-    // 攔截 response 完成事件
     res.on('finish', () => {
       const duration = Date.now() - startTime;
       const logEntry = formatLogEntry(req, res, duration);
 
-      // 自訂處理
-      if (onLog) {
-        onLog(logEntry);
-      }
+      if (onLog) onLog(logEntry);
 
-      // 加入佇列
       state.logQueue.push(logEntry);
       state.stats.totalRequests++;
 
-      // 佇列過大時立即發送
       if (state.logQueue.length >= CONFIG.BATCH_SIZE * 2) {
         sendLogs();
       }
@@ -165,59 +177,48 @@ function middleware(options = {}) {
   };
 }
 
-/**
- * 發送心跳
- */
 async function sendHeartbeat() {
-  try {
-    const payload = {
-      agent_id: CONFIG.AGENT_ID,
-      timestamp: Date.now(),
-      status: 'online',
-      hostname: os.hostname(),
-      platform: os.platform(),
-      uptime: process.uptime(),
-      memory: process.memoryUsage(),
-      stats: { ...state.stats }
-    };
+  const payload = {
+    events: [{
+      tenant_id: CONFIG.TENANT_ID,
+      timestamp: new Date().toISOString(),
+      event_type: 'heartbeat',
+      payload: {
+        agent_id: CONFIG.AGENT_ID,
+        hostname: os.hostname(),
+        platform: os.platform(),
+        uptime: process.uptime(),
+        queue_length: state.logQueue.length,
+        stats: { ...state.stats }
+      }
+    }]
+  };
 
-    await sendRequest(`${CONFIG.SERVER_URL}/api/heartbeat`, payload);
+  try {
+    await sendRequest(BATCH_URL, payload);
     console.log(`[Agent] 💓 心跳已發送 (${CONFIG.AGENT_ID})`);
   } catch (error) {
     console.error(`[Agent] ❌ 心跳失敗: ${error.message}`);
   }
 }
 
-/**
- * 批次發送日誌
- */
 async function sendLogs() {
   if (state.logQueue.length === 0) return;
 
   const logsToSend = state.logQueue.splice(0, CONFIG.BATCH_SIZE);
 
   try {
-    const payload = {
-      agent_id: CONFIG.AGENT_ID,
-      logs: logsToSend,
-      batch_size: logsToSend.length,
-      timestamp: Date.now()
-    };
-
-    await sendRequest(`${CONFIG.SERVER_URL}/api/logs`, payload);
+    const payload = { events: logsToSend.map(logEntryToEvent) };
+    await sendRequest(BATCH_URL, payload);
     state.stats.totalSent += logsToSend.length;
     console.log(`[Agent] 📤 已發送 ${logsToSend.length} 條日誌`);
   } catch (error) {
     console.error(`[Agent] ❌ 日誌發送失敗: ${error.message}`);
-    // 失敗的日誌放回佇列前端
     state.logQueue.unshift(...logsToSend);
     state.stats.totalFailed += logsToSend.length;
   }
 }
 
-/**
- * 啟動 Agent
- */
 function start() {
   if (state.isRunning) {
     console.warn('[Agent] 已經在運行中');
@@ -229,86 +230,65 @@ function start() {
 
   console.log(`\n[Agent] 🚀 IDS Agent Collector 啟動`);
   console.log(`[Agent]    ID: ${CONFIG.AGENT_ID}`);
-  console.log(`[Agent]    Server: ${CONFIG.SERVER_URL}`);
+  console.log(`[Agent]    Gateway: ${BATCH_URL}`);
+  console.log(`[Agent]    Tenant: ${CONFIG.TENANT_ID}`);
   console.log(`[Agent]    心跳間隔: ${CONFIG.HEARTBEAT_INTERVAL}ms`);
   console.log(`[Agent]    批次大小: ${CONFIG.BATCH_SIZE}`);
   console.log(`[Agent]    發送間隔: ${CONFIG.SEND_INTERVAL}ms\n`);
 
-  // 立即發送第一次心跳
   sendHeartbeat();
-
-  // 定期心跳
   state.heartbeatTimer = setInterval(sendHeartbeat, CONFIG.HEARTBEAT_INTERVAL);
-
-  // 定期發送日誌
   state.sendTimer = setInterval(sendLogs, CONFIG.SEND_INTERVAL);
 }
 
-/**
- * 停止 Agent
- */
 async function stop() {
   if (!state.isRunning) return;
 
   console.log('\n[Agent] 🛑 正在停止...');
 
-  // 清除定時器
   if (state.heartbeatTimer) clearInterval(state.heartbeatTimer);
   if (state.sendTimer) clearInterval(state.sendTimer);
 
-  // 發送剩餘日誌
   while (state.logQueue.length > 0) {
     await sendLogs();
   }
 
-  // 發送離線心跳
   try {
-    await sendRequest(`${CONFIG.SERVER_URL}/api/heartbeat`, {
-      agent_id: CONFIG.AGENT_ID,
-      timestamp: Date.now(),
-      status: 'offline'
+    await sendRequest(BATCH_URL, {
+      events: [{
+        tenant_id: CONFIG.TENANT_ID,
+        timestamp: new Date().toISOString(),
+        event_type: 'heartbeat',
+        payload: { agent_id: CONFIG.AGENT_ID, status: 'offline' }
+      }]
     });
     console.log('[Agent] 👋 已標記為離線');
-  } catch (e) {
-    // ignore
-  }
+  } catch (e) { /* ignore */ }
 
   state.isRunning = false;
   console.log('[Agent] ✓ 已停止\n');
 }
 
-/**
- * 取得目前狀態
- */
 function getStatus() {
   return {
     agentId: CONFIG.AGENT_ID,
-    serverUrl: CONFIG.SERVER_URL,
+    gatewayUrl: BATCH_URL,
+    tenantId: CONFIG.TENANT_ID,
     isRunning: state.isRunning,
     queueLength: state.logQueue.length,
     stats: { ...state.stats }
   };
 }
 
-// ============ 優雅關閉 ============
-process.on('SIGINT', async () => {
-  await stop();
-  process.exit(0);
-});
+process.on('SIGINT', async () => { await stop(); process.exit(0); });
+process.on('SIGTERM', async () => { await stop(); process.exit(0); });
 
-process.on('SIGTERM', async () => {
-  await stop();
-  process.exit(0);
-});
-
-// ============ 匯出 ============
 module.exports = {
   middleware,
   start,
   stop,
   getStatus,
   CONFIG,
-  // 進階：手動加入 log
   addLog: (logEntry) => {
     state.logQueue.push({ ...logEntry, timestamp: Date.now() });
     state.stats.totalRequests++;
