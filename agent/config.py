@@ -66,6 +66,11 @@ class LoggingConfig:
 
 
 @dataclass
+class HeartbeatConfig:
+    interval_sec: int = 30
+
+
+@dataclass
 class AgentConfig:
     tenant_id: str
     gateway_url: str
@@ -75,10 +80,11 @@ class AgentConfig:
     retry: RetryConfig = field(default_factory=RetryConfig)
     checkpoint: CheckpointConfig = field(default_factory=CheckpointConfig)
     logging: LoggingConfig = field(default_factory=LoggingConfig)
+    heartbeat: HeartbeatConfig = field(default_factory=HeartbeatConfig)
 
 
 def load_config(path: str) -> AgentConfig:
-    with open(path) as f:
+    with open(path, encoding="utf-8") as f:
         raw = yaml.safe_load(f)
 
     sources = [SourceConfig(**s) for s in raw["sources"]]
@@ -92,4 +98,5 @@ def load_config(path: str) -> AgentConfig:
         retry=RetryConfig(**raw.get("retry", {})),
         checkpoint=CheckpointConfig(**raw.get("checkpoint", {})),
         logging=LoggingConfig(**raw.get("logging", {})),
+        heartbeat=HeartbeatConfig(**raw.get("heartbeat", {})),
     )

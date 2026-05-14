@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 import logging
 import time
 import threading
@@ -11,6 +12,41 @@ from buffer import LocalBuffer
 from config import AgentConfig
 
 logger = logging.getLogger(__name__)
+
+
+class HeartbeatSender:
+    """Sends a periodic heartbeat event to the Gateway so it can detect dead agents."""
+
+    def __init__(self, cfg: AgentConfig) -> None:
+        self._url = cfg.gateway_url.rstrip("/") + "/api/v1/ingest"
+        self._tenant_id = cfg.tenant_id
+        self._interval = cfg.heartbeat.interval_sec
+        self._stop_event = threading.Event()
+
+    def run(self) -> None:
+        logger.info("heartbeat started — url=%s interval=%ds", self._url, self._interval)
+        while not self._stop_event.wait(timeout=self._interval):
+            self._send()
+        logger.info("heartbeat stopped")
+
+    def stop(self) -> None:
+        self._stop_event.set()
+
+    def _send(self) -> None:
+        payload = {
+            "tenant_id": self._tenant_id,
+            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "event_type": "heartbeat",
+        }
+        try:
+            resp = requests.post(self._url, json=payload, timeout=10,
+                                 headers={"Content-Type": "application/json"})
+            if resp.status_code == 200:
+                logger.debug("heartbeat ok")
+            else:
+                logger.warning("heartbeat failed: HTTP %d", resp.status_code)
+        except requests.RequestException as exc:
+            logger.warning("heartbeat failed: %s", exc)
 
 
 class BatchSender:

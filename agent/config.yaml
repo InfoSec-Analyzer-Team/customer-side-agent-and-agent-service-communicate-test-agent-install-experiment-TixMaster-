@@ -2,7 +2,7 @@
 # Copy to config.yaml and fill in your values.
 
 tenant_id: "tenant-demo-001"
-gateway_url: "http://localhost:80"
+gateway_url: "http://host.docker.internal:80" #"http://localhost:80"
 
 # Phase 2 (leave blank for now)
 # api_key: ""
@@ -34,3 +34,6 @@ checkpoint:
 logging:
   level: INFO   # DEBUG / INFO / WARNING / ERROR
   path: /var/log/xdr-agent/agent.log
+
+heartbeat:
+  interval_sec: 30   # 每 30 秒送一次心跳到 Gateway

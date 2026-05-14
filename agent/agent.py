@@ -16,7 +16,7 @@ from buffer import LocalBuffer
 from collector import FileCollector
 from config import AgentConfig, load_config
 from parser import parse_line
-from sender import BatchSender
+from sender import BatchSender, HeartbeatSender
 
 VERSION = "0.1.0"
 
@@ -109,6 +109,8 @@ def main() -> None:
     buffer: Optional[LocalBuffer] = None
     sender: Optional[BatchSender] = None
     sender_thread: Optional[Thread] = None
+    heartbeat: Optional[HeartbeatSender] = None
+    heartbeat_thread: Optional[Thread] = None
 
     if not args.dry_run:
         buffer = LocalBuffer(cfg.buffer.path, cfg.buffer.max_size_mb)
@@ -119,6 +121,9 @@ def main() -> None:
             "buffer: %s  flush_interval=%ds  chunk=%d",
             cfg.buffer.path, cfg.batch.flush_interval_sec, cfg.batch.chunk_size,
         )
+        heartbeat = HeartbeatSender(cfg)
+        heartbeat_thread = Thread(target=heartbeat.run, daemon=True, name="heartbeat")
+        heartbeat_thread.start()
     else:
         root_log.info("DRY-RUN: buffer and sender disabled; events go to stdout")
 
@@ -138,9 +143,9 @@ def main() -> None:
     # ── graceful shutdown on Ctrl-C / SIGTERM ─────────────────────────────────
     def _handle_signal(signum, _frame):
         root_log.info("signal %d received — shutting down", signum)
+        if heartbeat:
+            heartbeat.stop()
         if sender:
-            # stop() sets an event that causes run() to do a final flush
-            # before the thread exits, so we don't lose buffered events.
             sender.stop()
             sender_thread.join(timeout=90)  # wait up to 90s for final flush
         if buffer:
