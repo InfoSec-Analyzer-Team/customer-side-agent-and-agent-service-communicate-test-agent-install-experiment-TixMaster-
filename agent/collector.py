@@ -88,7 +88,7 @@ class FileCollector:
             self._fh = fh
             logger.info("opened %s (inode=%d offset=%d)", self.path, self._inode, self._offset)
         except OSError as e:
-            logger.warning("cannot open %s: %s", self.path, e)
+            logger.info("waiting for log file %s (%s)", self.path, e)
 
     def _rotation_detected(self) -> bool:
         try:
@@ -112,11 +112,12 @@ class FileCollector:
 
         while True:
             if self._rotation_detected():
-                self._offset = 0 if not self.from_beginning else 0
+                self._offset = 0
                 self._open()
-                if not self._fh:
-                    time.sleep(self.poll_interval)
-                    continue
+
+            if not self._fh:
+                time.sleep(self.poll_interval)
+                continue
 
             line = self._fh.readline()
             if line:

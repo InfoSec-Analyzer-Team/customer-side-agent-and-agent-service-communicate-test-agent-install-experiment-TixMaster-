@@ -1,8 +1,19 @@
 from __future__ import annotations
 
+import os
+import sys
+import tempfile
 import yaml
 from dataclasses import dataclass, field
 from typing import List
+
+
+def _resolve_path(path: str) -> str:
+    """On Windows, remap Linux absolute paths under %TEMP%/xdr-agent/."""
+    if sys.platform != "win32" or not path.startswith("/"):
+        return path
+    relative = path.lstrip("/")
+    return os.path.join(tempfile.gettempdir(), "xdr-agent", relative)
 
 
 @dataclass
@@ -10,6 +21,9 @@ class SourceConfig:
     type: str
     path: str
     format: str
+
+    def __post_init__(self) -> None:
+        self.path = _resolve_path(self.path)
 
 
 @dataclass
@@ -23,6 +37,9 @@ class BufferConfig:
     path: str = "/var/lib/xdr-agent/buffer.db"
     max_size_mb: int = 200
 
+    def __post_init__(self) -> None:
+        self.path = _resolve_path(self.path)
+
 
 @dataclass
 class RetryConfig:
@@ -35,11 +52,17 @@ class RetryConfig:
 class CheckpointConfig:
     path: str = "/var/lib/xdr-agent/checkpoint.json"
 
+    def __post_init__(self) -> None:
+        self.path = _resolve_path(self.path)
+
 
 @dataclass
 class LoggingConfig:
     level: str = "INFO"
     path: str = "/var/log/xdr-agent/agent.log"
+
+    def __post_init__(self) -> None:
+        self.path = _resolve_path(self.path)
 
 
 @dataclass
