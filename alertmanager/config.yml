@@ -1,6 +1,6 @@
 ﻿global:
   resolve_timeout: 5m
-  # SMTP ?蔭 (??generate_alert_config.ps1 ?芸??Ｙ?)
+
   smtp_smarthost: 'smtp.gmail.com:587'
   smtp_from: ''
   smtp_auth_username: ''
@@ -17,7 +17,7 @@ route:
 receivers:
 - name: 'email-notifications'
   email_configs:
-  - to: '' # ?身撖策?芸楛
+  - to: '' 
     send_resolved: true
     headers:
       Subject: '{{ .Status | toUpper }} - {{ .CommonLabels.alertname }}'
