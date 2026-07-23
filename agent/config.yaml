@@ -9,8 +9,11 @@ gateway_url: "http://host.docker.internal:80"
 # api_key: ""
 
 sources:
+  # Local testing: nginx runs via docker-compose.nginx.yml with
+  # ./nginx/logs bind-mounted from its container's /var/log/nginx.
+  # In a real deployment this is just /var/log/nginx/access.log.
   - type: file
-    path: /var/log/nginx/access.log
+    path: ../nginx/logs/access.log
     format: nginx_combined
   # - type: file
   #   path: /var/log/apache2/access.log
