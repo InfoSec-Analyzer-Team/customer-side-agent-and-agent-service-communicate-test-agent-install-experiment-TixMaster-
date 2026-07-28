@@ -1,0 +1,2 @@
+2026/07/27 09:59:26 [error] 22#22: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 172.20.0.1, server: _, request: "GET / HTTP/1.1", upstream: "http://192.168.65.254:3000/", host: "localhost:8080"
+2026/07/27 09:59:26 [error] 22#22: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 172.20.0.1, server: _, request: "GET /favicon.ico HTTP/1.1", upstream: "http://192.168.65.254:3000/favicon.ico", host: "localhost:8080", referrer: "http://localhost:8080/"

@@ -54,6 +54,9 @@
             width: 100%;
             max-width: 400px;
             padding: 50px 40px;
+        }
+
+        .logo {
             text-align: center;
         }
 
@@ -66,14 +69,61 @@
         .logo p {
             color: #666;
             font-size: 1.2rem;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
-        .message {
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
             color: #333;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
             font-size: 1rem;
-            margin-bottom: 30px;
-            line-height: 1.6;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
         }
 
         .btn {
@@ -94,8 +144,15 @@
             box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
         }
 
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .links {
-            margin-top: 30px;
+            margin-top: 20px;
+            text-align: center;
             color: #666;
             font-size: 0.9rem;
         }
@@ -108,31 +165,6 @@
 
         .links a:hover {
             text-decoration: underline;
-        }
-
-        .spinner {
-            display: none;
-            margin: 20px auto;
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f4f6;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .redirecting .spinner {
-            display: block;
-        }
-
-        .redirecting .message {
-            color: #667eea;
-            font-weight: 600;
         }
     </style>
 </head>
@@ -149,57 +181,129 @@
             <p>註冊 TixMaster</p>
         </div>
 
-        <div class="message" id="message">
-            點擊下方按鈕使用 Auth0 進行安全註冊
-        </div>
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage">✅ 註冊成功！正在為您登入...</div>
 
-        <div class="spinner" id="spinner"></div>
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="name">姓名</label>
+                <input type="text" id="name" name="name" required autocomplete="name">
+            </div>
 
-        <button class="btn" id="registerBtn" onclick="startOAuth()">
-            🔐 使用 Auth0 註冊
-        </button>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required autocomplete="email">
+            </div>
+
+            <div class="form-group">
+                <label for="phone">手機號碼（選填）</label>
+                <input type="tel" id="phone" name="phone" autocomplete="tel">
+            </div>
+
+            <div class="form-group">
+                <label for="password">密碼</label>
+                <input type="password" id="password" name="password" required minlength="6" autocomplete="new-password">
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">確認密碼</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required minlength="6" autocomplete="new-password">
+            </div>
+
+            <button type="submit" class="btn" id="registerBtn">註冊</button>
+        </form>
 
         <div class="links">
-            已有帳號？<a href="login.html">立即登入</a>
-            <br><br>
-            <a href="index.html">← 返回首頁</a>
+            已有帳號？<a href="login.html" id="loginLink">立即登入</a>
         </div>
     </div>
 
     <script>
-        function startOAuth() {
-            document.getElementById('message').textContent = '正在導向 Auth0 註冊頁面...';
-            document.body.querySelector('.register-container').classList.add('redirecting');
-            document.getElementById('registerBtn').style.display = 'none';
+        const API_BASE_URL = '/api';
 
-            // 檢查是否有返回 URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const returnUrl = urlParams.get('returnUrl') || localStorage.getItem('loginReturnUrl');
-
-            // 將返回 URL 儲存到 localStorage（OAuth 回調後會需要）
-            if (returnUrl) {
-                localStorage.setItem('loginReturnUrl', returnUrl);
-            }
-
-            // 導向到後端 OAuth 註冊路由（相對路徑）
-            setTimeout(() => {
-                window.location.href = '/auth/signup';
-            }, 500);
-        }
-
-        // 檢查是否有錯誤參數
         const urlParams = new URLSearchParams(window.location.search);
-        const error = urlParams.get('error');
-
-        if (error) {
-            let errorMessage = '註冊失敗，請重試';
-            if (error === 'oauth_failed') {
-                errorMessage = 'OAuth 認證失敗，請重試';
-            } else if (error === 'server_error') {
-                errorMessage = '伺服器錯誤，請稍後再試';
-            }
-            document.getElementById('message').innerHTML = `<span style="color: #ef4444;">❌ ${errorMessage}</span>`;
+        const returnUrl = urlParams.get('returnUrl') || localStorage.getItem('loginReturnUrl');
+        if (returnUrl) {
+            document.getElementById('loginLink').href = `login.html?returnUrl=${encodeURIComponent(returnUrl)}`;
         }
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const errorEl = document.getElementById('errorMessage');
+            const registerBtn = document.getElementById('registerBtn');
+
+            errorEl.classList.remove('show');
+
+            if (password !== confirmPassword) {
+                errorEl.textContent = '❌ 兩次輸入的密碼不一致';
+                errorEl.classList.add('show');
+                return;
+            }
+
+            registerBtn.disabled = true;
+            registerBtn.textContent = '註冊中...';
+
+            try {
+                const registerResponse = await fetch(`${API_BASE_URL}/users/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password, name, phone })
+                });
+
+                const registerData = await registerResponse.json();
+
+                if (!registerResponse.ok) {
+                    throw new Error(registerData.error || '註冊失敗');
+                }
+
+                // 註冊成功後直接登入，取得 JWT token
+                const loginResponse = await fetch(`${API_BASE_URL}/users/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const loginData = await loginResponse.json();
+
+                if (!loginResponse.ok) {
+                    // 帳號建立成功但自動登入失敗，導向登入頁讓使用者手動登入
+                    window.location.href = `login.html${returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : ''}`;
+                    return;
+                }
+
+                localStorage.setItem('token', loginData.token);
+                localStorage.setItem('currentUser', JSON.stringify({
+                    id: loginData.user.id,
+                    email: loginData.user.email,
+                    name: loginData.user.name,
+                    phone: loginData.user.phone,
+                    role: loginData.user.role,
+                    token: loginData.token
+                }));
+
+                document.getElementById('successMessage').classList.add('show');
+                localStorage.removeItem('loginReturnUrl');
+
+                setTimeout(() => {
+                    if (returnUrl) {
+                        window.location.href = decodeURIComponent(returnUrl);
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                }, 800);
+            } catch (error) {
+                errorEl.textContent = `❌ ${error.message}`;
+                errorEl.classList.add('show');
+                registerBtn.disabled = false;
+                registerBtn.textContent = '註冊';
+            }
+        });
     </script>
 </body>
 

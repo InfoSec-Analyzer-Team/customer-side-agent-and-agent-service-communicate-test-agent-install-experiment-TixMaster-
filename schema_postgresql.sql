@@ -1,5 +1,22 @@
 -- ============================================
--- TixMaster PostgreSQL Schema
+-- TixMaster PostgreSQL Schema — 舊草稿版，目前後端「沒有」在用這份
+--
+-- 這份是 RBAC/ABAC 改動之前的較早設計，users 表沒有 role / attributes
+-- 欄位，但 backend/routes/users.js 的註冊/登入 SQL 需要這兩個欄位，
+-- 所以單獨跑這份會導致註冊失敗（column "role" does not exist）。
+-- 要用真實資料庫測試登入/註冊請改用 init.sql。
+--
+-- 這份比 init.sql 多的東西（但目前 Node 後端都沒有實際呼叫/用到）：
+--   - waiting_queue 表（排隊搶票用，目前沒有任何 route 讀寫它）
+--   - DB 端 trigger/function：generate_order_number、
+--     reserve_tickets / release_tickets（鎖庫存防超賣）、
+--     set_order_expiration（訂單自動過期）
+--     → backend/routes/orders.js 這些邏輯是自己在 Node 端做
+--       (SELECT ... FOR UPDATE + JS 產生訂單編號)，不靠這些 DB trigger
+--   - 種子資料：3 筆範例活動與票種
+--
+-- 若之後想採用這份的防超賣 trigger／等待隊列設計，需要額外把
+-- init.sql 的 role/attributes 欄位補進來，兩份目前並未同步。
 -- ============================================
 
 -- 1. users (使用者)
