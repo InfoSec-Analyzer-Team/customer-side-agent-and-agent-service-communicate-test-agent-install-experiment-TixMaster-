@@ -197,6 +197,45 @@ check("chunking: first chunk has 3 events", len(_MockHandler.received[0]["events
 check("chunking: last chunk has 1 event",  len(_MockHandler.received[2]["events"]) == 1)
 buf.close()
 
+# ── Test F: 413 → chunk is halved and each half retried successfully ─────────
+cleanup(); reset_mock()
+_MockHandler.responses = [
+    (413, {}),
+    (200, {"status": "success", "queued": 2, "failed": 0}),
+    (200, {"status": "success", "queued": 2, "failed": 0}),
+]
+
+buf = LocalBuffer(DB, max_size_mb=50)
+buf.push([_make_event()] * 4)
+
+sender = BatchSender(_make_cfg(GATEWAY_URL), buf)
+sender._flush()
+
+check("413 split: buffer emptied", buf.count() == 0)
+check("413 split: 3 POSTs made (1 rejected + 2 halves)", len(_MockHandler.received) == 3)
+check("413 split: first half has 2 events", len(_MockHandler.received[1]["events"]) == 2)
+check("413 split: second half has 2 events", len(_MockHandler.received[2]["events"]) == 2)
+buf.close()
+
+# ── Test G: 413 down to a single event → that event is discarded, sibling sent ─
+cleanup(); reset_mock()
+_MockHandler.responses = [
+    (413, {}),                                              # whole batch (2 events)
+    (413, {}),                                              # left half (1 event) — still too big, discard
+    (200, {"status": "success", "queued": 1, "failed": 0}),  # right half (1 event) — sent
+]
+
+buf = LocalBuffer(DB, max_size_mb=50)
+buf.push([_make_event(), _make_event()])
+
+sender = BatchSender(_make_cfg(GATEWAY_URL), buf)
+sender._flush()
+
+check("413 min-split: buffer emptied (1 discarded + 1 sent)", buf.count() == 0)
+check("413 min-split: exactly 3 POSTs (no retry on the discarded event)",
+      len(_MockHandler.received) == 3)
+buf.close()
+
 # ── teardown ──────────────────────────────────────────────────────────────────
 server.shutdown()
 cleanup()

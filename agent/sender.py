@@ -99,13 +99,9 @@ class BatchSender:
             ids = [r[0] for r in rows]
             events = [r[1] for r in rows]
 
-            success = self._send_with_retry(events)
-            if success:
-                # Covers both 200 (sent) and 400/413 (discarded): either way
-                # remove from buffer so we don't re-attempt the same batch.
-                self._buffer.delete(ids)
-            else:
-                # 503 survived all retries — leave in buffer, try next cycle
+            if not self._send_and_resolve(ids, events):
+                # 503 survived all retries somewhere in this chunk — leave the
+                # unresolved events in buffer, try next cycle
                 logger.warning(
                     "flush aborted: %d events kept in buffer for next cycle",
                     len(ids),
@@ -117,16 +113,44 @@ class BatchSender:
 
     # ── HTTP with retry ───────────────────────────────────────────────────────
 
-    def _send_with_retry(self, events: List[dict]) -> bool:
+    def _send_and_resolve(self, ids: List[int], events: List[dict]) -> bool:
+        """Send a chunk, splitting it in half on 413 until it fits or is 1 event.
+
+        Returns True  → this slice is resolved (sent or permanently discarded)
+                         and has been removed from buffer.
+        Returns False → some part of this slice hit 503-exhausted and was left
+                         in buffer for the next flush cycle.
+        """
+        outcome = self._send_with_retry(events)
+
+        if outcome in ("sent", "discard"):
+            self._buffer.delete(ids)
+            return True
+
+        if outcome == "exhausted":
+            return False
+
+        # outcome == "split": halve and retry each half independently, each
+        # with its own full retry budget
+        mid = len(events) // 2
+        left_ok = self._send_and_resolve(ids[:mid], events[:mid])
+        right_ok = self._send_and_resolve(ids[mid:], events[mid:])
+        return left_ok and right_ok
+
+    def _send_with_retry(self, events: List[dict]) -> str:
         """POST one chunk to the Gateway.
 
-        Returns True  → caller should delete these events from buffer.
-        Returns False → caller should leave events in buffer (retry next cycle).
+        Returns one of:
+          "sent"      → 200, caller should delete these events from buffer
+          "discard"   → permanently rejected, caller should delete (no retry)
+          "split"     → 413 on more than one event, caller should halve and retry
+          "exhausted" → retries ran out, caller should leave events in buffer
 
         Status mapping (from CUSTOMER_AGENT_DESIGN.md §3.4):
           200 → sent OK, delete
-          400 → bad payload, discard (return True so caller deletes)
-          413 → body too large, discard (same as 400)
+          400 → bad payload, discard (whole chunk, no retry)
+          413 → body too large; halve the chunk and retry each half, unless
+                already down to a single event, in which case discard it
           503 → Kafka down, keep buffer, exponential backoff retry
         """
         payload = {"events": events}
@@ -149,7 +173,7 @@ class BatchSender:
                         "sent %d events — queued=%s failed=%s (%.2fs)",
                         len(events), body.get("queued"), body.get("failed"), elapsed,
                     )
-                    return True
+                    return "sent"
 
                 elif resp.status_code == 503:
                     # Gateway/Kafka is down; backoff and retry this chunk
@@ -162,13 +186,25 @@ class BatchSender:
                         # Exponential backoff: 1s → 2s → 4s → … → 60s
                         delay = min(delay * 2, self._max_delay)
 
-                elif resp.status_code in (400, 413):
+                elif resp.status_code == 413:
+                    if len(events) == 1:
+                        logger.error(
+                            "HTTP 413 on a single event — discarding (cannot split further)",
+                        )
+                        return "discard"
+                    logger.warning(
+                        "HTTP 413 — splitting %d events into 2 chunks and retrying",
+                        len(events),
+                    )
+                    return "split"
+
+                elif resp.status_code == 400:
                     # Payload permanently rejected; discard so the queue unblocks
                     logger.error(
-                        "HTTP %d — discarding %d events (no retry)",
-                        resp.status_code, len(events),
+                        "HTTP 400 — discarding %d events (no retry)",
+                        len(events),
                     )
-                    return True  # delete from buffer = discard
+                    return "discard"
 
                 else:
                     logger.warning(
@@ -193,4 +229,4 @@ class BatchSender:
             "all %d retry attempts exhausted for %d events",
             self._max_attempts, len(events),
         )
-        return False
+        return "exhausted"
