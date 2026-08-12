@@ -1,0 +1,10 @@
+batch_id: nginx01_batch_dicurigai_probe_001
+label: DICURIGAI
+traffic_type: suspicious_probe_mixed
+tool: powershell_manual_probe
+count_collected: 100
+nginx: nginx01
+target: http://localhost:8080
+log_file: nginx01_batch_dicurigai_probe_001.log
+notes: Suspicious but not confirmed attack traffic: sensitive paths, abnormal methods, long URL, many params, light encoded probes
+timezone_note: nginx timestamp is UTC; local time is Asia/Taipei UTC+8

@@ -1,0 +1,10 @@
+batch_id: nginx01_batch_sqlmap_sqli_001
+label: BAHAYA
+traffic_type: tool_generated_sqli
+tool: sqlmap
+count_collected: 378
+nginx: nginx01
+target: http://localhost:8080
+log_file: nginx01_batch_sqlmap_sqli_001.log
+notes: sqlmap against /api/events?id=1 using parrotsec/sqlmap:latest
+timezone_note: nginx timestamp is UTC; local time is Asia/Taipei UTC+8

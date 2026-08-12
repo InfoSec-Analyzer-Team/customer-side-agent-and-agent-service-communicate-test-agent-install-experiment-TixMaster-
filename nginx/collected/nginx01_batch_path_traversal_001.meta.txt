@@ -1,0 +1,10 @@
+batch_id: nginx01_batch_path_traversal_001
+label: BAHAYA
+traffic_type: path_traversal_attempt
+tool: powershell_manual_payload
+count_collected: 120
+nginx: nginx01
+target: http://localhost:8080
+log_file: nginx01_batch_path_traversal_001.log
+notes: Manual path traversal payload attempts against local nginx URLs
+timezone_note: nginx timestamp is UTC; local time is Asia/Taipei UTC+8
