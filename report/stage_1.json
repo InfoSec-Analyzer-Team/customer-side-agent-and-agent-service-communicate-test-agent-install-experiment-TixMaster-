@@ -1,11 +1,11 @@
 {
   "stage_id": 1,
-  "n_samples": 108,
-  "diversity_score": 0.2652970505845934,
-  "provisional": true,
+  "n_samples": 204,
+  "diversity_score": 0.26156516864009854,
+  "provisional": false,
   "per_feature": {
     "os_type": {
-      "d": 0.3169853494849908,
+      "d": 0.32941689305158917,
       "coverage": 0.25,
       "missing": [
         0,
@@ -36,10 +36,10 @@
       "d": 0.0
     },
     "url_length": {
-      "d": 0.28
+      "d": 0.30434782608695654
     },
     "referrer_type": {
-      "d": 0.1600862102209168,
+      "d": 0.10091554890039255,
       "coverage": 0.3333333333333333,
       "missing": [
         2,
@@ -50,8 +50,7 @@
     }
   },
   "warnings": [
-    "stage 1: 10/108 筆樣本不符合定義判準 [{'feature': 'accesses_sensitive_path', 'op': 'eq', 'value': 1, 'exclude_from_support': True}]，可能混入其他 stage 的樣本，或定義判準本身設錯",
-    "stage 1: n_samples=108 < MIN_SAMPLES=200，熵/QCD 數字僅供參考（provisional），CI 不得當硬門檻",
+    "stage 1: 12/204 筆樣本不符合定義判準 [{'feature': 'accesses_sensitive_path', 'op': 'eq', 'value': 1, 'exclude_from_support': True}]，可能混入其他 stage 的樣本，或定義判準本身設錯",
     "stage 1: 支撐特徵 'request_method' 完全塌縮（d=0）",
     "stage 1: 支撐特徵 'url_depth' 完全塌縮（d=0）"
   ]
