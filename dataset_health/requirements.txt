@@ -1,0 +1,10 @@
+# dataset_health 可重現性要求（§6.3）：percentile / 熵計算依賴這三個套件，
+# 版本浮動會讓分數不可重現，故 pin 死。CI 用這份檔案安裝。
+#
+# 這幾個版本是在本機 Python 3.14（venv/）實測裝得起來、且跑過 tests/unit/
+# test_diversity.py 全過的組合。CI 的 python-version 若跟本機不同，装不起來
+# 時請改成該 Python 版本能裝的最新穩定版，並重新在本機驗證一次。
+numpy==2.5.2
+pandas==3.0.5
+scipy==1.18.0
+pytest==8.3.4
