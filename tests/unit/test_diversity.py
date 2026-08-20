@@ -182,6 +182,59 @@ def test_stage_diversity_defining_flag_violation_warns():
     assert any("不符合定義判準" in w for w in report.warnings)
 
 
+def test_stage_diversity_defining_violations_empty_when_all_match():
+    df = _stage2_fixture(n=300, sql_flag_all_one=True)
+    report = stage_diversity(df, stage_id=2, cfg=cfg)
+    assert report.defining_violations == []
+
+
+def test_stage_diversity_defining_violations_lists_bad_indices():
+    n = 300
+    df = _stage2_fixture(n=n, sql_flag_all_one=False)  # 最後 5 筆 has_sql_injection=0
+    report = stage_diversity(df, stage_id=2, cfg=cfg)
+
+    assert len(report.defining_violations) == 5
+    bad_indices = {v["index"] for v in report.defining_violations}
+    assert bad_indices == set(range(n - 5, n))
+    # index 要是原生 int，不能是 numpy.int64，否則 json.dumps 會炸
+    assert all(isinstance(v["index"], int) for v in report.defining_violations)
+
+
+def test_stage_diversity_defining_violations_include_log_line_no_when_present():
+    n = 300
+    df = _stage2_fixture(n=n, sql_flag_all_one=False)
+    df["log_line_no"] = [i + 1 for i in range(n)]  # 模擬 load_stage_log 加的欄位
+
+    report = stage_diversity(df, stage_id=2, cfg=cfg)
+    line_nos = {v["log_line_no"] for v in report.defining_violations}
+    assert line_nos == set(range(n - 5 + 1, n + 1))
+
+
+def test_stage_diversity_defining_violations_json_serializable():
+    import json
+
+    df = _stage2_fixture(n=300, sql_flag_all_one=False)
+    df["log_line_no"] = list(range(1, 301))
+    report = stage_diversity(df, stage_id=2, cfg=cfg)
+
+    # 不該拋錯——確認 to_dict() 的輸出真的能被 json.dumps 吃
+    json.dumps(report.to_dict())
+
+
+def test_stage_diversity_defining_violations_empty_for_stage_without_predicate():
+    # stage 10 是「目標即多樣性」型，沒有定義判準，defining_violations 該是空的
+    n = 300
+    df = pd.DataFrame({
+        "os_type": [i % 8 for i in range(n)],
+        "ua_length": [50 + (i % 30) for i in range(n)],
+        "is_bot": [i % 2 for i in range(n)],
+        "referrer_type": [i % 6 for i in range(n)],
+        "request_method": ["GET" if i % 2 == 0 else "POST" for i in range(n)],
+    })
+    report = stage_diversity(df, stage_id=10, cfg=cfg)
+    assert report.defining_violations == []
+
+
 def test_stage_diversity_weighted_average_matches_manual_calc():
     df = _stage2_fixture(n=300)
     report = stage_diversity(df, stage_id=2, cfg=cfg)

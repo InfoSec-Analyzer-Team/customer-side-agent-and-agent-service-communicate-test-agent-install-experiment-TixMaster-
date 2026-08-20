@@ -14,6 +14,11 @@ from typing import Union
 from .diversity import StageDiversityReport
 from . import config as default_config
 
+# markdown 裡不符合定義判準的樣本列表最多印這麼多筆，超過的用「...還有 N 筆」
+# 收尾，避免一份混進太多其他 stage 樣本的 log 把報告拉到幾千行。JSON 輸出
+# （to_json / StageDiversityReport.to_dict）不受此限制，完整明細都在。
+_MAX_VIOLATIONS_IN_MARKDOWN = 20
+
 
 def to_json(report: StageDiversityReport) -> str:
     """§4 輸出契約：StageDiversityReport 可被序列化成 JSON（供 CI artifact）。"""
@@ -38,6 +43,21 @@ def to_markdown(report: StageDiversityReport, cfg=default_config) -> str:
         lines.append("")
         for w in report.warnings:
             lines.append(f"- ⚠️ {w}")
+        lines.append("")
+
+    if report.defining_violations:
+        lines.append("## 不符合定義判準的樣本")
+        lines.append("")
+        shown = report.defining_violations[:_MAX_VIOLATIONS_IN_MARKDOWN]
+        columns = list(dict.fromkeys(k for v in shown for k in v.keys()))  # 保留第一次出現的順序
+        lines.append("| " + " | ".join(columns) + " |")
+        lines.append("| " + " | ".join(["---"] * len(columns)) + " |")
+        for v in shown:
+            lines.append("| " + " | ".join(str(v.get(c, "")) for c in columns) + " |")
+        remaining = len(report.defining_violations) - len(shown)
+        if remaining > 0:
+            lines.append("")
+            lines.append(f"...還有 {remaining} 筆，完整明細見 JSON 輸出的 `defining_violations`")
         lines.append("")
 
     lines.append("## 支撐特徵明細")

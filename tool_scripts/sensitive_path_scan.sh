@@ -140,7 +140,14 @@ fire_request() {
   else
     ua="${UA_SCANNER_POOL[$((RANDOM % ${#UA_SCANNER_POOL[@]}))]}"
   fi
+  # --connect-timeout / --max-time: 沒有這兩個 flag 時，只要目標的
+  # nginx/後端對某個 method（實測 HEAD 100% 會中）沒有正確結束回應
+  # (回了 Content-Length 但body 永遠不會補滿)，curl 就會卡住等到天荒
+  # 地老，非 burst 模式是逐條同步發送，一條卡住整支腳本就跟著卡住、
+  # 沒有任何輸出也不會結束。加上這兩個 timeout，單一 request 卡住最多
+  # 等 max-time 秒就放棄、往下一條走，不會拖垮整輪掃描。
   curl -s -o /dev/null -w "%{http_code} $method $path ua=[$ua] ($mode_name)\n" \
+    --connect-timeout 5 --max-time 10 \
     -X "$method" "http://$TARGET$path" -A "$ua" "${extra_headers[@]}"
 }
 
