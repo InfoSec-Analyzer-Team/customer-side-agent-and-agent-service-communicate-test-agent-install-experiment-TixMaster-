@@ -4,6 +4,9 @@
 `diversity.py` 不得硬編任何 stage 專屬常數，一律從這裡讀。
 """
 
+import warnings
+from pathlib import Path
+
 # ============================================================
 # §3.7 — 基本門檻
 # ============================================================
@@ -199,14 +202,64 @@ STAGE_WEIGHTS = {
 # stage id，記得在這裡把它設 False。
 APPLY_TOOL_PENALTY = {stage_id: True for stage_id in SUPPORT_FEATURES}
 
-# stage_id -> log 檔案路徑/glob。⚠️ 待團隊填（見規格 §3.7）：哪個 stage 對應
-# 靶機上哪個 log 檔案，目前沒有定案的命名慣例。attack_log.md 只列了每個 stage
-# 要打什麼、用什麼工具，沒有定輸出 log 要存在哪、怎麼命名。
-# 目前 nginx/logs/ 底下已有 access1_Aman.log（benign）、
-# access2_Dicurigai_sensitive_path.log（疑似對應 stage 1），但命名慣例還沒
-# 拍板，此表故意留空——run_stage.py 的 --log/--stage 參數可以不依賴這張表，
-# 手動指定路徑優先於這裡的查表。
-STAGE_LOG_PATHS = {}
+# stage_id -> log 檔案路徑。§3.7 原本一直留空的命名慣例，現在由
+# nginx/logs/stage_log_CHECK/stage_log_map.txt 拍板（格式與規則見同目錄
+# README.md）；這裡在 import 時自動解析那份純文字表，不用改這份 config.py。
+# 手動指定路徑（run_stage.py 的 --log）仍然優先於這裡的查表，兩者互不依賴。
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+_NGINX_LOGS_DIR = _REPO_ROOT / "nginx" / "logs"
+_STAGE_LOG_MAP_PATH = _NGINX_LOGS_DIR / "stage_log_CHECK" / "stage_log_map.txt"
+
+
+def _load_stage_log_map(map_path: Path) -> dict:
+    """解析 stage_log_map.txt（`<檔名>==<stage id>`，# 開頭是註解）。
+
+    檔案不存在，或某一行格式不對，就跳過該行並發 warning，不讓
+    `import dataset_health.config` 整個炸掉——這張表本來就是持續在填的
+    施工中狀態，缺一筆不該讓其他完全無關的東西一起壞掉。
+    """
+    result: dict[int, str] = {}
+    if not map_path.exists():
+        return result
+
+    for line_no, raw_line in enumerate(map_path.read_text(encoding="utf-8").splitlines(), start=1):
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if "==" not in line:
+            warnings.warn(f"{map_path}:{line_no}: 格式不對（缺 '=='），跳過：{raw_line!r}")
+            continue
+
+        filename, _, stage_text = line.partition("==")
+        filename = filename.strip()
+        stage_text = stage_text.strip()
+        try:
+            stage_id = int(stage_text)
+        except ValueError:
+            warnings.warn(f"{map_path}:{line_no}: stage id 不是整數，跳過：{raw_line!r}")
+            continue
+
+        result[stage_id] = (_NGINX_LOGS_DIR / filename).relative_to(_REPO_ROOT).as_posix()
+
+    return result
+
+
+_LOG_PATH_MAP = _load_stage_log_map(_STAGE_LOG_MAP_PATH)
+
+# 只有 1-12（SUPPORT_FEATURES 涵蓋的攻擊 stage）會被 diversity 模組吃。
+STAGE_LOG_PATHS = {
+    stage_id: path for stage_id, path in _LOG_PATH_MAP.items() if stage_id in SUPPORT_FEATURES
+}
+
+# stage 0（benign/非攻擊，見 stage_log_CHECK/README.md）以及其他不在
+# SUPPORT_FEATURES 裡的代號，先留著當參考/未來擴充用（例如
+# confounder.py/realism.py 需要 benign baseline，見規格附錄 B）。
+# stage_diversity() 目前不吃這些，傳進去會直接 KeyError——這是刻意的，
+# diversity 這份規格只涵蓋攻擊 stage 的多元度，benign 流量的健檢屬於
+# 別的模組，不在這裡硬塞。
+NON_DIVERSITY_LOG_PATHS = {
+    stage_id: path for stage_id, path in _LOG_PATH_MAP.items() if stage_id not in SUPPORT_FEATURES
+}
 
 # 以下欄位供後續 whole-dataset 模組（confounder.py / realism.py）共用，
 # 先在此集中定義避免散落；本文件（diversity）不使用它們。

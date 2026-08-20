@@ -1,0 +1,4 @@
+# 格式與規則見同目錄 README.md。
+# <檔名（相對 nginx/logs/）>==<stage id>
+access1_Aman.log==0
+access2_Dicurigai_sensitive_path.log==1
