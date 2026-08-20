@@ -1,11 +1,11 @@
 {
   "stage_id": 1,
-  "n_samples": 192,
-  "diversity_score": 0.24243028108078388,
-  "provisional": true,
+  "n_samples": 264,
+  "diversity_score": 0.285427735872448,
+  "provisional": false,
   "per_feature": {
     "os_type": {
-      "d": 0.32575329562422684,
+      "d": 0.3259957996116666,
       "coverage": 0.25,
       "missing": [
         0,
@@ -20,11 +20,10 @@
       "d": 0.8347107438016529
     },
     "request_method": {
-      "d": 0.0,
-      "coverage": 0.125,
+      "d": 0.2577422247625448,
+      "coverage": 0.25,
       "missing": [
         "DELETE",
-        "HEAD",
         "OPTIONS",
         "PATCH",
         "POST",
@@ -51,8 +50,6 @@
     }
   },
   "warnings": [
-    "stage 1: n_samples=192 < MIN_SAMPLES=200，熵/QCD 數字僅供參考（provisional），CI 不得當硬門檻",
-    "stage 1: 支撐特徵 'request_method' 完全塌縮（d=0）",
     "stage 1: 支撐特徵 'url_depth' 完全塌縮（d=0）",
     "stage 1: 支撐特徵 'referrer_type' 完全塌縮（d=0）"
   ],

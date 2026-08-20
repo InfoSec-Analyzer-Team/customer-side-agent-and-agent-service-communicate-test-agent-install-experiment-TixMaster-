@@ -48,6 +48,14 @@
 #
 #   只對你自己的測試靶機使用 (TARGET 指向自己的 lab/容器)。
 #
+#   必須用 Git Bash 執行 (例如 `./sensitive_path_scan.sh ...` 或
+#   `bash sensitive_path_scan.sh ...`)，不要在 PowerShell 裡直接跑。
+#   PowerShell 不認得 `#!/bin/bash` shebang，`./sensitive_path_scan.sh`
+#   在 PowerShell 裡會靜默地什麼都不做、沒有任何錯誤訊息；而 PowerShell
+#   PATH 上找到的 `bash` 常常是 `C:\Windows\System32\bash.exe`，也就是
+#   舊版 WSL 的啟動器，不是 Git Bash，沒裝好 WSL distro 的話會直接報錯
+#   退出。
+#
 # 用法:
 #   ./sensitive_path_scan.sh -t <IP:PORT> [-m fast|slow|burst] \
 #       [-n 抽樣數量] [-u scanner|browser|both] [-x GET,HEAD,POST]
