@@ -160,7 +160,9 @@ jobs:
       - name: Run pytest
         run: |
           mkdir -p reports
-          pytest -q --junitxml=reports/tests-junit.xml --html=reports/test-report.html
+          # tests/unit/test_diversity.py 需要 pandas/numpy/scipy（dataset_health/requirements.txt），
+          # 這個 job 沒裝那些依賴；那份測試改由專屬的 diversity-unit workflow 跑，這裡排除避免收集失敗。
+          pytest -q --ignore=tests/unit/test_diversity.py --junitxml=reports/tests-junit.xml --html=reports/test-report.html
 
       - name: Run Playwright tests
         run: |

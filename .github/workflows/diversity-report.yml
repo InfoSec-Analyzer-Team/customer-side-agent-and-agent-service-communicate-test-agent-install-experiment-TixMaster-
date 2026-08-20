@@ -1,0 +1,58 @@
+name: diversity-report
+
+# Tier 2（規格 §6.2）：測資料夠不夠好，吃真實收集的 stage 裸 access.log。
+#
+# 目前只做手動單 stage（workflow_dispatch）：
+#   - config.STAGE_LOG_PATHS（§3.7）還沒拍板 log 檔案命名慣例，所以還沒有
+#     「push 時自動掃全部 stage」的 on: push 觸發——那需要先定案命名慣例、
+#     填好 STAGE_LOG_PATHS，並補上 run_all_stages.py（§8 步驟 4 後半）。
+#   - 這裡是 soft 模式：只產報告 artifact，不設 exit code 失敗。§7 的門檻
+#     （Diversity_stage < 0.4 擋、涵蓋率門檻等）明白標示「起始建議值，不是
+#     定論，需先用印尼真實資料集校準」，所以 DIVERSITY_STRICT 嚴格模式的
+#     判斷邏輯還沒接上；等門檻校準過再回來做。
+on:
+  workflow_dispatch:
+    inputs:
+      stage_id:
+        description: "stage id（1-12，見 dataset_health/config.py 的 SUPPORT_FEATURES）"
+        required: true
+      stage_log_path:
+        description: "裸 access.log 路徑（相對 repo 根目錄，例如 nginx/logs/access2_Dicurigai_sensitive_path.log）"
+        required: true
+
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dataset_health dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r dataset_health/requirements.txt
+
+      - name: Run stage diversity report
+        run: |
+          python -m dataset_health.run_stage \
+            --stage "${{ inputs.stage_id }}" \
+            --log "${{ inputs.stage_log_path }}" \
+            --out report/
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diversity-report-stage-${{ inputs.stage_id }}
+          path: report/
+
+      - name: Append report to job summary
+        if: always()
+        run: |
+          md_path="report/stage_${{ inputs.stage_id }}.md"
+          if [ -f "$md_path" ]; then
+            cat "$md_path" >> "$GITHUB_STEP_SUMMARY"
+          fi

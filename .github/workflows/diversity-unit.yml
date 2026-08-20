@@ -1,0 +1,23 @@
+name: diversity-unit
+
+# Tier 1（規格 §6.1）：測公式實作對不對，不碰真實資料，完全決定性。
+# 跟資料品質無關，純程式正確性——這層是必過的硬性 gate，每次 PR/push 都跑。
+on: [pull_request, push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dataset_health dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r dataset_health/requirements.txt
+
+      - name: Run diversity unit tests
+        run: pytest tests/unit/test_diversity.py -v
