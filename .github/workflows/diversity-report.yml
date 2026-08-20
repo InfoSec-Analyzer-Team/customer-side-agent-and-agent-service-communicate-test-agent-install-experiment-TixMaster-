@@ -18,6 +18,7 @@ on:
     paths:
       - "nginx/logs/**"
       - "dataset_health/**"
+      - ".github/workflows/diversity-report.yml"
   workflow_dispatch:
     inputs:
       stage_id:
