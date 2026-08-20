@@ -20,4 +20,8 @@ jobs:
           pip install -r dataset_health/requirements.txt
 
       - name: Run diversity unit tests
-        run: pytest tests/unit/test_diversity.py -v
+        # test_diversity.py + test_config.py：兩份都不碰真實 log 內容，純公式/
+        # 純邏輯測試，完全決定性，符合 Tier 1「不碰真實資料」的定義。
+        # test_run_stage.py 刻意吃真實、會變動的 log 資料，不放進這層——見它
+        # 檔頭的說明；要跑它屬於 Tier 2（diversity-report.yml）的範疇。
+        run: pytest tests/unit/test_diversity.py tests/unit/test_config.py -v
