@@ -292,37 +292,48 @@ def _describe_violations(bad: pd.DataFrame) -> list[dict]:
     return violations
 
 
-def _defining_violations(df: pd.DataFrame, stage_id: int, cfg) -> tuple[list[str], list[dict]]:
+def _defining_violations(df: pd.DataFrame, stage_id: int, cfg) -> tuple[list[str], list[dict], int]:
     """步驟 1：用 cfg.DEFINING_FLAG / DEFINING_PREDICATE 驗證這批確實屬於此
     stage（不符 → warn，並回傳每一筆不符合樣本的定位資訊）。stage 10/12 這種
-    「目標即多樣性」型沒有判準，兩者都回空。
+    「目標即多樣性」型沒有判準，三者都回空/0。
+
+    回傳 (warnings, violations, n_bad_total)：`violations` 依
+    cfg.MAX_DEFINING_VIOLATIONS 截斷（大型工具掃描動輒上萬筆不符合，明細
+    塞滿 JSON 沒有意義，還會讓報告檔案不必要地肥大）；`n_bad_total` 永遠是
+    真實總數，截斷與否都不失真。
     """
     conditions = _defining_conditions(stage_id, cfg)
     if not conditions:
-        return [], []
+        return [], [], 0
 
     n = len(df)
     if n == 0:
-        return [], []
+        return [], [], 0
 
     mask = pd.Series(True, index=df.index)
     for cond in conditions:
         try:
             mask &= _eval_condition(df, cond)
         except KeyError as exc:
-            return [f"stage {stage_id}: {exc}"], []
+            return [f"stage {stage_id}: {exc}"], [], 0
 
     bad = df.loc[~mask]
-    if bad.empty:
-        return [], []
+    n_bad = len(bad)
+    if n_bad == 0:
+        return [], [], 0
 
-    violations = _describe_violations(bad)
+    max_violations = getattr(cfg, "MAX_DEFINING_VIOLATIONS", None)
+    truncated = max_violations is not None and n_bad > max_violations
+    violations = _describe_violations(bad.iloc[:max_violations] if truncated else bad)
+
     warning = (
-        f"stage {stage_id}: {len(bad)}/{n} 筆樣本不符合定義判準 {conditions!r}，"
+        f"stage {stage_id}: {n_bad}/{n} 筆樣本不符合定義判準 {conditions!r}，"
         f"可能混入其他 stage 的樣本，或定義判準本身設錯"
-        f"（明細見 StageDiversityReport.defining_violations）"
+        f"（明細見 StageDiversityReport.defining_violations"
+        + (f"，只列前 {max_violations} 筆，真實總數見 defining_violations_total" if truncated else "")
+        + "）"
     )
-    return [warning], violations
+    return [warning], violations, n_bad
 
 
 # ============================================================
@@ -351,7 +362,8 @@ class StageDiversityReport:
     per_feature: dict  # feature -> PerFeatureDiversity
     warnings: list
     provisional: bool
-    defining_violations: list = dataclasses.field(default_factory=list)  # 不符合定義判準的樣本明細（見 _describe_violations）
+    defining_violations: list = dataclasses.field(default_factory=list)  # 不符合定義判準的樣本明細（見 _describe_violations，可能被 cfg.MAX_DEFINING_VIOLATIONS 截斷）
+    defining_violations_total: int = 0  # 不符合定義判準的真實總數，不受截斷影響
 
     def to_dict(self) -> dict:
         """供 report.py 序列化成 JSON（§4 輸出契約）。"""
@@ -363,6 +375,7 @@ class StageDiversityReport:
             "per_feature": {f: pf.to_dict() for f, pf in self.per_feature.items()},
             "warnings": list(self.warnings),
             "defining_violations": list(self.defining_violations),
+            "defining_violations_total": self.defining_violations_total,
         }
 
 
@@ -383,7 +396,7 @@ def stage_diversity(df: pd.DataFrame, stage_id: int, cfg) -> StageDiversityRepor
     if stage_id not in cfg.SUPPORT_FEATURES:
         raise KeyError(f"stage_diversity: 未知的 stage_id {stage_id!r}（不在 cfg.SUPPORT_FEATURES 裡）")
 
-    warnings_list, defining_violations = _defining_violations(df, stage_id, cfg)
+    warnings_list, defining_violations, defining_violations_total = _defining_violations(df, stage_id, cfg)
 
     if (
         stage_id == 9
@@ -453,4 +466,5 @@ def stage_diversity(df: pd.DataFrame, stage_id: int, cfg) -> StageDiversityRepor
         warnings=warnings_list,
         provisional=provisional,
         defining_violations=defining_violations,
+        defining_violations_total=defining_violations_total,
     )

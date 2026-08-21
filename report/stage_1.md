@@ -1,51 +1,47 @@
 # Stage 1 多元度驗收報告 — 敏感路徑
 
-- 樣本數：378
-- **Diversity_stage = 0.0980**
+- 樣本數：16107
+- **Diversity_stage = 0.2142**
 
 ## Warnings
 
-- ⚠️ stage 1: 356/378 筆樣本不符合定義判準 [{'feature': 'accesses_sensitive_path', 'op': 'eq', 'value': 1, 'exclude_from_support': True}]，可能混入其他 stage 的樣本，或定義判準本身設錯（明細見 StageDiversityReport.defining_violations）
-- ⚠️ stage 1: 支撐特徵 'os_type' 完全塌縮（d=0）
+- ⚠️ stage 1: 11223/16107 筆樣本不符合定義判準 [{'feature': 'accesses_sensitive_path', 'op': 'eq', 'value': 1, 'exclude_from_support': True}]，可能混入其他 stage 的樣本，或定義判準本身設錯（明細見 StageDiversityReport.defining_violations，只列前 500 筆，真實總數見 defining_violations_total）
 - ⚠️ stage 1: 支撐特徵 'ua_length' 完全塌縮（d=0）
-- ⚠️ stage 1: 支撐特徵 'request_method' 完全塌縮（d=0）
-- ⚠️ stage 1: 支撐特徵 'url_depth' 完全塌縮（d=0）
-- ⚠️ stage 1: 支撐特徵 'referrer_type' 完全塌縮（d=0）
 
 ## 不符合定義判準的樣本
 
-| index | log_line_no | ip | datetime | request | url | request_method | browser |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 0 | 1 | 172.22.0.1 | 2026-08-06T14:15:45+00:00 | GET /api/events?id=1 HTTP/1.1 | /api/events?id=1 | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
-| 1 | 2 | 172.22.0.1 | 2026-08-06T14:15:45+00:00 | GET /api/events?id=1&rtAi=4432%20AND%201%3D1%20UNION%20ALL%20SELECT%201%2CNULL%2C%27%3Cscript%3Ealert%28%22XSS%22%29%3C%2Fscript%3E%27%2Ctable_name%20FROM%20information_schema.tables%20WHERE%202%3E1--%2F%2A%2A%2F%3B%20EXEC%20xp_cmdshell%28%27cat%20..%2F..%2F..%2Fetc%2Fpasswd%27%29%23 HTTP/1.1 | /api/events?id=1&rtAi=4432%20AND%201%3D1%20UNION%20ALL%20SELECT%201%2CNULL%2C%27%3Cscript%3Ealert%28%22XSS%22%29%3C%2Fscript%3E%27%2Ctable_name%20FROM%20information_schema.tables%20WHERE%202%3E1--%2F%2A%2A%2F%3B%20EXEC%20xp_cmdshell%28%27cat%20..%2F..%2F..%2Fetc%2Fpasswd%27%29%23 | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
-| 2 | 3 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1 HTTP/1.1 | /api/events?id=1 | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
-| 3 | 4 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=6275 HTTP/1.1 | /api/events?id=6275 | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
-| 4 | 5 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1%29%29%28.%29%27.%2C%22%29 HTTP/1.1 | /api/events?id=1%29%29%28.%29%27.%2C%22%29 | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
-| 5 | 6 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1%27PDjlVW%3C%27%22%3EYGheEx HTTP/1.1 | /api/events?id=1%27PDjlVW%3C%27%22%3EYGheEx | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
-| 6 | 7 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1%29%20AND%207973%3D2007%20AND%20%288113%3D8113 HTTP/1.1 | /api/events?id=1%29%20AND%207973%3D2007%20AND%20%288113%3D8113 | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
-| 7 | 8 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1%29%29%20AND%209588%3D7570%20AND%20%28%285328%3D5328 HTTP/1.1 | /api/events?id=1%29%29%20AND%209588%3D7570%20AND%20%28%285328%3D5328 | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
-| 8 | 9 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1%20AND%207110%3D9042 HTTP/1.1 | /api/events?id=1%20AND%207110%3D9042 | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
-| 9 | 10 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1%20AND%206218%3D3524--%20hJSL HTTP/1.1 | /api/events?id=1%20AND%206218%3D3524--%20hJSL | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
-| 10 | 11 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1%27%29%20AND%204947%3D9521%20AND%20%28%27IwIp%27%3D%27IwIp HTTP/1.1 | /api/events?id=1%27%29%20AND%204947%3D9521%20AND%20%28%27IwIp%27%3D%27IwIp | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
-| 11 | 12 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1%27%29%29%20AND%201399%3D2063%20AND%20%28%28%27vXKC%27%3D%27vXKC HTTP/1.1 | /api/events?id=1%27%29%29%20AND%201399%3D2063%20AND%20%28%28%27vXKC%27%3D%27vXKC | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
-| 12 | 13 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1%27%20AND%205206%3D9476%20AND%20%27KyHp%27%3D%27KyHp HTTP/1.1 | /api/events?id=1%27%20AND%205206%3D9476%20AND%20%27KyHp%27%3D%27KyHp | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
-| 13 | 14 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1%27%29%20AND%204845%3D1847%20AND%20%28%27sFOb%27%20LIKE%20%27sFOb HTTP/1.1 | /api/events?id=1%27%29%20AND%204845%3D1847%20AND%20%28%27sFOb%27%20LIKE%20%27sFOb | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
-| 14 | 15 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1%25%27%20AND%205678%3D4103%20AND%20%27BIsQ%25%27%3D%27BIsQ HTTP/1.1 | /api/events?id=1%25%27%20AND%205678%3D4103%20AND%20%27BIsQ%25%27%3D%27BIsQ | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
-| 15 | 16 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1%27%20AND%207114%3D9249%20AND%20%27TEjT%27%20LIKE%20%27TEjT HTTP/1.1 | /api/events?id=1%27%20AND%207114%3D9249%20AND%20%27TEjT%27%20LIKE%20%27TEjT | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
-| 16 | 17 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1%22%29%20AND%206118%3D5908%20AND%20%28%22HdVL%22%3D%22HdVL HTTP/1.1 | /api/events?id=1%22%29%20AND%206118%3D5908%20AND%20%28%22HdVL%22%3D%22HdVL | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
-| 17 | 18 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1%22%20AND%208392%3D9563%20AND%20%22LLVv%22%3D%22LLVv HTTP/1.1 | /api/events?id=1%22%20AND%208392%3D9563%20AND%20%22LLVv%22%3D%22LLVv | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
-| 18 | 19 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1%29%20AND%208945%3D%28SELECT%20%28CASE%20WHEN%20%288945%3D5980%29%20THEN%208945%20ELSE%20%28SELECT%205980%20UNION%20SELECT%203240%29%20END%29%29--%20BfBX HTTP/1.1 | /api/events?id=1%29%20AND%208945%3D%28SELECT%20%28CASE%20WHEN%20%288945%3D5980%29%20THEN%208945%20ELSE%20%28SELECT%205980%20UNION%20SELECT%203240%29%20END%29%29--%20BfBX | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
-| 19 | 20 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1%29%29%20AND%206547%3D%28SELECT%20%28CASE%20WHEN%20%286547%3D4302%29%20THEN%206547%20ELSE%20%28SELECT%204302%20UNION%20SELECT%203175%29%20END%29%29--%20qqXD HTTP/1.1 | /api/events?id=1%29%29%20AND%206547%3D%28SELECT%20%28CASE%20WHEN%20%286547%3D4302%29%20THEN%206547%20ELSE%20%28SELECT%204302%20UNION%20SELECT%203175%29%20END%29%29--%20qqXD | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
+| index | log_source | log_line_no | ip | datetime | request | url | request_method | browser |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 264 | nginx/collected/nginx01_batch_nikto_scan_001.log | 1 | 172.22.0.1 | 2026-08-06T13:59:57+00:00 | GET / HTTP/1.1 | / | GET | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36 |
+| 265 | nginx/collected/nginx01_batch_nikto_scan_001.log | 2 | 172.22.0.1 | 2026-08-06T13:59:57+00:00 | GET / HTTP/1.1 | / | GET | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36 |
+| 266 | nginx/collected/nginx01_batch_nikto_scan_001.log | 3 | 172.22.0.1 | 2026-08-06T13:59:57+00:00 | GET / HTTP/1.1 | / | GET | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36 |
+| 267 | nginx/collected/nginx01_batch_nikto_scan_001.log | 4 | 172.22.0.1 | 2026-08-06T13:59:57+00:00 | GET /Et6fMbjV.md HTTP/1.1 | /Et6fMbjV.md | GET | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36 |
+| 268 | nginx/collected/nginx01_batch_nikto_scan_001.log | 5 | 172.22.0.1 | 2026-08-06T13:59:57+00:00 | GET /Et6fMbjV.en HTTP/1.1 | /Et6fMbjV.en | GET | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36 |
+| 269 | nginx/collected/nginx01_batch_nikto_scan_001.log | 6 | 172.22.0.1 | 2026-08-06T13:59:57+00:00 | GET /Et6fMbjV.htpasswd HTTP/1.1 | /Et6fMbjV.htpasswd | GET | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36 |
+| 270 | nginx/collected/nginx01_batch_nikto_scan_001.log | 7 | 172.22.0.1 | 2026-08-06T13:59:57+00:00 | GET /Et6fMbjV.list HTTP/1.1 | /Et6fMbjV.list | GET | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36 |
+| 271 | nginx/collected/nginx01_batch_nikto_scan_001.log | 8 | 172.22.0.1 | 2026-08-06T13:59:57+00:00 | GET /Et6fMbjV.cfm HTTP/1.1 | /Et6fMbjV.cfm | GET | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36 |
+| 272 | nginx/collected/nginx01_batch_nikto_scan_001.log | 9 | 172.22.0.1 | 2026-08-06T13:59:57+00:00 | GET /Et6fMbjV.se HTTP/1.1 | /Et6fMbjV.se | GET | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36 |
+| 274 | nginx/collected/nginx01_batch_nikto_scan_001.log | 11 | 172.22.0.1 | 2026-08-06T13:59:58+00:00 | GET /Et6fMbjV HTTP/1.1 | /Et6fMbjV | GET | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36 |
+| 275 | nginx/collected/nginx01_batch_nikto_scan_001.log | 12 | 172.22.0.1 | 2026-08-06T13:59:58+00:00 | GET /Et6fMbjV.jsp+ HTTP/1.1 | /Et6fMbjV.jsp+ | GET | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36 |
+| 276 | nginx/collected/nginx01_batch_nikto_scan_001.log | 13 | 172.22.0.1 | 2026-08-06T13:59:58+00:00 | GET /Et6fMbjV.markdown HTTP/1.1 | /Et6fMbjV.markdown | GET | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36 |
+| 277 | nginx/collected/nginx01_batch_nikto_scan_001.log | 14 | 172.22.0.1 | 2026-08-06T13:59:58+00:00 | GET /Et6fMbjV.lic HTTP/1.1 | /Et6fMbjV.lic | GET | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36 |
+| 278 | nginx/collected/nginx01_batch_nikto_scan_001.log | 15 | 172.22.0.1 | 2026-08-06T13:59:58+00:00 | GET /Et6fMbjV.genpopuplist HTTP/1.1 | /Et6fMbjV.genpopuplist | GET | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36 |
+| 279 | nginx/collected/nginx01_batch_nikto_scan_001.log | 16 | 172.22.0.1 | 2026-08-06T13:59:58+00:00 | GET /Et6fMbjV.conf HTTP/1.1 | /Et6fMbjV.conf | GET | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36 |
+| 280 | nginx/collected/nginx01_batch_nikto_scan_001.log | 17 | 172.22.0.1 | 2026-08-06T13:59:58+00:00 | GET /Et6fMbjV.snp HTTP/1.1 | /Et6fMbjV.snp | GET | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36 |
+| 281 | nginx/collected/nginx01_batch_nikto_scan_001.log | 18 | 172.22.0.1 | 2026-08-06T13:59:58+00:00 | GET /Et6fMbjV.eml HTTP/1.1 | /Et6fMbjV.eml | GET | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36 |
+| 282 | nginx/collected/nginx01_batch_nikto_scan_001.log | 19 | 172.22.0.1 | 2026-08-06T13:59:58+00:00 | GET /Et6fMbjV.idc HTTP/1.1 | /Et6fMbjV.idc | GET | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36 |
+| 283 | nginx/collected/nginx01_batch_nikto_scan_001.log | 20 | 172.22.0.1 | 2026-08-06T13:59:58+00:00 | GET /Et6fMbjV.es HTTP/1.1 | /Et6fMbjV.es | GET | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36 |
+| 284 | nginx/collected/nginx01_batch_nikto_scan_001.log | 21 | 172.22.0.1 | 2026-08-06T13:59:58+00:00 | GET /Et6fMbjV.stm HTTP/1.1 | /Et6fMbjV.stm | GET | Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36 |
 
-...還有 336 筆，完整明細見 JSON 輸出的 `defining_violations`
+...還有 11203 筆，明細見 JSON 輸出的 `defining_violations`（JSON 也有截斷，見 config.MAX_DEFINING_VIOLATIONS）
 
 ## 支撐特徵明細
 
 | 特徵 | d(f) | coverage | missing |
 | --- | --- | --- | --- |
-| `os_type` | 0.0000 | 0.12 | 0, 1, 2, 3, 4, 5, 6 |
+| `os_type` | 0.0520 | 0.25 | 0, 2, 3, 4, 5, 6 |
 | `ua_length` | 0.0000 | — | — |
-| `request_method` | 0.0000 | 0.12 | DELETE, HEAD, OPTIONS, PATCH, POST, PUT, TRACE |
-| `url_depth` | 0.0000 | — | — |
-| `url_length` | 0.5879 | — | — |
-| `referrer_type` | 0.0000 | 0.17 | 1, 2, 3, 4, 5 |
+| `request_method` | 0.0377 | 0.75 | DELETE, PATCH |
+| `url_depth` | 0.5000 | — | — |
+| `url_length` | 0.6706 | — | — |
+| `referrer_type` | 0.0252 | 0.33 | 1, 2, 3, 4 |

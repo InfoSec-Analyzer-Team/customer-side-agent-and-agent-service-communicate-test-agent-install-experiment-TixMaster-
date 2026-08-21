@@ -13,6 +13,14 @@ from pathlib import Path
 
 MIN_SAMPLES = 200  # 低於此，熵/QCD 標 provisional=true，CI 不得當硬門檻
 
+# defining_violations 明細（StageDiversityReport）超過這個數字就截斷，只留
+# 前 N 筆 + 真實總數。拿大型工具掃描（例如 15843 筆的 nikto scan，其中
+# 11223 筆不符合 stage 1 的定義判準）實測過：不截斷的話 JSON 報告會膨脹到
+# 5+ MB，且每次重跑內容都會變、被 git 追蹤只會讓 repo 越滾越大。500 這個數字
+# 純粹是「肉眼核對綽綽有餘、又不會讓報告失控變大」的經驗值，不是規格定義的
+# 門檻，需要的話可以調。
+MAX_DEFINING_VIOLATIONS = 500
+
 
 # ============================================================
 # §3.1 — 每個 stage 的定義 flag 與支撐特徵集

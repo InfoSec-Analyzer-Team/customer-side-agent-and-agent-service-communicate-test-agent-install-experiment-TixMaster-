@@ -56,6 +56,7 @@
   "defining_violations": [
     {
       "index": 0,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 1,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:45+00:00",
@@ -66,6 +67,7 @@
     },
     {
       "index": 2,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 3,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -76,6 +78,7 @@
     },
     {
       "index": 3,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 4,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -86,6 +89,7 @@
     },
     {
       "index": 4,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 5,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -96,6 +100,7 @@
     },
     {
       "index": 5,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 6,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -106,6 +111,7 @@
     },
     {
       "index": 6,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 7,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -116,6 +122,7 @@
     },
     {
       "index": 7,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 8,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -126,6 +133,7 @@
     },
     {
       "index": 8,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 9,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -136,6 +144,7 @@
     },
     {
       "index": 9,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 10,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -146,6 +155,7 @@
     },
     {
       "index": 10,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 11,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -156,6 +166,7 @@
     },
     {
       "index": 11,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 12,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -166,6 +177,7 @@
     },
     {
       "index": 12,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 13,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -176,6 +188,7 @@
     },
     {
       "index": 13,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 14,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -186,6 +199,7 @@
     },
     {
       "index": 14,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 15,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -196,6 +210,7 @@
     },
     {
       "index": 15,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 16,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -206,6 +221,7 @@
     },
     {
       "index": 16,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 17,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -216,6 +232,7 @@
     },
     {
       "index": 17,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 18,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -226,6 +243,7 @@
     },
     {
       "index": 27,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 28,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -236,6 +254,7 @@
     },
     {
       "index": 28,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 29,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -246,6 +265,7 @@
     },
     {
       "index": 29,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 30,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -256,6 +276,7 @@
     },
     {
       "index": 30,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 31,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -266,6 +287,7 @@
     },
     {
       "index": 31,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 32,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -276,6 +298,7 @@
     },
     {
       "index": 32,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 33,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -286,6 +309,7 @@
     },
     {
       "index": 33,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 34,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -296,6 +320,7 @@
     },
     {
       "index": 34,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 35,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -306,6 +331,7 @@
     },
     {
       "index": 35,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 36,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -316,6 +342,7 @@
     },
     {
       "index": 36,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 37,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -326,6 +353,7 @@
     },
     {
       "index": 37,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 38,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -336,6 +364,7 @@
     },
     {
       "index": 38,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 39,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -346,6 +375,7 @@
     },
     {
       "index": 39,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 40,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -356,6 +386,7 @@
     },
     {
       "index": 40,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 41,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -366,6 +397,7 @@
     },
     {
       "index": 41,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 42,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -376,6 +408,7 @@
     },
     {
       "index": 42,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 43,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -386,6 +419,7 @@
     },
     {
       "index": 43,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 44,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -396,6 +430,7 @@
     },
     {
       "index": 44,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 45,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -406,6 +441,7 @@
     },
     {
       "index": 45,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 46,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -416,6 +452,7 @@
     },
     {
       "index": 46,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 47,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -426,6 +463,7 @@
     },
     {
       "index": 47,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 48,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -436,6 +474,7 @@
     },
     {
       "index": 48,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 49,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -446,6 +485,7 @@
     },
     {
       "index": 49,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 50,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -456,6 +496,7 @@
     },
     {
       "index": 50,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 51,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -466,6 +507,7 @@
     },
     {
       "index": 51,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 52,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -476,6 +518,7 @@
     },
     {
       "index": 52,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 53,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -486,6 +529,7 @@
     },
     {
       "index": 53,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 54,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -496,6 +540,7 @@
     },
     {
       "index": 54,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 55,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -506,6 +551,7 @@
     },
     {
       "index": 55,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 56,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -516,6 +562,7 @@
     },
     {
       "index": 56,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 57,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -526,6 +573,7 @@
     },
     {
       "index": 57,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 58,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -536,6 +584,7 @@
     },
     {
       "index": 58,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 59,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:46+00:00",
@@ -546,6 +595,7 @@
     },
     {
       "index": 71,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 72,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -556,6 +606,7 @@
     },
     {
       "index": 72,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 73,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -566,6 +617,7 @@
     },
     {
       "index": 73,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 74,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -576,6 +628,7 @@
     },
     {
       "index": 74,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 75,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -586,6 +639,7 @@
     },
     {
       "index": 75,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 76,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -596,6 +650,7 @@
     },
     {
       "index": 76,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 77,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -606,6 +661,7 @@
     },
     {
       "index": 77,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 78,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -616,6 +672,7 @@
     },
     {
       "index": 78,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 79,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -626,6 +683,7 @@
     },
     {
       "index": 79,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 80,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -636,6 +694,7 @@
     },
     {
       "index": 80,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 81,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -646,6 +705,7 @@
     },
     {
       "index": 81,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 82,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -656,6 +716,7 @@
     },
     {
       "index": 82,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 83,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -666,6 +727,7 @@
     },
     {
       "index": 85,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 86,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -676,6 +738,7 @@
     },
     {
       "index": 87,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 88,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -686,6 +749,7 @@
     },
     {
       "index": 88,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 89,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -696,6 +760,7 @@
     },
     {
       "index": 89,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 90,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -706,6 +771,7 @@
     },
     {
       "index": 90,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 91,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -716,6 +782,7 @@
     },
     {
       "index": 91,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 92,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -726,6 +793,7 @@
     },
     {
       "index": 92,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 93,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -736,6 +804,7 @@
     },
     {
       "index": 93,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 94,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -746,6 +815,7 @@
     },
     {
       "index": 94,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 95,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -756,6 +826,7 @@
     },
     {
       "index": 95,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 96,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -766,6 +837,7 @@
     },
     {
       "index": 96,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 97,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -776,6 +848,7 @@
     },
     {
       "index": 97,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 98,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -786,6 +859,7 @@
     },
     {
       "index": 98,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 99,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -796,6 +870,7 @@
     },
     {
       "index": 99,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 100,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -806,6 +881,7 @@
     },
     {
       "index": 100,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 101,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -816,6 +892,7 @@
     },
     {
       "index": 101,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 102,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -826,6 +903,7 @@
     },
     {
       "index": 102,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 103,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -836,6 +914,7 @@
     },
     {
       "index": 103,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 104,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -846,6 +925,7 @@
     },
     {
       "index": 104,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 105,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -856,6 +936,7 @@
     },
     {
       "index": 105,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 106,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -866,6 +947,7 @@
     },
     {
       "index": 106,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 107,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -876,6 +958,7 @@
     },
     {
       "index": 107,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 108,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -886,6 +969,7 @@
     },
     {
       "index": 108,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 109,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -896,6 +980,7 @@
     },
     {
       "index": 109,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 110,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -906,6 +991,7 @@
     },
     {
       "index": 110,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 111,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -916,6 +1002,7 @@
     },
     {
       "index": 111,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 112,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -926,6 +1013,7 @@
     },
     {
       "index": 112,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 113,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -936,6 +1024,7 @@
     },
     {
       "index": 113,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 114,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -946,6 +1035,7 @@
     },
     {
       "index": 114,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 115,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -956,6 +1046,7 @@
     },
     {
       "index": 115,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 116,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -966,6 +1057,7 @@
     },
     {
       "index": 116,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 117,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -976,6 +1068,7 @@
     },
     {
       "index": 117,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 118,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -986,6 +1079,7 @@
     },
     {
       "index": 118,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 119,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -996,6 +1090,7 @@
     },
     {
       "index": 119,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 120,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -1006,6 +1101,7 @@
     },
     {
       "index": 120,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 121,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -1016,6 +1112,7 @@
     },
     {
       "index": 121,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 122,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -1026,6 +1123,7 @@
     },
     {
       "index": 122,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 123,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -1036,6 +1134,7 @@
     },
     {
       "index": 123,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 124,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -1046,6 +1145,7 @@
     },
     {
       "index": 124,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 125,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -1056,6 +1156,7 @@
     },
     {
       "index": 125,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 126,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -1066,6 +1167,7 @@
     },
     {
       "index": 126,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 127,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -1076,6 +1178,7 @@
     },
     {
       "index": 127,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 128,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -1086,6 +1189,7 @@
     },
     {
       "index": 128,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 129,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -1096,6 +1200,7 @@
     },
     {
       "index": 129,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 130,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -1106,6 +1211,7 @@
     },
     {
       "index": 130,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 131,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -1116,6 +1222,7 @@
     },
     {
       "index": 131,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 132,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -1126,6 +1233,7 @@
     },
     {
       "index": 132,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 133,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -1136,6 +1244,7 @@
     },
     {
       "index": 133,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 134,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -1146,6 +1255,7 @@
     },
     {
       "index": 134,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 135,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -1156,6 +1266,7 @@
     },
     {
       "index": 135,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 136,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -1166,6 +1277,7 @@
     },
     {
       "index": 136,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 137,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -1176,6 +1288,7 @@
     },
     {
       "index": 137,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 138,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -1186,6 +1299,7 @@
     },
     {
       "index": 138,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 139,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -1196,6 +1310,7 @@
     },
     {
       "index": 139,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 140,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -1206,6 +1321,7 @@
     },
     {
       "index": 140,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 141,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:47+00:00",
@@ -1216,6 +1332,7 @@
     },
     {
       "index": 141,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 142,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1226,6 +1343,7 @@
     },
     {
       "index": 142,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 143,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1236,6 +1354,7 @@
     },
     {
       "index": 143,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 144,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1246,6 +1365,7 @@
     },
     {
       "index": 144,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 145,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1256,6 +1376,7 @@
     },
     {
       "index": 145,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 146,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1266,6 +1387,7 @@
     },
     {
       "index": 146,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 147,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1276,6 +1398,7 @@
     },
     {
       "index": 147,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 148,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1286,6 +1409,7 @@
     },
     {
       "index": 148,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 149,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1296,6 +1420,7 @@
     },
     {
       "index": 149,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 150,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1306,6 +1431,7 @@
     },
     {
       "index": 150,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 151,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1316,6 +1442,7 @@
     },
     {
       "index": 151,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 152,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1326,6 +1453,7 @@
     },
     {
       "index": 152,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 153,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1336,6 +1464,7 @@
     },
     {
       "index": 153,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 154,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1346,6 +1475,7 @@
     },
     {
       "index": 154,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 155,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1356,6 +1486,7 @@
     },
     {
       "index": 155,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 156,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1366,6 +1497,7 @@
     },
     {
       "index": 156,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 157,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1376,6 +1508,7 @@
     },
     {
       "index": 157,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 158,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1386,6 +1519,7 @@
     },
     {
       "index": 158,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 159,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1396,6 +1530,7 @@
     },
     {
       "index": 159,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 160,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1406,6 +1541,7 @@
     },
     {
       "index": 184,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 185,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1416,6 +1552,7 @@
     },
     {
       "index": 185,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 186,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1426,6 +1563,7 @@
     },
     {
       "index": 186,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 187,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1436,6 +1574,7 @@
     },
     {
       "index": 187,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 188,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1446,6 +1585,7 @@
     },
     {
       "index": 188,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 189,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1456,6 +1596,7 @@
     },
     {
       "index": 189,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 190,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1466,6 +1607,7 @@
     },
     {
       "index": 190,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 191,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1476,6 +1618,7 @@
     },
     {
       "index": 191,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 192,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1486,6 +1629,7 @@
     },
     {
       "index": 192,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 193,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1496,6 +1640,7 @@
     },
     {
       "index": 193,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 194,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1506,6 +1651,7 @@
     },
     {
       "index": 194,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 195,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1516,6 +1662,7 @@
     },
     {
       "index": 195,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 196,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1526,6 +1673,7 @@
     },
     {
       "index": 196,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 197,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1536,6 +1684,7 @@
     },
     {
       "index": 197,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 198,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1546,6 +1695,7 @@
     },
     {
       "index": 207,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 208,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1556,6 +1706,7 @@
     },
     {
       "index": 208,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 209,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1566,6 +1717,7 @@
     },
     {
       "index": 209,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 210,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1576,6 +1728,7 @@
     },
     {
       "index": 210,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 211,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:48+00:00",
@@ -1586,6 +1739,7 @@
     },
     {
       "index": 212,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 213,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:49+00:00",
@@ -1596,6 +1750,7 @@
     },
     {
       "index": 213,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 214,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:49+00:00",
@@ -1606,6 +1761,7 @@
     },
     {
       "index": 214,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 215,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:49+00:00",
@@ -1616,6 +1772,7 @@
     },
     {
       "index": 215,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 216,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:49+00:00",
@@ -1626,6 +1783,7 @@
     },
     {
       "index": 216,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 217,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:49+00:00",
@@ -1636,6 +1794,7 @@
     },
     {
       "index": 217,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 218,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:49+00:00",
@@ -1646,6 +1805,7 @@
     },
     {
       "index": 218,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 219,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:49+00:00",
@@ -1656,6 +1816,7 @@
     },
     {
       "index": 219,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 220,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:49+00:00",
@@ -1666,6 +1827,7 @@
     },
     {
       "index": 220,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 221,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:49+00:00",
@@ -1676,6 +1838,7 @@
     },
     {
       "index": 269,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 270,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:49+00:00",
@@ -1686,6 +1849,7 @@
     },
     {
       "index": 270,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 271,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:49+00:00",
@@ -1696,6 +1860,7 @@
     },
     {
       "index": 271,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 272,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:49+00:00",
@@ -1706,6 +1871,7 @@
     },
     {
       "index": 272,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 273,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:49+00:00",
@@ -1716,6 +1882,7 @@
     },
     {
       "index": 273,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 274,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:49+00:00",
@@ -1726,6 +1893,7 @@
     },
     {
       "index": 274,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 275,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:49+00:00",
@@ -1736,6 +1904,7 @@
     },
     {
       "index": 275,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 276,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:49+00:00",
@@ -1746,6 +1915,7 @@
     },
     {
       "index": 276,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 277,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:49+00:00",
@@ -1756,6 +1926,7 @@
     },
     {
       "index": 277,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 278,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:49+00:00",
@@ -1766,6 +1937,7 @@
     },
     {
       "index": 278,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 279,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:49+00:00",
@@ -1776,6 +1948,7 @@
     },
     {
       "index": 279,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 280,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:49+00:00",
@@ -1786,6 +1959,7 @@
     },
     {
       "index": 280,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 281,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:49+00:00",
@@ -1796,6 +1970,7 @@
     },
     {
       "index": 281,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 282,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:49+00:00",
@@ -1806,6 +1981,7 @@
     },
     {
       "index": 282,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 283,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:49+00:00",
@@ -1816,6 +1992,7 @@
     },
     {
       "index": 283,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 284,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:49+00:00",
@@ -1826,6 +2003,7 @@
     },
     {
       "index": 284,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 285,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:49+00:00",
@@ -1836,6 +2014,7 @@
     },
     {
       "index": 285,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 286,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:49+00:00",
@@ -1846,6 +2025,7 @@
     },
     {
       "index": 286,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 287,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -1856,6 +2036,7 @@
     },
     {
       "index": 287,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 288,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -1866,6 +2047,7 @@
     },
     {
       "index": 288,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 289,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -1876,6 +2058,7 @@
     },
     {
       "index": 289,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 290,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -1886,6 +2069,7 @@
     },
     {
       "index": 290,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 291,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -1896,6 +2080,7 @@
     },
     {
       "index": 291,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 292,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -1906,6 +2091,7 @@
     },
     {
       "index": 292,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 293,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -1916,6 +2102,7 @@
     },
     {
       "index": 305,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 306,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -1926,6 +2113,7 @@
     },
     {
       "index": 306,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 307,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -1936,6 +2124,7 @@
     },
     {
       "index": 307,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 308,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -1946,6 +2135,7 @@
     },
     {
       "index": 308,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 309,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -1956,6 +2146,7 @@
     },
     {
       "index": 309,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 310,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -1966,6 +2157,7 @@
     },
     {
       "index": 310,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 311,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -1976,6 +2168,7 @@
     },
     {
       "index": 311,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 312,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -1986,6 +2179,7 @@
     },
     {
       "index": 312,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 313,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -1996,6 +2190,7 @@
     },
     {
       "index": 313,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 314,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2006,6 +2201,7 @@
     },
     {
       "index": 314,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 315,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2016,6 +2212,7 @@
     },
     {
       "index": 315,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 316,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2026,6 +2223,7 @@
     },
     {
       "index": 316,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 317,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2036,6 +2234,7 @@
     },
     {
       "index": 317,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 318,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2046,6 +2245,7 @@
     },
     {
       "index": 318,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 319,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2056,6 +2256,7 @@
     },
     {
       "index": 319,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 320,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2066,6 +2267,7 @@
     },
     {
       "index": 320,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 321,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2076,6 +2278,7 @@
     },
     {
       "index": 321,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 322,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2086,6 +2289,7 @@
     },
     {
       "index": 322,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 323,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2096,6 +2300,7 @@
     },
     {
       "index": 323,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 324,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2106,6 +2311,7 @@
     },
     {
       "index": 324,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 325,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2116,6 +2322,7 @@
     },
     {
       "index": 325,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 326,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2126,6 +2333,7 @@
     },
     {
       "index": 326,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 327,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2136,6 +2344,7 @@
     },
     {
       "index": 327,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 328,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2146,6 +2355,7 @@
     },
     {
       "index": 328,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 329,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2156,6 +2366,7 @@
     },
     {
       "index": 329,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 330,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2166,6 +2377,7 @@
     },
     {
       "index": 330,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 331,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2176,6 +2388,7 @@
     },
     {
       "index": 331,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 332,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2186,6 +2399,7 @@
     },
     {
       "index": 332,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 333,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2196,6 +2410,7 @@
     },
     {
       "index": 333,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 334,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2206,6 +2421,7 @@
     },
     {
       "index": 334,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 335,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2216,6 +2432,7 @@
     },
     {
       "index": 335,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 336,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2226,6 +2443,7 @@
     },
     {
       "index": 336,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 337,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2236,6 +2454,7 @@
     },
     {
       "index": 337,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 338,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2246,6 +2465,7 @@
     },
     {
       "index": 338,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 339,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2256,6 +2476,7 @@
     },
     {
       "index": 339,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 340,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2266,6 +2487,7 @@
     },
     {
       "index": 340,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 341,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2276,6 +2498,7 @@
     },
     {
       "index": 341,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 342,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2286,6 +2509,7 @@
     },
     {
       "index": 342,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 343,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2296,6 +2520,7 @@
     },
     {
       "index": 343,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 344,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2306,6 +2531,7 @@
     },
     {
       "index": 344,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 345,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2316,6 +2542,7 @@
     },
     {
       "index": 345,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 346,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2326,6 +2553,7 @@
     },
     {
       "index": 346,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 347,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2336,6 +2564,7 @@
     },
     {
       "index": 347,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 348,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2346,6 +2575,7 @@
     },
     {
       "index": 348,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 349,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2356,6 +2586,7 @@
     },
     {
       "index": 349,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 350,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2366,6 +2597,7 @@
     },
     {
       "index": 350,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 351,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2376,6 +2608,7 @@
     },
     {
       "index": 351,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 352,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2386,6 +2619,7 @@
     },
     {
       "index": 352,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 353,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2396,6 +2630,7 @@
     },
     {
       "index": 353,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 354,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2406,6 +2641,7 @@
     },
     {
       "index": 354,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 355,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2416,6 +2652,7 @@
     },
     {
       "index": 355,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 356,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2426,6 +2663,7 @@
     },
     {
       "index": 356,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 357,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2436,6 +2674,7 @@
     },
     {
       "index": 357,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 358,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2446,6 +2685,7 @@
     },
     {
       "index": 358,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 359,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2456,6 +2696,7 @@
     },
     {
       "index": 359,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 360,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2466,6 +2707,7 @@
     },
     {
       "index": 360,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 361,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:50+00:00",
@@ -2476,6 +2718,7 @@
     },
     {
       "index": 361,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 362,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:51+00:00",
@@ -2486,6 +2729,7 @@
     },
     {
       "index": 362,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 363,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:51+00:00",
@@ -2496,6 +2740,7 @@
     },
     {
       "index": 363,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 364,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:51+00:00",
@@ -2506,6 +2751,7 @@
     },
     {
       "index": 364,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 365,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:51+00:00",
@@ -2516,6 +2762,7 @@
     },
     {
       "index": 365,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 366,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:51+00:00",
@@ -2526,6 +2773,7 @@
     },
     {
       "index": 366,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 367,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:51+00:00",
@@ -2536,6 +2784,7 @@
     },
     {
       "index": 367,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 368,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:51+00:00",
@@ -2546,6 +2795,7 @@
     },
     {
       "index": 368,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 369,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:51+00:00",
@@ -2556,6 +2806,7 @@
     },
     {
       "index": 369,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 370,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:51+00:00",
@@ -2566,6 +2817,7 @@
     },
     {
       "index": 370,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 371,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:51+00:00",
@@ -2576,6 +2828,7 @@
     },
     {
       "index": 371,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 372,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:51+00:00",
@@ -2586,6 +2839,7 @@
     },
     {
       "index": 372,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 373,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:51+00:00",
@@ -2596,6 +2850,7 @@
     },
     {
       "index": 373,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 374,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:51+00:00",
@@ -2606,6 +2861,7 @@
     },
     {
       "index": 374,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 375,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:51+00:00",
@@ -2616,6 +2872,7 @@
     },
     {
       "index": 375,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 376,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:51+00:00",
@@ -2626,6 +2883,7 @@
     },
     {
       "index": 376,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 377,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:51+00:00",
@@ -2636,6 +2894,7 @@
     },
     {
       "index": 377,
+      "log_source": "nginx/collected/nginx01_batch_sqlmap_sqli_001.log",
       "log_line_no": 378,
       "ip": "172.22.0.1",
       "datetime": "2026-08-06T14:15:51+00:00",
@@ -2644,5 +2903,6 @@
       "request_method": "GET",
       "browser": "sqlmap/1.10.4#stable (https://sqlmap.org)"
     }
-  ]
+  ],
+  "defining_violations_total": 259
 }

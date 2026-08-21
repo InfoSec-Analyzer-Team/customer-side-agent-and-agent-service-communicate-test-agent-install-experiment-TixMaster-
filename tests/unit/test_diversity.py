@@ -221,6 +221,30 @@ def test_stage_diversity_defining_violations_json_serializable():
     json.dumps(report.to_dict())
 
 
+def test_stage_diversity_defining_violations_truncated_past_max(monkeypatch):
+    # 迴歸測試：拿真實 nikto scan（15843 筆，11223 筆不符合 stage 1 定義判準）
+    # 跑過一次直接把 JSON 報告灌到 5+ MB、還在巢狀 subprocess 環境裡撐爆記憶體。
+    # 這裡用小樣本 + monkeypatch 一個很小的上限，斷言截斷邏輯本身：
+    # defining_violations 只留前 MAX_DEFINING_VIOLATIONS 筆，
+    # defining_violations_total 仍然是真實總數。
+    monkeypatch.setattr(cfg, "MAX_DEFINING_VIOLATIONS", 3)
+    df = _stage2_fixture(n=300, sql_flag_all_one=False)  # 最後 5 筆不符合
+
+    report = stage_diversity(df, stage_id=2, cfg=cfg)
+
+    assert report.defining_violations_total == 5
+    assert len(report.defining_violations) == 3
+    assert any("只列前 3 筆" in w for w in report.warnings)
+
+
+def test_stage_diversity_defining_violations_not_truncated_when_under_max():
+    df = _stage2_fixture(n=300, sql_flag_all_one=False)  # 最後 5 筆不符合，遠低於預設上限
+    report = stage_diversity(df, stage_id=2, cfg=cfg)
+
+    assert report.defining_violations_total == 5
+    assert len(report.defining_violations) == 5
+
+
 def test_stage_diversity_defining_violations_empty_for_stage_without_predicate():
     # stage 10 是「目標即多樣性」型，沒有定義判準，defining_violations 該是空的
     n = 300
