@@ -22,28 +22,50 @@ def test_missing_file_returns_empty_dict(tmp_path):
 
 
 def test_parses_valid_lines(tmp_path):
-    p = _write(tmp_path, "access1_Aman.log==0\naccess2_Dicurigai_sensitive_path.log==1\n")
+    p = _write(tmp_path, "logs/access1_Aman.log==0\nlogs/access2_Dicurigai_sensitive_path.log==1\n")
     result = _load_stage_log_map(p)
-    assert result[0].endswith("nginx/logs/access1_Aman.log")
-    assert result[1].endswith("nginx/logs/access2_Dicurigai_sensitive_path.log")
+    assert result[0] == ["nginx/logs/access1_Aman.log"]
+    assert result[1] == ["nginx/logs/access2_Dicurigai_sensitive_path.log"]
+
+
+def test_parses_comma_separated_multiple_paths_on_one_line(tmp_path):
+    p = _write(tmp_path, "logs/access2_Dicurigai_sensitive_path.log,collected/nikto.log==1\n")
+    result = _load_stage_log_map(p)
+    assert result[1] == [
+        "nginx/logs/access2_Dicurigai_sensitive_path.log",
+        "nginx/collected/nikto.log",
+    ]
+
+
+def test_multiple_lines_for_same_stage_accumulate_not_overwrite(tmp_path):
+    p = _write(tmp_path, "logs/a.log==1\nlogs/b.log==1\n")
+    result = _load_stage_log_map(p)
+    assert result[1] == ["nginx/logs/a.log", "nginx/logs/b.log"]
 
 
 def test_skips_blank_lines_and_comments(tmp_path):
-    p = _write(tmp_path, "\n# just a comment\n\naccess1_Aman.log==0\n")
+    p = _write(tmp_path, "\n# just a comment\n\nlogs/access1_Aman.log==0\n")
     result = _load_stage_log_map(p)
     assert result == {0: result[0]}  # 只有那一筆有效條目
 
 
 def test_skips_line_without_equals_and_warns(tmp_path):
-    p = _write(tmp_path, "not_a_valid_line\naccess1_Aman.log==0\n")
+    p = _write(tmp_path, "not_a_valid_line\nlogs/access1_Aman.log==0\n")
     with pytest.warns(UserWarning, match="=="):
         result = _load_stage_log_map(p)
     assert result == {0: result[0]}
 
 
 def test_skips_non_integer_stage_id_and_warns(tmp_path):
-    p = _write(tmp_path, "foo.log==notanumber\naccess1_Aman.log==0\n")
+    p = _write(tmp_path, "foo.log==notanumber\nlogs/access1_Aman.log==0\n")
     with pytest.warns(UserWarning, match="stage id"):
+        result = _load_stage_log_map(p)
+    assert result == {0: result[0]}
+
+
+def test_skips_line_with_no_path_before_equals_and_warns(tmp_path):
+    p = _write(tmp_path, "==1\nlogs/access1_Aman.log==0\n")
+    with pytest.warns(UserWarning, match="沒有檔名"):
         result = _load_stage_log_map(p)
     assert result == {0: result[0]}
 

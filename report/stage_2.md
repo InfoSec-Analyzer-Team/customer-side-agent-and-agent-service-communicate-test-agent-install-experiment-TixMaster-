@@ -1,23 +1,21 @@
-# Stage 1 多元度驗收報告 — 敏感路徑
+# Stage 2 多元度驗收報告 — SQLi
 
 - 樣本數：378
-- **Diversity_stage = 0.0980**
+- **Diversity_stage = 0.2684**
 
 ## Warnings
 
-- ⚠️ stage 1: 356/378 筆樣本不符合定義判準 [{'feature': 'accesses_sensitive_path', 'op': 'eq', 'value': 1, 'exclude_from_support': True}]，可能混入其他 stage 的樣本，或定義判準本身設錯（明細見 StageDiversityReport.defining_violations）
-- ⚠️ stage 1: 支撐特徵 'os_type' 完全塌縮（d=0）
-- ⚠️ stage 1: 支撐特徵 'ua_length' 完全塌縮（d=0）
-- ⚠️ stage 1: 支撐特徵 'request_method' 完全塌縮（d=0）
-- ⚠️ stage 1: 支撐特徵 'url_depth' 完全塌縮（d=0）
-- ⚠️ stage 1: 支撐特徵 'referrer_type' 完全塌縮（d=0）
+- ⚠️ stage 2: 259/378 筆樣本不符合定義判準 [{'feature': 'has_sql_injection', 'op': 'eq', 'value': 1, 'exclude_from_support': True}]，可能混入其他 stage 的樣本，或定義判準本身設錯（明細見 StageDiversityReport.defining_violations）
+- ⚠️ stage 2: 支撐特徵 'os_type' 完全塌縮（d=0）
+- ⚠️ stage 2: 支撐特徵 'ua_length' 完全塌縮（d=0）
+- ⚠️ stage 2: 支撐特徵 'url_param_count' 完全塌縮（d=0）
+- ⚠️ stage 2: 支撐特徵 'request_method' 完全塌縮（d=0）
 
 ## 不符合定義判準的樣本
 
 | index | log_line_no | ip | datetime | request | url | request_method | browser |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | 0 | 1 | 172.22.0.1 | 2026-08-06T14:15:45+00:00 | GET /api/events?id=1 HTTP/1.1 | /api/events?id=1 | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
-| 1 | 2 | 172.22.0.1 | 2026-08-06T14:15:45+00:00 | GET /api/events?id=1&rtAi=4432%20AND%201%3D1%20UNION%20ALL%20SELECT%201%2CNULL%2C%27%3Cscript%3Ealert%28%22XSS%22%29%3C%2Fscript%3E%27%2Ctable_name%20FROM%20information_schema.tables%20WHERE%202%3E1--%2F%2A%2A%2F%3B%20EXEC%20xp_cmdshell%28%27cat%20..%2F..%2F..%2Fetc%2Fpasswd%27%29%23 HTTP/1.1 | /api/events?id=1&rtAi=4432%20AND%201%3D1%20UNION%20ALL%20SELECT%201%2CNULL%2C%27%3Cscript%3Ealert%28%22XSS%22%29%3C%2Fscript%3E%27%2Ctable_name%20FROM%20information_schema.tables%20WHERE%202%3E1--%2F%2A%2A%2F%3B%20EXEC%20xp_cmdshell%28%27cat%20..%2F..%2F..%2Fetc%2Fpasswd%27%29%23 | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
 | 2 | 3 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1 HTTP/1.1 | /api/events?id=1 | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
 | 3 | 4 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=6275 HTTP/1.1 | /api/events?id=6275 | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
 | 4 | 5 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1%29%29%28.%29%27.%2C%22%29 HTTP/1.1 | /api/events?id=1%29%29%28.%29%27.%2C%22%29 | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
@@ -34,10 +32,11 @@
 | 15 | 16 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1%27%20AND%207114%3D9249%20AND%20%27TEjT%27%20LIKE%20%27TEjT HTTP/1.1 | /api/events?id=1%27%20AND%207114%3D9249%20AND%20%27TEjT%27%20LIKE%20%27TEjT | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
 | 16 | 17 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1%22%29%20AND%206118%3D5908%20AND%20%28%22HdVL%22%3D%22HdVL HTTP/1.1 | /api/events?id=1%22%29%20AND%206118%3D5908%20AND%20%28%22HdVL%22%3D%22HdVL | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
 | 17 | 18 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1%22%20AND%208392%3D9563%20AND%20%22LLVv%22%3D%22LLVv HTTP/1.1 | /api/events?id=1%22%20AND%208392%3D9563%20AND%20%22LLVv%22%3D%22LLVv | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
-| 18 | 19 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1%29%20AND%208945%3D%28SELECT%20%28CASE%20WHEN%20%288945%3D5980%29%20THEN%208945%20ELSE%20%28SELECT%205980%20UNION%20SELECT%203240%29%20END%29%29--%20BfBX HTTP/1.1 | /api/events?id=1%29%20AND%208945%3D%28SELECT%20%28CASE%20WHEN%20%288945%3D5980%29%20THEN%208945%20ELSE%20%28SELECT%205980%20UNION%20SELECT%203240%29%20END%29%29--%20BfBX | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
-| 19 | 20 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1%29%29%20AND%206547%3D%28SELECT%20%28CASE%20WHEN%20%286547%3D4302%29%20THEN%206547%20ELSE%20%28SELECT%204302%20UNION%20SELECT%203175%29%20END%29%29--%20qqXD HTTP/1.1 | /api/events?id=1%29%29%20AND%206547%3D%28SELECT%20%28CASE%20WHEN%20%286547%3D4302%29%20THEN%206547%20ELSE%20%28SELECT%204302%20UNION%20SELECT%203175%29%20END%29%29--%20qqXD | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
+| 27 | 28 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1%29%20AND%206750%3D8207--%20DNJF HTTP/1.1 | /api/events?id=1%29%20AND%206750%3D8207--%20DNJF | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
+| 28 | 29 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1%29%29%20AND%203489%3D3534--%20yJRZ HTTP/1.1 | /api/events?id=1%29%29%20AND%203489%3D3534--%20yJRZ | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
+| 29 | 30 | 172.22.0.1 | 2026-08-06T14:15:46+00:00 | GET /api/events?id=1%27%29%20AND%208708%3D6423--%20jrQW HTTP/1.1 | /api/events?id=1%27%29%20AND%208708%3D6423--%20jrQW | GET | sqlmap/1.10.4#stable (https://sqlmap.org) |
 
-...還有 336 筆，完整明細見 JSON 輸出的 `defining_violations`
+...還有 239 筆，完整明細見 JSON 輸出的 `defining_violations`
 
 ## 支撐特徵明細
 
@@ -45,7 +44,8 @@
 | --- | --- | --- | --- |
 | `os_type` | 0.0000 | 0.12 | 0, 1, 2, 3, 4, 5, 6 |
 | `ua_length` | 0.0000 | — | — |
-| `request_method` | 0.0000 | 0.12 | DELETE, HEAD, OPTIONS, PATCH, POST, PUT, TRACE |
-| `url_depth` | 0.0000 | — | — |
 | `url_length` | 0.5879 | — | — |
-| `referrer_type` | 0.0000 | 0.17 | 1, 2, 3, 4, 5 |
+| `url_special_chars` | 0.6453 | — | — |
+| `url_param_count` | 0.0000 | — | — |
+| `request_method` | 0.0000 | 0.12 | DELETE, HEAD, OPTIONS, PATCH, POST, PUT, TRACE |
+| `url_encoding_count` | 0.6453 | — | — |
