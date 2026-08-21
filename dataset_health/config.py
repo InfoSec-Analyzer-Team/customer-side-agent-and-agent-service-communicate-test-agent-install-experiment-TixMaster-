@@ -134,6 +134,13 @@ CARDINALITY = {
     "is_odd_hour": 2,
     "local_is_odd_hour": 2,
     "is_error_status": 2,
+    # stage 4（路徑遍歷）的支撐特徵集 F 明確保留 has_double_encoding 本身的
+    # 多元度（§3.1 表格 row 4）——這裡跟其他 stage 排除定義 flag 的規則不同，
+    # 不是漏掉，是 stage 4 就是要看「這批路徑遍歷樣本裡，有沒有混雙重編碼
+    # 變形」。之前漏掉沒登記進 CARDINALITY/EXPECTED_VALUES，拿真實 log
+    # （nginx/collected/nginx01_batch_path_traversal_001.log）測 stage 4
+    # 時直接 ValueError，這裡補上。
+    "has_double_encoding": 2,
 }
 
 EXPECTED_VALUES = {
@@ -164,6 +171,7 @@ EXPECTED_VALUES = {
     "is_odd_hour": [0, 1],
     "local_is_odd_hour": [0, 1],
     "is_error_status": [0, 1],
+    "has_double_encoding": [0, 1],
 }
 
 

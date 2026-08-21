@@ -48,6 +48,31 @@ def test_skips_non_integer_stage_id_and_warns(tmp_path):
     assert result == {0: result[0]}
 
 
+def test_every_support_feature_has_a_registered_feature_type():
+    # 迴歸測試：has_double_encoding 曾經出現在 SUPPORT_FEATURES[4] 裡，卻沒登記
+    # 進 CARDINALITY/EXPECTED_VALUES（進而沒進 FEATURE_TYPE），拿真實
+    # nginx/collected/nginx01_batch_path_traversal_001.log 跑 stage 4 時
+    # 直接 ValueError。這裡把「SUPPORT_FEATURES 用到的每個特徵，FEATURE_TYPE
+    # 都要有」這條隱性契約直接斷言出來，之後同類遺漏會在單元測試就炸，不用
+    # 等到真實資料才發現。
+    from dataset_health import config as cfg
+
+    used_features = {f for features in cfg.SUPPORT_FEATURES.values() for f in features}
+    missing = used_features - set(cfg.FEATURE_TYPE.keys())
+    assert not missing, f"這些特徵出現在 SUPPORT_FEATURES 裡，但沒登記進 FEATURE_TYPE: {missing}"
+
+
+def test_every_categorical_support_feature_has_expected_values():
+    # 同上，但斷言 EXPECTED_VALUES（coverage 診斷用）也要有，不能只顧
+    # entropy 那一半。
+    from dataset_health import config as cfg
+
+    used_features = {f for features in cfg.SUPPORT_FEATURES.values() for f in features}
+    used_categorical = {f for f in used_features if cfg.FEATURE_TYPE.get(f) == "categorical"}
+    missing = used_categorical - set(cfg.EXPECTED_VALUES.keys())
+    assert not missing, f"這些類別型特徵出現在 SUPPORT_FEATURES 裡，但沒登記進 EXPECTED_VALUES: {missing}"
+
+
 def test_stage_log_paths_only_covers_attack_stages():
     # 真正的 config module-level STAGE_LOG_PATHS/NON_DIVERSITY_LOG_PATHS 是
     # import 時就從 nginx/logs/stage_log_CHECK/stage_log_map.txt 解析好的；
