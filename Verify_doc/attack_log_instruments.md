@@ -7,7 +7,7 @@
 | 3 | `has_xss` | XSS 注入 | 手動 payload(`<script>` / `onerror=` / `<iframe>`)打搜尋框、可回顯參數;XSStrike 自動化 | 半 | BAHAYA |
 | 4 | `has_path_traversal` | 路徑遍歷 | `../`、`%2e%2e`、編碼變形讀 `/etc/passwd`;dotdotpwn | ✅ 建議 | BAHAYA |
 | 5 | `has_command_injection` | 命令注入 | `;`、`&&`、`$()`、反引號、`/etc/passwd`、`/bin/bash`;commix | ✅ 建議 | BAHAYA |
-| 6 | `has_file_inclusion` | 檔案包含 (LFI/RFI) | `php://`、`file://`、`data://`、`expect://`、`input://`;手動 + wfuzz | 半 | BAHAYA |
+| 6 | `has_file_inclusion` | 檔案包含 (LFI/RFI)(已建 sink) | `php://`、`file://`、`data://`、`expect://`、`input://`;手動 + wfuzz;打 `GET /api/events/:id/attachment?file=`(見 `nginx/collected/collection_method.md` 第 6 節) | 半 | BAHAYA |
 | 7 | `has_double_encoding` | 雙重編碼繞 WAF | `%25XX` 手動構造(工具預設不打,必須手動) | ❌ 但要手工 | BAHAYA / DICURIGAI |
 | 8 | `url_encoding_count` | URL 編碼變形 | 把上述 payload 做單層 `%XX` 編碼版本 | ❌ | 同對應攻擊 |
 | 9 | `has_xss` + `url_special_chars` | 特殊字元密集 payload | 塞 `< > ' " ; % ( ) [ ] { }` 的請求 | ❌ | 視情況 |

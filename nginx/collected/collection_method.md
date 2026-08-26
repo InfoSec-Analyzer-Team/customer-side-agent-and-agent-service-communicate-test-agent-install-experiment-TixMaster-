@@ -28,6 +28,7 @@ http://localhost:8080
 | nginx01_batch_xss_001 | BAHAYA | xss_payload_attempt | PowerShell manual payload | 250 | XSS payload attempt |
 | nginx01_batch_path_traversal_001 | BAHAYA | path_traversal_attempt | PowerShell manual payload | 120 | Path traversal attempt |
 | nginx01_batch_dicurigai_probe_001 | DICURIGAI | suspicious_probe_mixed | PowerShell manual probe | 100 | 可疑但非確認攻擊的探測流量 |
+| nginx01_batch_file_inclusion_001 | BAHAYA | file_inclusion_attempt | PowerShell manual payload | TBD | LFI/RFI payload attempt against real sink |
 
 ## Common Capture Commands
 
@@ -276,6 +277,79 @@ url_depth
 url_param_count
 has_double_encoding
 suspicious_user_agent
+```
+
+## 6. File Inclusion (LFI/RFI) Attempts
+
+Batch:
+
+```text
+nginx01_batch_file_inclusion_001
+```
+
+Method:
+
+```text
+PowerShell 手動送出 LFI/RFI payload，打在後端真實存在的 attachment sink 上
+（GET /api/events/:id/attachment?file=<value>，backend/routes/events.js）。
+
+這個 sink 是刻意留的：file 參數未做任何路徑淨化，直接
+path.join(ATTACH_DIR, file) 再 fs.readFile。預設關閉（回 403），
+只有設定環境變數 ENABLE_LFI_SINK=true 啟動 backend 時才會生效
+（backend/server.js 啟動前先 $env:ENABLE_LFI_SINK="true"）。
+
+沙盒目錄 backend/data/attachments/ 放了一個 benign 附件
+（poster.txt），backend/etc/passwd 與 backend/windows/win.ini
+放了兩個 lab decoy（假內容，不是真系統檔案）供路徑遍歷 payload
+「打中」時回傳，讓 200（成功）與 404（未打中）都有真實分佈，
+不會像先前 path traversal 那批全部落在 SPA fallback（200/6537）。
+```
+
+Example payloads (打中 → 200，打不中 → 404):
+
+```text
+# 打中（真的讀到 sandbox 內的 decoy 檔案，200）
+/api/events/1/attachment?file=poster.txt
+/api/events/1/attachment?file=../../etc/passwd
+/api/events/1/attachment?file=..%2F..%2Fetc%2Fpasswd
+/api/events/1/attachment?file=..%5C..%5Cwindows%5Cwin.ini
+
+# 打不中（wrapper 語法 Node 原生不支援，或路徑不存在，404）
+/api/events/1/attachment?file=php://filter/convert.base64-encode/resource=index.php
+/api/events/1/attachment?file=php://input
+/api/events/1/attachment?file=data://text/plain;base64,PD9waHAgcGhwaW5mbygpOz8+
+/api/events/1/attachment?file=expect://id
+/api/events/1/attachment?file=input://
+/api/events/1/attachment?file=file:///etc/passwd
+/api/events/1/attachment?file=nonexistent_file.txt
+```
+
+Label:
+
+```text
+BAHAYA
+```
+
+Reason:
+
+```text
+這批是真實 LFI/RFI attack attempt log，打在真實存在的檔案讀取 sink 上，
+不是打不存在路徑觸發 SPA fallback。php://、expect://、input:// 等
+wrapper 在這個 Node 後端上不會被解讀（Node 沒有 PHP 那套 stream
+wrapper），一律落到 fs.readFile 的 ENOENT/EINVAL 錯誤 → 404，
+如實反映「這個後端對這些 wrapper 沒有洞」；純路徑遍歷
+（../、..%2F、..%5C）則因為 sink 本身沒有做路徑淨化，
+真的能讀到 sandbox 內的 decoy 檔案 → 200，如實反映「這個後端對
+路徑遍歷有洞」。
+```
+
+Covers features:
+
+```text
+has_file_inclusion
+has_path_traversal
+url_encoding_count
+accesses_sensitive_path
 ```
 
 ## Labeling Rule
