@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [ main, dev_front_end,compare/yc-compare_premerge_branch ]
+    branches: [ main, dev_front_end,compare/yc-compare_premerge_branch,has_file_inclusion ]
   pull_request:
     branches: [ main, dev_front_end,compare/yc-compare_premerge_branch ]
 
