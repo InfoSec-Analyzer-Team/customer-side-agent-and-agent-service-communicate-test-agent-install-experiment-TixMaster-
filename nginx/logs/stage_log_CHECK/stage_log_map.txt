@@ -5,3 +5,4 @@ logs/access2_Dicurigai_sensitive_path.log,collected/nginx01_batch_nikto_scan_001
 collected/nginx01_batch_sqlmap_sqli_001.log==2
 collected/nginx01_batch_xss_001.log==3
 collected/nginx01_batch_path_traversal_001.log==4
+LFI_method_record/access3_Local_file_inclusion_1.log,LFI_method_record/access4_Local_file_inclusion_2_wfuzz.log,LFI_method_record/access5_Local_file_inclusion_3_wfuzz.log==6

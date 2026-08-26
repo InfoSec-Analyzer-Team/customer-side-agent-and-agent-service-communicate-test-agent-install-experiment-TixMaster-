@@ -57,5 +57,11 @@ stage id 進來只會讓 `defining_violations` 洗版。這種批次**不放進*
 - stage 2（SQLi）：`nginx01_batch_sqlmap_sqli_001.log`（sqlmap 產生）
 - stage 3（XSS）：`nginx01_batch_xss_001.log`（手動 payload）
 - stage 4（路徑遍歷）：`nginx01_batch_path_traversal_001.log`（手動 payload）
+- stage 6（檔案包含 LFI/RFI）：`LFI_method_record/access3_Local_file_inclusion_1.log`（手動 payload,打真實
+  attachment sink）+ `access4_Local_file_inclusion_2_wfuzz.log`（wfuzz +
+  SecLists `LFI-gracefulsecurity-linux.txt`,純絕對路徑,對這個 sink 100%
+  404,shape 單一）+ `access5_Local_file_inclusion_3_wfuzz.log`（wfuzz + 客製
+  `lfi_sink_traversal_wordlist.txt`,200/404/500 三種真實回應都有）
 
-詳細收集方式見 `nginx/collected/collection_method.md`。
+詳細收集方式見 `nginx/collected/collection_method.md` 第 6 節，sink 本身的
+設計與風險說明見 `Verify_doc/lfi_sink.md`。
