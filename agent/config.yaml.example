@@ -4,8 +4,13 @@
 tenant_id: "tenant-demo-001"
 gateway_url: "http://localhost:80"
 
-# Phase 2 (leave blank for now)
-# api_key: ""
+# Ingest API Key（由平台 Portal 產生，明碼僅顯示一次）。
+# 建議改用環境變數 XDR_API_KEY 帶入（見 xdr-agent.service 的 EnvironmentFile），
+# 避免明碼憑證落進版控；環境變數優先於此處。留空＝匿名（Gateway 過渡期仍放行）。
+# api_key: "lac_xxxxxxxxxxxxxxxx"
+
+# 本 Agent 在平台的識別碼（Portal 新增 Agent 時產生）。可留空。
+# agent_id: "agent-xxxxxxxxxxxx"
 
 sources:
   - type: file

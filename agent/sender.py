@@ -14,12 +14,22 @@ from config import AgentConfig
 logger = logging.getLogger(__name__)
 
 
+def _auth_headers(api_key) -> dict:
+    """Content-Type 一律帶上；有 api_key 時附 Bearer 憑證（見 AGENT_MANAGEMENT_PLAN §3.2）。"""
+    headers = {"Content-Type": "application/json"}
+    if api_key:
+        headers["Authorization"] = "Bearer " + api_key
+    return headers
+
+
 class HeartbeatSender:
     """Sends a periodic heartbeat event to the Gateway so it can detect dead agents."""
 
     def __init__(self, cfg: AgentConfig) -> None:
         self._url = cfg.gateway_url.rstrip("/") + "/api/v1/ingest"
         self._tenant_id = cfg.tenant_id
+        self._agent_id = cfg.agent_id
+        self._headers = _auth_headers(cfg.api_key)
         self._interval = cfg.heartbeat.interval_sec
         self._stop_event = threading.Event()
 
@@ -38,9 +48,10 @@ class HeartbeatSender:
             "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
             "event_type": "heartbeat",
         }
+        if self._agent_id:
+            payload["agent_id"] = self._agent_id
         try:
-            resp = requests.post(self._url, json=payload, timeout=10,
-                                 headers={"Content-Type": "application/json"})
+            resp = requests.post(self._url, json=payload, timeout=10, headers=self._headers)
             if resp.status_code == 200:
                 logger.debug("heartbeat ok")
             else:
@@ -64,6 +75,8 @@ class BatchSender:
         self._max_attempts = cfg.retry.max_attempts
         self._base_delay = cfg.retry.base_delay_sec
         self._max_delay = cfg.retry.max_delay_sec
+        self._agent_id = cfg.agent_id
+        self._headers = _auth_headers(cfg.api_key)
         self._buffer = buffer
         # Event used both as a sleep interruptor and a stop signal
         self._stop_event = threading.Event()
@@ -149,11 +162,17 @@ class BatchSender:
         Status mapping (from CUSTOMER_AGENT_DESIGN.md §3.4):
           200 → sent OK, delete
           400 → bad payload, discard (whole chunk, no retry)
+          401/403 → auth rejected (bad/revoked key, tenant mismatch, disabled agent);
+                keep buffer and backoff-retry so data is not lost while the operator
+                fixes the key / re-enables the agent (see AGENT_MANAGEMENT_PLAN §3.2)
           413 → body too large; halve the chunk and retry each half, unless
                 already down to a single event, in which case discard it
           503 → Kafka down, keep buffer, exponential backoff retry
         """
+        # 批次信封層帶一次 agent_id（非逐筆）；權威身分仍以 Bearer key 對應為準。
         payload = {"events": events}
+        if self._agent_id:
+            payload["agent_id"] = self._agent_id
         delay = self._base_delay
 
         for attempt in range(1, self._max_attempts + 1):
@@ -163,7 +182,7 @@ class BatchSender:
                     self._url,
                     json=payload,
                     timeout=30,
-                    headers={"Content-Type": "application/json"},
+                    headers=self._headers,
                 )
                 elapsed = time.monotonic() - t0
 
@@ -184,6 +203,17 @@ class BatchSender:
                     if attempt < self._max_attempts:
                         time.sleep(delay)
                         # Exponential backoff: 1s → 2s → 4s → … → 60s
+                        delay = min(delay * 2, self._max_delay)
+
+                elif resp.status_code in (401, 403):
+                    # 憑證/授權被拒：換 key 或重新啟用 Agent 後即可恢復，故保留 buffer
+                    # 並退避重試，不丟資料（重試耗盡則留待下個 flush 週期）。
+                    logger.warning(
+                        "HTTP %d auth rejected — keeping %d events, attempt %d/%d, retry in %.0fs",
+                        resp.status_code, len(events), attempt, self._max_attempts, delay,
+                    )
+                    if attempt < self._max_attempts:
+                        time.sleep(delay)
                         delay = min(delay * 2, self._max_delay)
 
                 elif resp.status_code == 413:

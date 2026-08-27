@@ -42,10 +42,11 @@ ReadWritePaths=/var/lib/xdr-agent /var/log/xdr-agent
 # 禁止存取 /home 和 /root，agent 完全不需要
 ProtectHome=yes
 
-# ── Phase 2 預留 ──────────────────────────────────────────────────────────────
-# 加入 API key 認證後取消以下註解，將 key 存成 XDR_API_KEY=<value>
-# config.py 再從 os.environ 讀取覆蓋
-# EnvironmentFile=/etc/xdr-agent/secrets.env
+# ── Ingest API Key 憑證 ───────────────────────────────────────────────────────
+# config.py 會優先從環境變數 XDR_API_KEY 讀取憑證（見 AGENT_MANAGEMENT_PLAN §4.2）。
+# 把 key 存成 /etc/xdr-agent/secrets.env（單行 XDR_API_KEY=lac_xxxx，chmod 600）。
+# 開頭的「-」代表檔案不存在時不報錯（匿名模式，相容 Gateway 過渡期）。
+EnvironmentFile=-/etc/xdr-agent/secrets.env
 
 [Install]
 WantedBy=multi-user.target

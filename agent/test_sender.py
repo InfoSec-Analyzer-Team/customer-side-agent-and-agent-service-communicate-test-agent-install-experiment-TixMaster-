@@ -53,11 +53,13 @@ class _MockHandler(BaseHTTPRequestHandler):
     # Each test resets these via reset_mock().
     responses: list = []   # [(status_code, body_dict), ...]
     received: list = []    # request JSON bodies received so far
+    headers_seen: list = []  # request header dicts received so far
 
     def do_POST(self) -> None:
         length = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(length)
         _MockHandler.received.append(json.loads(body))
+        _MockHandler.headers_seen.append({k.lower(): v for k, v in self.headers.items()})
 
         if _MockHandler.responses:
             status, resp_body = _MockHandler.responses.pop(0)
@@ -77,6 +79,7 @@ class _MockHandler(BaseHTTPRequestHandler):
 def reset_mock() -> None:
     _MockHandler.responses.clear()
     _MockHandler.received.clear()
+    _MockHandler.headers_seen.clear()
 
 
 def _start_mock_server() -> tuple:
@@ -234,6 +237,42 @@ sender._flush()
 check("413 min-split: buffer emptied (1 discarded + 1 sent)", buf.count() == 0)
 check("413 min-split: exactly 3 POSTs (no retry on the discarded event)",
       len(_MockHandler.received) == 3)
+buf.close()
+
+# ── Test H: api_key → Authorization: Bearer header + agent_id envelope ────────
+cleanup(); reset_mock()
+_MockHandler.responses = [(200, {"status": "success", "queued": 1, "failed": 0})]
+
+cfg_auth = _make_cfg(GATEWAY_URL)
+cfg_auth.api_key = "lac_testkey123"
+cfg_auth.agent_id = "agent-test-01"
+
+buf = LocalBuffer(DB, max_size_mb=50)
+buf.push([_make_event()])
+
+sender = BatchSender(cfg_auth, buf)
+sender._flush()
+
+check("auth: Authorization Bearer header sent",
+      _MockHandler.headers_seen[0].get("authorization") == "Bearer lac_testkey123")
+check("auth: agent_id present in batch envelope",
+      _MockHandler.received[0].get("agent_id") == "agent-test-01")
+buf.close()
+
+# ── Test I: no api_key → no Authorization header (anonymous, backward compatible) ─
+cleanup(); reset_mock()
+_MockHandler.responses = [(200, {"status": "success", "queued": 1, "failed": 0})]
+
+buf = LocalBuffer(DB, max_size_mb=50)
+buf.push([_make_event()])
+
+sender = BatchSender(_make_cfg(GATEWAY_URL), buf)
+sender._flush()
+
+check("no-auth: no Authorization header when api_key unset",
+      "authorization" not in _MockHandler.headers_seen[0])
+check("no-auth: no agent_id in envelope when unset",
+      "agent_id" not in _MockHandler.received[0])
 buf.close()
 
 # ── teardown ──────────────────────────────────────────────────────────────────

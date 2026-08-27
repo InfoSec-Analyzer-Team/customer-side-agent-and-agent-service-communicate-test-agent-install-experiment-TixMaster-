@@ -80,6 +80,20 @@ logging:
   path: /tmp/xdr-test/agent.log
 ```
 
+### （選用）Ingest API Key 憑證
+
+平台 Gateway 導入憑證驗證後（`INGEST_REQUIRE_AUTH=true`），Agent 需帶平台 Portal
+產生的 Ingest API Key。Agent 會在所有請求附上 `Authorization: Bearer <api_key>`。
+憑證優先從環境變數讀取（不落版控）：
+
+```bash
+export XDR_API_KEY="lac_xxxxxxxxxxxxxxxx"
+python3 -u agent.py --config config.yaml
+```
+
+或在 config.yaml 填 `api_key:` / `agent_id:`（見 config.yaml.example）。
+本地測試預設 `INGEST_REQUIRE_AUTH=false`，留空即可（匿名放行）。
+
 ---
 
 ## Step 3 — 準備測試 log 來源
