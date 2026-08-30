@@ -19,15 +19,46 @@ http://localhost:8080
 
 注意：這些資料是 lab / pentest traffic，不是 production real-world incident log。
 
+## Review-Driven Replacement
+
+The first submitted batches were replaced after PR review because several of
+them had strong shortcut-learning risks: fixed tool User-Agent strings
+(`sqlmap`/`Nikto`), repeated request templates, narrow method coverage, and weak
+IP/OS/time diversity.
+
+The current collected dataset therefore removes those old tool-heavy batches
+from the formal log set and replaces them with browser-like attack batches.
+These new batches still come from real HTTP requests through Nginx, but mix
+User-Agent, OS family, `X-Forwarded-For`, referrer, language, method, and
+payload variants so the model has to learn request content instead of a single
+tool fingerprint.
+
 ## Batch Summary
 
 | Batch ID | Label | Traffic Type | Tool / Method | Count | Purpose |
 |---|---|---|---|---:|---|
-| nginx01_batch_nikto_scan_001 | BAHAYA | tool_generated_scan | Nikto Docker | 15843 | 敏感路徑掃描、弱點掃描、scanner UA |
-| nginx01_batch_sqlmap_sqli_001 | BAHAYA | tool_generated_sqli | sqlmap Docker | 378 | SQL Injection 測試請求 |
-| nginx01_batch_xss_001 | BAHAYA | xss_payload_attempt | PowerShell manual payload | 250 | XSS payload attempt |
-| nginx01_batch_path_traversal_001 | BAHAYA | path_traversal_attempt | PowerShell manual payload | 120 | Path traversal attempt |
-| nginx01_batch_dicurigai_probe_001 | DICURIGAI | suspicious_probe_mixed | PowerShell manual probe | 100 | 可疑但非確認攻擊的探測流量 |
+| nginx01_batch_sqli_browserua_001 | BAHAYA | sqli_payload_browser_like | PowerShell Invoke-WebRequest | 240 | SQLi payload attempts without sqlmap User-Agent shortcut |
+| nginx01_batch_xss_browserua_001 | BAHAYA | xss_payload_browser_like | PowerShell Invoke-WebRequest | 240 | XSS payload attempts with desktop/mobile browser UA diversity |
+| nginx01_batch_path_traversal_encoded_001 | BAHAYA | path_traversal_encoded_browser_like | PowerShell Invoke-WebRequest | 240 | Encoded path traversal variants including `..%2F` and double encoding |
+| nginx01_batch_dicurigai_diverse_probe_001 | DICURIGAI | diverse_suspicious_probe | PowerShell Invoke-WebRequest | 225 | Diverse suspicious probes without repeating only 10 templates |
+
+## Diversity Controls
+
+The replacement batches intentionally vary these support features:
+
+```text
+User-Agent: Windows Chrome, Mac Safari, Linux Chrome, iPhone Safari,
+            Android Chrome, Firefox, Edge
+X-Forwarded-For: 198.51.100.0/24, 203.0.113.0/24, 192.0.2.0/24
+Referrer: none, local pages, search-like, external-like, social-like
+HTTP methods: GET, POST, HEAD, OPTIONS; DICURIGAI also includes PUT,
+              DELETE, TRACE
+Accept-Language: en-US, zh-TW, id-ID
+```
+
+The IP ranges are RFC 5737 documentation ranges used only for lab simulation.
+They are varied through Nginx `X-Forwarded-For` handling so the access log does
+not collapse to the Docker bridge address.
 
 ## Common Capture Commands
 
@@ -47,235 +78,118 @@ powershell -ExecutionPolicy Bypass -File .\tools\capture-nginx-batch.ps1 `
   -BatchId <batch_id> `
   -Label <AMAN/DICURIGAI/BAHAYA> `
   -TrafficType <traffic_type> `
-  -Tool <tool> `
+  -Tool powershell_invoke_webrequest `
   -Notes "<notes>"
 ```
 
-## 1. Nikto Scan
+## 1. SQLi Browser-Like
 
 Batch:
 
 ```text
-nginx01_batch_nikto_scan_001
+nginx01_batch_sqli_browserua_001
 ```
 
-Command:
-
-```powershell
-docker run --rm ghcr.io/sullo/nikto:latest -h http://host.docker.internal:8080
-```
-
-Label:
+Payload families:
 
 ```text
-BAHAYA
+' OR '1'='1
+UNION SELECT 1,2,3
+AND 7110=9042
+'--
+OR SLEEP(1)
+ASCII(SUBSTR(database(),1,1)) > 64
 ```
 
-Reason:
+Purpose:
 
 ```text
-Nikto 會產生大量敏感路徑探測與弱點掃描 request，例如 metadata endpoint、wp-config.php、admin/login、swagger、graphql 等。
+Keep SQLi payload evidence in the request URL while removing the obvious
+sqlmap User-Agent shortcut.
 ```
 
-Covers features:
-
-```text
-accesses_sensitive_path
-is_bot
-os_type / ua_length
-url_depth
-scanner-like behavior
-```
-
-## 2. SQL Injection via sqlmap
+## 2. XSS Browser-Like
 
 Batch:
 
 ```text
-nginx01_batch_sqlmap_sqli_001
+nginx01_batch_xss_browserua_001
 ```
 
-Command:
-
-```powershell
-docker run --rm parrotsec/sqlmap:latest `
-  -u "http://host.docker.internal:8080/api/events?id=1" `
-  --batch --level=2 --risk=1
-```
-
-Label:
-
-```text
-BAHAYA
-```
-
-Reason:
-
-```text
-sqlmap 會對 id 參數發送 boolean-based、error-based、time-based、UNION 等 SQLi 測試 payload。即使目標未被確認可注入，這批仍是 SQLi attack attempt log。
-```
-
-Covers features:
-
-```text
-has_sql_injection
-url_encoding_count
-url_special_chars
-suspicious_user_agent
-query_param_payload
-```
-
-## 3. XSS Payload Attempts
-
-Batch:
-
-```text
-nginx01_batch_xss_001
-```
-
-Method:
-
-```text
-PowerShell 手動送出 XSS payload，payload 放在 query string 中，確保 Nginx access.log 能記錄到。
-```
-
-Example payloads:
+Payload families:
 
 ```text
 <script>alert(1)</script>
 <img src=x onerror=alert(1)>
 <svg onload=alert(1)>
-"><script>alert(document.domain)</script>
+javascript:alert(1)
+"><script>alert(1)</script>
 <iframe src=javascript:alert(1)>
 ```
 
-Example target paths:
+Purpose:
 
 ```text
-/event-detail.html?id=1&name=<payload>
-/login.html?returnUrl=<payload>
-/register.html?name=<payload>
-/api/events?keyword=<payload>
-/search?q=<payload>
+Preserve XSS attack-attempt payloads while mixing desktop and mobile browser
+User-Agent strings.
 ```
 
-Label:
-
-```text
-BAHAYA
-```
-
-Reason:
-
-```text
-這批是 XSS attack attempt log。它表示 request 內含 XSS payload，但不宣稱網站一定成功執行 JavaScript。
-```
-
-Covers features:
-
-```text
-has_xss
-url_special_chars
-url_encoding_count
-payload_in_query
-```
-
-## 4. Path Traversal Attempts
+## 3. Encoded Path Traversal
 
 Batch:
 
 ```text
-nginx01_batch_path_traversal_001
+nginx01_batch_path_traversal_encoded_001
 ```
 
-Method:
+Payload families:
 
 ```text
-PowerShell 手動送出 path traversal payload。
+..%2F..%2F..%2Fetc%2Fpasswd
+%2e%2e%2f%2e%2e%2fetc%2fpasswd
+%252e%252e%252f%252e%252e%252fetc%252fpasswd
+....//....//etc/passwd
+..%5C..%5Cwindows%5Cwin.ini
 ```
 
-Example payloads:
+Purpose:
 
 ```text
-/../../etc/passwd
-/..%2F..%2F..%2Fetc%2Fpasswd
-/static/../../backend/.env
-/download?file=..%2F..%2F..%2Fetc%2Fpasswd
-/download?file=..%5C..%5Cwindows%5Cwin.ini
-/images/%2e%2e/%2e%2e/%2e%2e/etc/passwd
-/view?file=..%2F..%2F..%2Fetc%2Fshadow
-/api/events?file=..%2F..%2F..%2Fetc%2Fpasswd
+Address the review finding that simple traversal detection misses common
+encoded variants such as ..%2F.
 ```
 
-Label:
-
-```text
-BAHAYA
-```
-
-Reason:
-
-```text
-這批 request 嘗試使用 ../、URL encoded traversal、Windows 路徑等方式讀取敏感檔案。
-```
-
-Covers features:
-
-```text
-has_path_traversal
-accesses_sensitive_path
-url_encoding_count
-url_depth
-```
-
-## 5. Suspicious Probe Mixed
+## 4. DICURIGAI Diverse Probe
 
 Batch:
 
 ```text
-nginx01_batch_dicurigai_probe_001
+nginx01_batch_dicurigai_diverse_probe_001
 ```
 
-Method:
+Probe families:
 
 ```text
-PowerShell 手動送出可疑但非確認攻擊的 request。
+/.env
+/.git/config
+/admin
+/phpmyadmin
+/server-status
+/backup.zip
+/db.sql
+/wp-login.php
+/.aws/credentials
+/actuator/env
+double-encoded probes
+long query strings
 ```
 
-Included request types:
+Purpose:
 
 ```text
-敏感路徑探測但使用瀏覽器 UA
-輕量單引號 probe
-雙重編碼 probe
-OPTIONS / TRACE / PUT 等異常 method
-超長 URL
-大量 query parameters
-curl / PowerShell UA
-```
-
-Label:
-
-```text
-DICURIGAI
-```
-
-Reason:
-
-```text
-這批行為可疑，但不一定能確認為成功攻擊，因此標為 DICURIGAI，而不是 BAHAYA。
-```
-
-Covers features:
-
-```text
-accesses_sensitive_path
-request_method
-url_length
-url_depth
-url_param_count
-has_double_encoding
-suspicious_user_agent
+Replace the old 100-line probe batch that repeated only 10 request templates.
+This batch uses more path variation, more methods, more IPs, and full
+browser-like User-Agent strings.
 ```
 
 ## Labeling Rule
@@ -283,16 +197,16 @@ suspicious_user_agent
 Nginx access.log 本身不包含 label。Label 寫在對應的 `.meta.txt` 中，例如：
 
 ```text
-nginx01_batch_xss_001.log
-nginx01_batch_xss_001.meta.txt  -> label: BAHAYA
+nginx01_batch_xss_browserua_001.log
+nginx01_batch_xss_browserua_001.meta.txt  -> label: BAHAYA
 ```
 
 後續轉 dataset 時，應由 `.meta.txt` 將整批 log 補上 label 欄位。
 
 ## Important Notes
 
-1. `BAHAYA` 表示明確攻擊 payload 或工具攻擊流量。
+1. `BAHAYA` 表示明確攻擊 payload 或 browser-like attack-attempt traffic。
 2. `DICURIGAI` 表示可疑探測、異常結構或輕量 probe，但不一定是確認攻擊。
-3. 這些是 lab-generated / tool-generated attack attempt logs，不是 production incident logs。
+3. 這些是 lab-generated browser-like attack attempt logs，不是 production incident logs。
 4. 有些 TixMaster 路徑會被 SPA fallback 回 200，因此不要只依賴 status code 或 response size 判斷惡意程度。
 5. 訓練模型時應避免過度依賴 source_ip、hour、User-Agent 單一特徵，應更重視 payload pattern、URL 結構、encoding、method、path 等特徵。

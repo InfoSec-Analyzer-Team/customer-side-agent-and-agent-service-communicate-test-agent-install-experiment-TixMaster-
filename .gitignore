@@ -21,6 +21,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 nginx/logs/*.log
+nginx/collected/access.log
 backend/logs/*.log
 
 # OS
