@@ -1,212 +1,74 @@
-﻿# Nginx Attack Log Collection Method
+# Nginx Attack Log Collection Method
 
-本資料夾內的 log 皆為本機 lab 環境中，攻擊工具或手動 payload 真的對本機 Nginx 發送 HTTP request 後，由 Nginx 自己寫出的 access log。不是手寫偽造 log。
+本資料夾只保留可作為正式資料來源的 Nginx access log。PowerShell Invoke-WebRequest 產生的 scripted attack-like batches 已判定不能作為正式 ML 訓練資料；PowerShell 只能用來輔助啟動工具、切批次與檢查檔案，不作為正式攻擊流量產生工具。
 
-Target:
-
-```text
-http://localhost:8080
-```
-
-收集方式固定為：
+保留原則：
 
 ```text
-1. capture-nginx-batch.ps1 start 記錄 access.log 起始行數
-2. 執行工具或手動 payload 對 Nginx 發 request
-3. capture-nginx-batch.ps1 finish 擷取本批新增 log
-4. 產生 .log 與 .meta.txt
+1. request 必須真的打到本機 Nginx / TixMaster lab target
+2. access log 必須由 Nginx 自己產生，不手寫偽造 log
+3. 惡意資料優先使用專用工具或明確手動漏洞驗證流程產生
+4. backend 必須有開，避免整批只打到 Nginx 而變成 502
 ```
 
-注意：這些資料是 lab / pentest traffic，不是 production real-world incident log。
+## Current Formal Logs
 
-## Review-Driven Replacement
+| Log | Label | Stage | Tool / Method | Count | Notes |
+|---|---|---:|---|---:|---|
+| `collected/nginx01_batch_sqli_sqlmap_randomua_002.log` | BAHAYA | 2 | sqlmap (`parrotsec/sqlmap`, `--random-agent`) | 378 | SQLi tool traffic through Nginx/backend, 200 responses |
+| `collected/nginx01_batch_xss_zap_fullscan_001.log` | BAHAYA | 3 | OWASP ZAP Docker full scan | 790 | XSS active scan traffic; ZAP also emits some SQLi/protocol probes |
+| `collected/nginx01_batch_command_injection_commix_001.log` | BAHAYA | 5 | commix | 1666 | Command injection tool traffic against `/api/events?keyword=` |
+| `LFI_method_record/access3_Local_file_inclusion_1.log` | BAHAYA | 6 | Browser/manual LFI payload | 22 | Manual requests against the real attachment sink |
+| `LFI_method_record/access4_Local_file_inclusion_2_wfuzz.log` | BAHAYA | 6 | wfuzz | 882 | LFI/path traversal wordlist run against the real attachment sink |
+| `LFI_method_record/access5_Local_file_inclusion_3_wfuzz.log` | BAHAYA | 6 | wfuzz | 71 | Additional LFI/path traversal wordlist run |
 
-The first submitted batches were replaced after PR review because several of
-them had strong shortcut-learning risks: fixed tool User-Agent strings
-(`sqlmap`/`Nikto`), repeated request templates, narrow method coverage, and weak
-IP/OS/time diversity.
+## Removed From Formal Dataset
 
-The current collected dataset therefore removes those old tool-heavy batches
-from the formal log set and replaces them with browser-like attack batches.
-These new batches still come from real HTTP requests through Nginx, but mix
-User-Agent, OS family, `X-Forwarded-For`, referrer, language, method, and
-payload variants so the model has to learn request content instead of a single
-tool fingerprint.
-
-## Batch Summary
-
-| Batch ID | Label | Traffic Type | Tool / Method | Count | Purpose |
-|---|---|---|---|---:|---|
-| nginx01_batch_sqli_browserua_001 | BAHAYA | sqli_payload_browser_like | PowerShell Invoke-WebRequest | 240 | SQLi payload attempts without sqlmap User-Agent shortcut |
-| nginx01_batch_xss_browserua_001 | BAHAYA | xss_payload_browser_like | PowerShell Invoke-WebRequest | 240 | XSS payload attempts with desktop/mobile browser UA diversity |
-| nginx01_batch_path_traversal_encoded_001 | BAHAYA | path_traversal_encoded_browser_like | PowerShell Invoke-WebRequest | 240 | Encoded path traversal variants including `..%2F` and double encoding |
-| nginx01_batch_dicurigai_diverse_probe_001 | DICURIGAI | diverse_suspicious_probe | PowerShell Invoke-WebRequest | 225 | Diverse suspicious probes without repeating only 10 templates |
-
-## Diversity Controls
-
-The replacement batches intentionally vary these support features:
-
-```text
-User-Agent: Windows Chrome, Mac Safari, Linux Chrome, iPhone Safari,
-            Android Chrome, Firefox, Edge
-X-Forwarded-For: 198.51.100.0/24, 203.0.113.0/24, 192.0.2.0/24
-Referrer: none, local pages, search-like, external-like, social-like
-HTTP methods: GET, POST, HEAD, OPTIONS; DICURIGAI also includes PUT,
-              DELETE, TRACE
-Accept-Language: en-US, zh-TW, id-ID
-```
-
-The IP ranges are RFC 5737 documentation ranges used only for lab simulation.
-They are varied through Nginx `X-Forwarded-For` handling so the access log does
-not collapse to the Docker bridge address.
-
-## Common Capture Commands
-
-Start batch:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\capture-nginx-batch.ps1 `
-  -Action start `
-  -BatchId <batch_id>
-```
-
-Finish batch:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\capture-nginx-batch.ps1 `
-  -Action finish `
-  -BatchId <batch_id> `
-  -Label <AMAN/DICURIGAI/BAHAYA> `
-  -TrafficType <traffic_type> `
-  -Tool powershell_invoke_webrequest `
-  -Notes "<notes>"
-```
-
-## 1. SQLi Browser-Like
-
-Batch:
+以下批次已移除或不再列入 `stage_log_map.txt`：
 
 ```text
 nginx01_batch_sqli_browserua_001
-```
-
-Payload families:
-
-```text
-' OR '1'='1
-UNION SELECT 1,2,3
-AND 7110=9042
-'--
-OR SLEEP(1)
-ASCII(SUBSTR(database(),1,1)) > 64
-```
-
-Purpose:
-
-```text
-Keep SQLi payload evidence in the request URL while removing the obvious
-sqlmap User-Agent shortcut.
-```
-
-## 2. XSS Browser-Like
-
-Batch:
-
-```text
 nginx01_batch_xss_browserua_001
-```
-
-Payload families:
-
-```text
-<script>alert(1)</script>
-<img src=x onerror=alert(1)>
-<svg onload=alert(1)>
-javascript:alert(1)
-"><script>alert(1)</script>
-<iframe src=javascript:alert(1)>
-```
-
-Purpose:
-
-```text
-Preserve XSS attack-attempt payloads while mixing desktop and mobile browser
-User-Agent strings.
-```
-
-## 3. Encoded Path Traversal
-
-Batch:
-
-```text
 nginx01_batch_path_traversal_encoded_001
-```
-
-Payload families:
-
-```text
-..%2F..%2F..%2Fetc%2Fpasswd
-%2e%2e%2f%2e%2e%2fetc%2fpasswd
-%252e%252e%252f%252e%252e%252fetc%252fpasswd
-....//....//etc/passwd
-..%5C..%5Cwindows%5Cwin.ini
-```
-
-Purpose:
-
-```text
-Address the review finding that simple traversal detection misses common
-encoded variants such as ..%2F.
-```
-
-## 4. DICURIGAI Diverse Probe
-
-Batch:
-
-```text
 nginx01_batch_dicurigai_diverse_probe_001
+nginx01_batch_command_injection_browserua_001
+nginx01_batch_sqlmap_sqli_001
+nginx01_batch_xss_001
+nginx01_batch_path_traversal_001
+nginx01_batch_nikto_scan_001
+nginx01_batch_dicurigai_probe_001
 ```
 
-Probe families:
+## Remaining Replacement Plan
 
 ```text
-/.env
-/.git/config
-/admin
-/phpmyadmin
-/server-status
-/backup.zip
-/db.sql
-/wp-login.php
-/.aws/credentials
-/actuator/env
-double-encoded probes
-long query strings
+Stage 4 Path Traversal      -> wfuzz/ffuf/dotdotpwn，打真實檔案參數或已建 sink
+Stage 7 Double Encoding     -> wfuzz/ffuf wordlist，double-encoded payload list
+Stage 8 URL Encoding Count  -> wfuzz/ffuf wordlist，單層/多層 encoded variants
+Stage 9 Special Chars Dense -> ZAP/XSStrike 或 wordlist，含 < > ' " ; % ( ) [ ] { }
+Stage 10 Scanner UA         -> nikto/ffuf/wfuzz/nuclei 等工具流量
+Stage 11 Abnormal Methods   -> curl/ffuf/httpx 送 PUT/DELETE/OPTIONS/TRACE
+Stage 12 Abnormal URL       -> ffuf/wfuzz 送超長 URL、深路徑、大量參數
 ```
 
-Purpose:
+## Current Caveats
+
+目前 SQLi、XSS、command injection 已符合「工具真打 Nginx/backend」的要求，但仍有泛化風險需要後續批次補強：
 
 ```text
-Replace the old 100-line probe batch that repeated only 10 request templates.
-This batch uses more path variation, more methods, more IPs, and full
-browser-like User-Agent strings.
+- 單批 IP 幾乎都來自 Docker bridge，例如 172.17.0.1
+- 單批時間集中在短時間內
+- sqlmap/commix/wfuzz 這類工具批次仍可能有工具 UA 指紋
 ```
+
+正式訓練前應使用多批次、不同時間、不同來源環境或不同工具設定補強 IP / time / UA diversity。
 
 ## Labeling Rule
 
-Nginx access.log 本身不包含 label。Label 寫在對應的 `.meta.txt` 中，例如：
+Nginx access.log 本身不包含 label。Label 應寫在對應 `.meta.txt`，或由 `stage_log_map.txt` 在轉 dataset 時補上。
 
 ```text
-nginx01_batch_xss_browserua_001.log
-nginx01_batch_xss_browserua_001.meta.txt  -> label: BAHAYA
+BAHAYA    = 明確攻擊 payload 或工具攻擊流量
+DICURIGAI = 可疑探測、異常結構或掃描行為，但不一定是確認攻擊
+AMAN      = 正常流量
 ```
-
-後續轉 dataset 時，應由 `.meta.txt` 將整批 log 補上 label 欄位。
-
-## Important Notes
-
-1. `BAHAYA` 表示明確攻擊 payload 或 browser-like attack-attempt traffic。
-2. `DICURIGAI` 表示可疑探測、異常結構或輕量 probe，但不一定是確認攻擊。
-3. 這些是 lab-generated browser-like attack attempt logs，不是 production incident logs。
-4. 有些 TixMaster 路徑會被 SPA fallback 回 200，因此不要只依賴 status code 或 response size 判斷惡意程度。
-5. 訓練模型時應避免過度依賴 source_ip、hour、User-Agent 單一特徵，應更重視 payload pattern、URL 結構、encoding、method、path 等特徵。

@@ -1,0 +1,8 @@
+# 格式與規則見同目錄 README.md。
+# <path1>[,<path2>,...]==<stage id>，path 相對 nginx/（不是 nginx/logs/）
+logs/access1_Aman.log==0
+logs/access2_Dicurigai_sensitive_path.log==1
+collected/nginx01_batch_sqli_sqlmap_randomua_002.log==2
+collected/nginx01_batch_xss_zap_fullscan_001.log==3
+collected/nginx01_batch_command_injection_commix_001.log==5
+LFI_method_record/access3_Local_file_inclusion_1.log,LFI_method_record/access4_Local_file_inclusion_2_wfuzz.log,LFI_method_record/access5_Local_file_inclusion_3_wfuzz.log==6
