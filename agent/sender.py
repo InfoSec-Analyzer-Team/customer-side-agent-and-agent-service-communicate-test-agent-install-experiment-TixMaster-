@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def _auth_headers(api_key) -> dict:
-    """Content-Type 一律帶上；有 api_key 時附 Bearer 憑證（見 AGENT_MANAGEMENT_PLAN §3.2）。"""
+    """Content-Type 一律帶上；有 api_key 時附 Bearer 憑證（見 AGENT_MANAGEMENT §3.2）。"""
     headers = {"Content-Type": "application/json"}
     if api_key:
         headers["Authorization"] = "Bearer " + api_key
@@ -164,7 +164,7 @@ class BatchSender:
           400 → bad payload, discard (whole chunk, no retry)
           401/403 → auth rejected (bad/revoked key, tenant mismatch, disabled agent);
                 keep buffer and backoff-retry so data is not lost while the operator
-                fixes the key / re-enables the agent (see AGENT_MANAGEMENT_PLAN §3.2)
+                fixes the key / re-enables the agent (see AGENT_MANAGEMENT §3.2)
           413 → body too large; halve the chunk and retry each half, unless
                 already down to a single event, in which case discard it
           503 → Kafka down, keep buffer, exponential backoff retry

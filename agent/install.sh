@@ -17,9 +17,20 @@
 #   2. sudo systemctl start xdr-agent
 #
 # API Key 刻意不接受命令列參數：命令列參數在 /proc/<pid>/cmdline 全主機可見，
-# 且會留在 shell history。自動換發憑證見 AGENT_MANAGEMENT_PLAN.md §10 Phase 2。
+# 且會留在 shell history。自動換發憑證見 AGENT_MANAGEMENT.md §10 Phase 2。
 
 set -euo pipefail
+
+# ── 發版資訊（由 tool_script/build_agent_release.sh 在打包時置換） ────────────
+# 未置換（直接從 repo 執行）時維持 @@ 佔位字串，腳本會走「本機原始碼」路徑。
+AGENT_VERSION="@@AGENT_VERSION@@"
+AGENT_SHA256="@@AGENT_SHA256@@"
+DEFAULT_SOURCE_URL="@@DEFAULT_SOURCE_URL@@"
+# 直接從 repo 執行時上面三個值仍是 @@ 佔位字串，一律視為空值。
+# 這裡刻意用 @@* 萬用比對，避免打包時的 sed 連這段判斷一起換掉。
+case "$AGENT_VERSION"     in @@*) AGENT_VERSION="" ;;     esac
+case "$AGENT_SHA256"      in @@*) AGENT_SHA256="" ;;      esac
+case "$DEFAULT_SOURCE_URL" in @@*) DEFAULT_SOURCE_URL="" ;; esac
 
 INSTALL_DIR="/opt/xdr-agent"
 CONFIG_DIR="/etc/xdr-agent"
@@ -87,7 +98,11 @@ ask() {
   fi
 }
 
-echo "=== XDR Agent 安裝程序 ==="
+if [[ -z "$AGENT_VERSION" ]]; then
+  echo "=== XDR Agent 安裝程序（開發版，未經發版打包）==="
+else
+  echo "=== XDR Agent 安裝程序 v$AGENT_VERSION ==="
+fi
 
 # ── 0. 前置檢查 ───────────────────────────────────────────────────────────────
 [[ "$EUID" -eq 0 ]] || die "請用 root 執行：sudo bash install.sh"
@@ -135,16 +150,44 @@ PY_OK="$(python3 -c 'import sys; print(1 if sys.version_info[:2] >= (3,8) else 0
 python3 -c 'import venv' 2>/dev/null || die "python3 缺少 venv 模組，請安裝 python3-venv"
 
 # ── 3. 取得 agent 原始碼 ─────────────────────────────────────────────────────
+# 三種來源，依序：--source-dir → 腳本同目錄（從 repo 直接跑）→ tarball 下載。
+# curl | bash 模式下沒有本機原始碼，會走 tarball；網址取自 --source-url，
+# 未給則用發版時內嵌的 DEFAULT_SOURCE_URL。
 echo "[3/8] 取得 agent 原始碼"
 SRC=""; TMP_SRC=""
+if [[ -z "$SOURCE_URL" && -n "$DEFAULT_SOURCE_URL" ]]; then
+  SOURCE_URL="$DEFAULT_SOURCE_URL"
+fi
+
 if [[ -n "$SOURCE_DIR" ]]; then
   SRC="$SOURCE_DIR"
 elif [[ -n "${BASH_SOURCE[0]:-}" && -f "$(dirname "${BASH_SOURCE[0]}")/agent.py" ]]; then
   SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 elif [[ -n "$SOURCE_URL" ]]; then
+  case "$SOURCE_URL" in
+    https://*) ;;
+    http://*)  echo "    [!] 下載網址不是 HTTPS，憑證與程式在傳輸中可被竄改：$SOURCE_URL" ;;
+    *) die "--source-url 必須是 http(s) 網址：$SOURCE_URL" ;;
+  esac
   TMP_SRC="$(mktemp -d)"
-  echo "    從 $SOURCE_URL 下載"
+  echo "    下載 $SOURCE_URL"
   curl -fsSL "$SOURCE_URL" -o "$TMP_SRC/agent.tar.gz" || die "下載失敗：$SOURCE_URL"
+
+  # 校驗碼：發版時把 tarball 的 sha256 內嵌進本腳本，兩者必須一起從同一個
+  # HTTPS 來源取得才有意義（腳本被竄改的話校驗碼也會被一起改掉）。
+  if [[ "$AGENT_SHA256" =~ ^[0-9a-f]{64}$ ]]; then
+    ACTUAL="$(sha256sum "$TMP_SRC/agent.tar.gz" | awk '{print $1}')"
+    if [[ "$ACTUAL" != "$AGENT_SHA256" ]]; then
+      rm -rf "$TMP_SRC"
+      die "tarball 校驗失敗（可能被竄改或版本不符）
+        預期：$AGENT_SHA256
+        實得：$ACTUAL"
+    fi
+    echo "    [OK] SHA256 校驗通過"
+  else
+    echo "    [!] 本腳本未內嵌校驗碼（開發版），略過完整性驗證"
+  fi
+
   tar -xzf "$TMP_SRC/agent.tar.gz" -C "$TMP_SRC"
   FOUND="$(find "$TMP_SRC" -name agent.py -print -quit)"
   [[ -n "$FOUND" ]] || die "壓縮檔中找不到 agent.py"

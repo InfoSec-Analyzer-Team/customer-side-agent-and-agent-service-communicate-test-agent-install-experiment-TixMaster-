@@ -43,7 +43,7 @@ ReadWritePaths=/var/lib/xdr-agent /var/log/xdr-agent
 ProtectHome=yes
 
 # ── Ingest API Key 憑證 ───────────────────────────────────────────────────────
-# config.py 會優先從環境變數 XDR_API_KEY 讀取憑證（見 AGENT_MANAGEMENT_PLAN §4.2）。
+# config.py 會優先從環境變數 XDR_API_KEY 讀取憑證（見 AGENT_MANAGEMENT §4.2）。
 # 把 key 存成 /etc/xdr-agent/secrets.env（單行 XDR_API_KEY=lac_xxxx，chmod 600）。
 # 開頭的「-」代表檔案不存在時不報錯（匿名模式，相容 Gateway 過渡期）。
 EnvironmentFile=-/etc/xdr-agent/secrets.env
