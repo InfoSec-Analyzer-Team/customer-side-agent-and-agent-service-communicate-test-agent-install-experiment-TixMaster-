@@ -5,16 +5,20 @@
   "provisional": false,
   "per_feature": {
     "url_special_chars": {
-      "d": 0.07692307692307693
+      "d": 0.07692307692307693,
+      "collapsed": false
     },
     "url_length": {
-      "d": 0.1111111111111111
+      "d": 0.1111111111111111,
+      "collapsed": false
     },
     "ua_length": {
-      "d": 0.4074074074074074
+      "d": 0.4074074074074074,
+      "collapsed": false
     },
     "url_encoding_count": {
-      "d": 0.1111111111111111
+      "d": 0.1111111111111111,
+      "collapsed": false
     },
     "os_type": {
       "d": 0.0,
@@ -27,7 +31,8 @@
         4,
         5,
         6
-      ]
+      ],
+      "collapsed": true
     },
     "request_method": {
       "d": 0.0,
@@ -40,12 +45,13 @@
         "POST",
         "PUT",
         "TRACE"
-      ]
+      ],
+      "collapsed": true
     }
   },
   "warnings": [
-    "stage 3: 支撐特徵 'os_type' 完全塌縮（d=0）",
-    "stage 3: 支撐特徵 'request_method' 完全塌縮（d=0）"
+    "stage 3: 支撐特徵 'os_type' 完全塌縮（d=0，只有 1 種取值）",
+    "stage 3: 支撐特徵 'request_method' 完全塌縮（d=0，只有 1 種取值）"
   ],
   "defining_violations": [],
   "defining_violations_total": 0

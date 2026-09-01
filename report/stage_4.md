@@ -7,8 +7,8 @@
 
 - ⚠️ stage 4: 30/120 筆樣本不符合定義判準 [{'feature': 'has_path_traversal', 'op': 'eq', 'value': 1, 'exclude_from_support': True}]，可能混入其他 stage 的樣本，或定義判準本身設錯（明細見 StageDiversityReport.defining_violations）
 - ⚠️ stage 4: n_samples=120 < MIN_SAMPLES=200，熵/QCD 數字僅供參考（provisional），CI 不得當硬門檻
-- ⚠️ stage 4: 支撐特徵 'os_type' 完全塌縮（d=0）
-- ⚠️ stage 4: 支撐特徵 'has_double_encoding' 完全塌縮（d=0）
+- ⚠️ stage 4: 支撐特徵 'os_type' 完全塌縮（d=0，只有 1 種取值）
+- ⚠️ stage 4: 支撐特徵 'has_double_encoding' 完全塌縮（d=0，只有 1 種取值）
 
 ## 不符合定義判準的樣本
 

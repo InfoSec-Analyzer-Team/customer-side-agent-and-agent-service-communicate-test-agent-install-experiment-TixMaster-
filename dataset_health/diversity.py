@@ -345,12 +345,21 @@ class PerFeatureDiversity:
     d: float
     coverage: Optional[float] = None
     missing: Optional[set] = None
+    # 真塌縮（nunique<=1）才是 True；QCD==0 但 nunique>1（低基數/尾部集中分布
+    # 讓 Q1==Q3）不算——這兩種情況在 d==0.0 這個單一數字上看不出差異，但對
+    # strict gate「塌縮數 ≥1 就擋」的意義完全不同，所以拆成獨立欄位，未來
+    # strict 邏輯要判斷是否塌縮，看這個欄位，不要看 d==0.0。見
+    # Verify_doc 對應 review 意見：url_depth={1:237,2:27} 這種案例 QCD=0
+    # 但明明有 10% 樣本不同，不是真塌縮。
+    collapsed: Optional[bool] = None
 
     def to_dict(self) -> dict:
         out: dict[str, Any] = {"d": self.d}
         if self.coverage is not None:
             out["coverage"] = self.coverage
             out["missing"] = sorted(self.missing) if self.missing else []
+        if self.collapsed is not None:
+            out["collapsed"] = self.collapsed
         return out
 
 
@@ -439,6 +448,7 @@ def stage_diversity(df: pd.DataFrame, stage_id: int, cfg) -> StageDiversityRepor
 
         series = df[feature]
         d = feature_diversity(series, feature, cfg)
+        collapsed = series.dropna().nunique() <= 1
 
         cov = None
         missing = None
@@ -447,10 +457,23 @@ def stage_diversity(df: pd.DataFrame, stage_id: int, cfg) -> StageDiversityRepor
             if expected is not None:
                 cov, missing = coverage(series, expected)
 
-        per_feature[feature] = PerFeatureDiversity(d=d, coverage=cov, missing=missing)
+        per_feature[feature] = PerFeatureDiversity(d=d, coverage=cov, missing=missing, collapsed=collapsed)
 
         if d == 0.0:
-            warnings_list.append(f"stage {stage_id}: 支撐特徵 {feature!r} 完全塌縮（d=0）")
+            if collapsed:
+                warnings_list.append(f"stage {stage_id}: 支撐特徵 {feature!r} 完全塌縮（d=0，只有 1 種取值）")
+            else:
+                # 只有數值型（QCD）特徵會落到這裡：類別型的熵 d==0 恆等於
+                # nunique<=1（單點質量），不會有這種分歧。QCD 對低基數/尾部
+                # 集中分布不敏感，Q1==Q3 就會算出 0，即使實際上有 >1 種取值
+                # （例如 90% 是 1、10% 是 2，Q1=Q3=1）。這不是真塌縮，
+                # strict gate 不該把它算進「塌縮數」。
+                warnings_list.append(
+                    f"stage {stage_id}: 支撐特徵 {feature!r} 的 QCD=0，"
+                    f"但實際有 {series.dropna().nunique()} 種取值（不是真塌縮，"
+                    f"是低基數或尾部集中分布讓 Q1=Q3——見 §2.3 QCD 已知限制，"
+                    f"strict 門檻的「塌縮數」不該把這種情況算進去）"
+                )
 
         w = weights.get(feature, 1.0)
         weighted_sum += w * d

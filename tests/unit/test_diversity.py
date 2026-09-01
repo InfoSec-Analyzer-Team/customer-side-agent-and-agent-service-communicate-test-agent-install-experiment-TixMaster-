@@ -173,7 +173,41 @@ def test_stage_diversity_full_collapse_warns():
     df["os_type"] = 1  # 支撐特徵完全無變異
     report = stage_diversity(df, stage_id=2, cfg=cfg)
     assert report.per_feature["os_type"].d == 0.0
-    assert any("os_type" in w and "塌縮" in w for w in report.warnings)
+    assert report.per_feature["os_type"].collapsed is True
+    assert any("os_type" in w and "只有 1 種取值" in w for w in report.warnings)
+
+
+def test_stage_diversity_qcd_zero_but_not_collapsed_gets_distinct_warning():
+    # 迴歸測試：url_depth={1: 237, 2: 27}（少數值佔 10%）這種真實案例，
+    # QCD 算出 0（Q1=Q3=1），但 nunique=2，不是真塌縮。之前的訊息一律寫
+    # 「完全塌縮」，會讓 strict gate「塌縮數 >=1 就擋」誤觸——這裡驗證
+    # d=0 時，nunique>1 的數值特徵要走不同的訊息分支，且 collapsed=False。
+    n = 300
+    df = _stage2_fixture(n=n)
+    # 90% 為 1、10% 為 2 → Q1=Q3=1 → QCD=0，但明明有兩種取值
+    df["url_length"] = [1] * (n - 30) + [2] * 30
+    report = stage_diversity(df, stage_id=2, cfg=cfg)
+
+    pf = report.per_feature["url_length"]
+    assert pf.d == 0.0
+    assert pf.collapsed is False
+    assert not any("url_length" in w and "只有 1 種取值" in w for w in report.warnings)
+    assert any(
+        "url_length" in w and "QCD=0" in w and "不是真塌縮" in w
+        for w in report.warnings
+    )
+
+
+def test_stage_diversity_numeric_true_collapse_still_flagged_as_collapsed():
+    n = 300
+    df = _stage2_fixture(n=n)
+    df["url_length"] = 5  # 全部同一個值，數值型真塌縮
+    report = stage_diversity(df, stage_id=2, cfg=cfg)
+
+    pf = report.per_feature["url_length"]
+    assert pf.d == 0.0
+    assert pf.collapsed is True
+    assert any("url_length" in w and "只有 1 種取值" in w for w in report.warnings)
 
 
 def test_stage_diversity_defining_flag_violation_warns():

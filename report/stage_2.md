@@ -6,10 +6,10 @@
 ## Warnings
 
 - ⚠️ stage 2: 102/378 筆樣本不符合定義判準 [{'feature': 'has_sql_injection', 'op': 'eq', 'value': 1, 'exclude_from_support': True}]，可能混入其他 stage 的樣本，或定義判準本身設錯（明細見 StageDiversityReport.defining_violations）
-- ⚠️ stage 2: 支撐特徵 'os_type' 完全塌縮（d=0）
-- ⚠️ stage 2: 支撐特徵 'ua_length' 完全塌縮（d=0）
-- ⚠️ stage 2: 支撐特徵 'url_param_count' 完全塌縮（d=0）
-- ⚠️ stage 2: 支撐特徵 'request_method' 完全塌縮（d=0）
+- ⚠️ stage 2: 支撐特徵 'os_type' 完全塌縮（d=0，只有 1 種取值）
+- ⚠️ stage 2: 支撐特徵 'ua_length' 完全塌縮（d=0，只有 1 種取值）
+- ⚠️ stage 2: 支撐特徵 'url_param_count' 的 QCD=0，但實際有 2 種取值（不是真塌縮，是低基數或尾部集中分布讓 Q1=Q3——見 §2.3 QCD 已知限制，strict 門檻的「塌縮數」不該把這種情況算進去）
+- ⚠️ stage 2: 支撐特徵 'request_method' 完全塌縮（d=0，只有 1 種取值）
 
 ## 不符合定義判準的樣本
 

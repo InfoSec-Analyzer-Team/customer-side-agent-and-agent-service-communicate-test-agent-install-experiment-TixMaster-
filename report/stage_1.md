@@ -6,7 +6,7 @@
 ## Warnings
 
 - ⚠️ stage 1: 13549/16107 筆樣本不符合定義判準 [{'feature': 'accesses_sensitive_path', 'op': 'eq', 'value': 1, 'exclude_from_support': True}]，可能混入其他 stage 的樣本，或定義判準本身設錯（明細見 StageDiversityReport.defining_violations，只列前 500 筆，真實總數見 defining_violations_total）
-- ⚠️ stage 1: 支撐特徵 'ua_length' 完全塌縮（d=0）
+- ⚠️ stage 1: 支撐特徵 'ua_length' 的 QCD=0，但實際有 11 種取值（不是真塌縮，是低基數或尾部集中分布讓 Q1=Q3——見 §2.3 QCD 已知限制，strict 門檻的「塌縮數」不該把這種情況算進去）
 
 ## 不符合定義判準的樣本
 

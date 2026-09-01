@@ -5,8 +5,8 @@
 
 ## Warnings
 
-- ⚠️ stage 3: 支撐特徵 'os_type' 完全塌縮（d=0）
-- ⚠️ stage 3: 支撐特徵 'request_method' 完全塌縮（d=0）
+- ⚠️ stage 3: 支撐特徵 'os_type' 完全塌縮（d=0，只有 1 種取值）
+- ⚠️ stage 3: 支撐特徵 'request_method' 完全塌縮（d=0，只有 1 種取值）
 
 ## 支撐特徵明細
 
