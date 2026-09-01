@@ -11,8 +11,8 @@
 
 ```
 logs/access1_Aman.log==0
-logs/access2_Dicurigai_sensitive_path.log,collected/nginx01_batch_nikto_scan_001.log==1
-collected/nginx01_batch_sqlmap_sqli_001.log==2
+logs/access2_Dicurigai_sensitive_path.log,collected/nginx01_batch_nikto_scan_xff_clean_003.log==1
+collected/nginx01_batch_sqli_sqlmap_randomua_002.log==2
 ```
 
 - path 是**相對 `nginx/` 的路徑**（不是相對 `nginx/logs/`，也不是完整路徑）——
@@ -50,18 +50,19 @@ stage id 進來只會讓 `defining_violations` 洗版。這種批次**不放進*
 
 ## 目前每個 stage 條目的來源
 
-- stage 0（benign）：`nginx/logs/access1_Aman.log`
-- stage 1（敏感路徑）：手打探測 `access2_Dicurigai_sensitive_path.log` +
-  `nginx01_batch_nikto_scan_001.log`（Nikto 掃描，範圍比規格 §3.2 的 16 個
-  關鍵字廣很多，兩者合併看待）
-- stage 2（SQLi）：`nginx01_batch_sqlmap_sqli_001.log`（sqlmap 產生）
-- stage 3（XSS）：`nginx01_batch_xss_001.log`（手動 payload）
-- stage 4（路徑遍歷）：`nginx01_batch_path_traversal_001.log`（手動 payload）
-- stage 6（檔案包含 LFI/RFI）：`LFI_method_record/access3_Local_file_inclusion_1.log`（手動 payload,打真實
-  attachment sink）+ `access4_Local_file_inclusion_2_wfuzz.log`（wfuzz +
-  SecLists `LFI-gracefulsecurity-linux.txt`,純絕對路徑,對這個 sink 100%
-  404,shape 單一）+ `access5_Local_file_inclusion_3_wfuzz.log`（wfuzz + 客製
-  `lfi_sink_traversal_wordlist.txt`,200/404/500 三種真實回應都有）
+- stage 0（benign）：`nginx/logs/access1_Aman_clean.log`
+- stage 1（敏感路徑 / scanner probe）：手打探測 `logs/access2_Dicurigai_sensitive_path.log` + Nikto controlled scan clean subset `collected/nginx01_batch_nikto_scan_xff_clean_003.log`
+- stage 2（SQLi）：`collected/nginx01_batch_sqli_sqlmap_randomua_002.log` + night/IP/POST method diversity batches
+- stage 3（XSS）：`collected/nginx01_batch_xss_zap_fullscan_clean_001.log` + ffuf night/IP/POST method diversity batches
+- stage 4（Path Traversal）：`collected/nginx01_batch_path_traversal_ffuf_002.log` + IP/UA/POST method diversity batches
+- stage 5（Command Injection）：`collected/nginx01_batch_command_injection_commix_001.log` + ffuf night/POST method diversity batches
+- stage 6（LFI/RFI）：`LFI_method_record/access3_Local_file_inclusion_1.log` + `access4_Local_file_inclusion_2_wfuzz_clean.log` + `access5_Local_file_inclusion_3_wfuzz.log`
+- stage 7（Double Encoding）：`collected/nginx01_batch_double_encoding_ffuf_002.log` + IP/UA/POST method diversity batches
+- stage 8（URL Encoding Count）：`collected/nginx01_batch_url_encoding_count_ffuf_001.log` + IP/UA/POST method diversity batches
+- stage 9（Special Chars Dense）：`collected/nginx01_batch_special_chars_dense_ffuf_001.log` + IP/UA/POST method diversity batches
+- stage 10（Scanner UA）：`collected/nginx01_batch_scanner_ua_gobuster_005.log` + IP/UA diversity batch
+- stage 11（Abnormal Methods）：`collected/nginx01_batch_abnormal_methods_ffuf_002.log` + clean-IP method diversity batch
+- stage 12（Abnormal URL）：`collected/nginx01_batch_abnormal_url_ffuf_001.log` + IP/UA/POST method diversity batches
 
-詳細收集方式見 `nginx/collected/collection_method.md` 第 6 節，sink 本身的
-設計與風險說明見 `Verify_doc/lfi_sink.md`。
+詳細收集方式見 `nginx/collected/collection_method.md`。LFI sink 本身的設計與風險說明見 `Verify_doc/lfi_sink.md`。
+

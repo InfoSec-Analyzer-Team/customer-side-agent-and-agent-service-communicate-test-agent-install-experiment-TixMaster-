@@ -1,0 +1,9 @@
+batch_id: access1_Aman_clean
+label: AMAN
+stage: 0
+source_log: logs\access1_Aman.log
+count_original: 912
+count_collected: 911
+removed_malformed_lines: 1
+notes: Clean parser-compatible subset from access1_Aman.log; excluded malformed/non-combined lines only.
+timezone_note: nginx timestamp is UTC; local time is Asia/Taipei UTC+8

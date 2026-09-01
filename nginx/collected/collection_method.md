@@ -22,7 +22,7 @@
 | `collected/nginx01_batch_url_encoding_count_ffuf_001.log` | BAHAYA | 8 | ffuf | 36 | Single-layer and multi-layer URL-encoded attack payloads against `/api/events?keyword=` |
 | `collected/nginx01_batch_special_chars_dense_ffuf_001.log` | BAHAYA | 9 | ffuf | 30 | Dense special-character attack payloads against `/api/events?keyword=` |
 | `collected/nginx01_batch_scanner_ua_gobuster_005.log` | BAHAYA | 10 | gobuster | 33 | Scanner User-Agent and directory enumeration traffic against the lab target |
-| `collected/nginx01_batch_abnormal_methods_ffuf_002.log` | BAHAYA | 11 | ffuf | 100 | PUT/DELETE/OPTIONS/PATCH/TRACE requests against common lab paths |
+| `collected/nginx01_batch_abnormal_methods_ffuf_002.log` | BAHAYA | 11 | ffuf | 100 | PUT/DELETE/OPTIONS/PATCH/HEAD requests against common lab paths |
 | `collected/nginx01_batch_abnormal_url_ffuf_001.log` | BAHAYA | 12 | ffuf | 30 | Deep paths, long paths, repeated parameters, traversal-like segments, and unusual delimiters |
 | `collected/nginx01_batch_command_injection_commix_001.log` | BAHAYA | 5 | commix | 1666 | Command injection tool traffic against `/api/events?keyword=` |
 | `LFI_method_record/access3_Local_file_inclusion_1.log` | BAHAYA | 6 | Browser/manual LFI payload | 22 | Manual requests against the real attachment sink |
@@ -70,6 +70,36 @@ Stage 10 使用的 gobuster wordlist 保存在 `collected/scanner_ua_gobuster_wo
 Stage 11 使用的 abnormal-method path 清單保存在 `collected/abnormal_methods_ffuf_paths_001.txt`。
 Stage 12 使用的 abnormal-URL payload 清單保存在 `collected/abnormal_url_ffuf_payloads_001.txt`。
 
+
+## IP / UA Diversity Round 002
+
+The following batches reuse the same lab endpoints and tool-generated payload lists, but collect another round with a different `X-Forwarded-For` range (`10.88.x.x`) and non-default User-Agent values where appropriate. These are not new stages; they are additional logs mapped to the same stage IDs to reduce IP and UA shortcut risk.
+
+| Log | Stage | Tool | Count | Diversity change |
+|---|---:|---|---:|---|
+| `collected/nginx01_batch_path_traversal_ffuf_ipua_003.log` | 4 | ffuf | 33 | `10.88.4.31`, browser-like Chrome UA |
+| `collected/nginx01_batch_double_encoding_ffuf_ipua_003.log` | 7 | ffuf | 34 | `10.88.7.31`, browser-like Firefox UA |
+| `collected/nginx01_batch_url_encoding_count_ffuf_ipua_002.log` | 8 | ffuf | 36 | `10.88.8.31`, browser-like Edge UA |
+| `collected/nginx01_batch_special_chars_dense_ffuf_ipua_002.log` | 9 | ffuf | 30 | `10.88.9.31`, browser-like Safari UA |
+| `collected/nginx01_batch_scanner_ua_gobuster_ipua_002.log` | 10 | gobuster | 33 | `10.88.10.31`, alternate gobuster UA |
+| `collected/nginx01_batch_abnormal_methods_ffuf_ipua_004.log` | 11 | ffuf | 100 | `10.88.11.32`, browser-like Chrome/Linux UA |
+| `collected/nginx01_batch_abnormal_url_ffuf_ipua_003.log` | 12 | ffuf | 30 | `10.88.12.32`, browser-like mobile Safari UA, clean-IP URL set |
+
+Time diversity is intentionally not faked in the log files. To address time shortcut risk, collect another round in a separate real time window and map the resulting logs to the same stage IDs.
+
+
+## Night Round 003
+
+The following batches were collected in a real night time window (Asia/Taipei, UTC+8) instead of synthetically editing timestamps. They add time diversity for stages that previously had fewer later-time samples, while also using a different `X-Forwarded-For` range (`10.99.x.x`) and non-default User-Agent settings.
+
+| Log | Stage | Tool | Count | Diversity change |
+|---|---:|---|---:|---|
+| `collected/nginx01_batch_sqli_sqlmap_randomua_night_003.log` | 2 | sqlmap | 75 | night window, `10.99.2.31`, sqlmap `--random-agent` |
+| `collected/nginx01_batch_xss_ffuf_browserua_night_002.log` | 3 | ffuf | 30 | night window, `10.99.3.31`, browser-like Chrome UA |
+| `collected/nginx01_batch_command_injection_ffuf_browserua_night_002.log` | 5 | ffuf | 30 | night window, `10.99.5.32`, browser-like Chrome/Linux UA; complements commix baseline |
+
+A second commix run was attempted for stage 5, but the Kali package installation did not reach the request phase in a reasonable time window. No formal log was kept from that failed attempt; the retained night round uses ffuf-generated command injection payload traffic.
+
 ## Labeling Rule
 
 Nginx access.log 本身不包含 label。Label 應寫在對應 `.meta.txt`，或由 `stage_log_map.txt` 在轉 dataset 時補上。
@@ -86,3 +116,55 @@ AMAN      = 正常流量
 
 
 
+
+
+
+
+## POST Method Diversity Round 004
+
+The following batches were collected after review feedback that most attack logs were GET-only. They are real tool-generated requests through Nginx, not hand-written logs. Because the current Nginx parser expects the standard `combined` log format and does not record request bodies, these batches use POST requests while keeping the attack payload in the query string. This preserves both the HTTP method and the payload in `access.log` without changing the parser contract.
+
+| Log | Stage | Tool | Count | Method | Notes |
+|---|---:|---|---:|---|---|
+| `collected/nginx01_batch_sqli_sqlmap_postquery_night_005.log` | 2 | sqlmap | 147 | POST | POST `/api/users/login` with SQLi probes; sqlmap `--random-agent`, `10.99.2.42` |
+| `collected/nginx01_batch_xss_ffuf_postquery_night_004.log` | 3 | ffuf | 30 | POST | XSS payloads against `/api/events?keyword=FUZZ`, browser-like UA, `10.99.3.41` |
+| `collected/nginx01_batch_path_traversal_ffuf_postquery_night_004.log` | 4 | ffuf | 33 | POST | traversal payloads against attachment path, `10.99.4.41` |
+| `collected/nginx01_batch_command_injection_ffuf_postquery_night_004.log` | 5 | ffuf | 30 | POST | command injection payloads against `/api/events?keyword=FUZZ`, `10.99.5.41` |
+| `collected/nginx01_batch_double_encoding_ffuf_postquery_night_004.log` | 7 | ffuf | 34 | POST | double-encoded payloads, `10.99.7.41` |
+| `collected/nginx01_batch_url_encoding_count_ffuf_postquery_night_004.log` | 8 | ffuf | 36 | POST | URL-encoding-heavy payloads, `10.99.8.41` |
+| `collected/nginx01_batch_special_chars_dense_ffuf_postquery_night_004.log` | 9 | ffuf | 30 | POST | special-character-dense payloads, `10.99.9.41` |
+| `collected/nginx01_batch_abnormal_url_ffuf_post_night_004.log` | 12 | ffuf | 30 | POST | abnormal URL paths using POST, `10.99.12.41` |
+
+Validation result for this round: all eight new files are parseable Nginx combined logs (`bad_format=0`) and each file is 100% POST. This does not eliminate every method shortcut by itself, but it removes the previous GET-only shape for the major attack stages while keeping log format compatible with the existing ML pipeline.
+
+## Nikto Stage 1補強
+
+PR feedback noted that stage 1 should combine the manual sensitive-path probe with a Nikto scanner batch. A controlled Nikto run was collected against the local Nginx/TixMaster lab target with a 45-second cap:
+
+```text
+collection: Nikto v2.6.1 real scan through local Nginx with a 45-second cap
+formal mapped log: collected/nginx01_batch_nikto_scan_xff_clean_003.log
+stage: 1
+label: DICURIGAI
+tool: nikto
+count: 4479
+source IP: 10.99.1.41 via X-Forwarded-For
+```
+
+The formal mapped file is a parser-compatible subset of the real Nginx access log. It excludes malformed/pre-header rejection lines and lines where Nginx could not apply the X-Forwarded-For source IP. This keeps the dataset compatible with the current Nginx combined-log parser while preserving real tool-generated traffic.
+
+Caveat: Nikto still has a strong scanner User-Agent fingerprint. It is included because stage 1 explicitly covers sensitive-path/scanner probing, but it should not be treated as solving UA diversity by itself.
+
+
+
+## Parser-Compatible Clean Subsets
+
+Some real tool/browser traffic can produce malformed or pre-header request lines that are valid Nginx observations but not accepted by the current combined-log parser. To keep the formal ML dataset parser-compatible, clean subset files were created without editing the original source logs.
+
+| Formal mapped log | Source log | Removed | Reason |
+|---|---|---:|---|
+| `logs/access1_Aman_clean.log` | `logs/access1_Aman.log` | 1 | malformed/non-combined line |
+| `collected/nginx01_batch_xss_zap_fullscan_clean_001.log` | `collected/nginx01_batch_xss_zap_fullscan_001.log` | 3 | ZAP TLS/pre-header probe lines such as `"\x16"` |
+| `LFI_method_record/access4_Local_file_inclusion_2_wfuzz_clean.log` | `LFI_method_record/access4_Local_file_inclusion_2_wfuzz.log` | 1 | malformed/non-combined line |
+
+The original raw logs are preserved for auditability. `stage_log_map.txt` points to the clean files so dataset conversion and diversity checks do not fail on malformed lines.
