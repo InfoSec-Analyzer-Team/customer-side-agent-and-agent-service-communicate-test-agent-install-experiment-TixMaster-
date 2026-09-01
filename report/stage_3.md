@@ -1,7 +1,7 @@
 # Stage 3 多元度驗收報告 — XSS
 
 - 樣本數：250
-- **Diversity_stage = 0.1178**
+- **Diversity_stage = 0.0598**
 
 ## Warnings
 
@@ -14,7 +14,6 @@
 | --- | --- | --- | --- |
 | `url_special_chars` | 0.0769 | — | — |
 | `url_length` | 0.1111 | — | — |
-| `ua_length` | 0.4074 | — | — |
 | `url_encoding_count` | 0.1111 | — | — |
 | `os_type` | 0.0000 | 0.12 | 0, 1, 2, 3, 4, 5, 6 |
 | `request_method` | 0.0000 | 0.12 | DELETE, HEAD, OPTIONS, PATCH, POST, PUT, TRACE |

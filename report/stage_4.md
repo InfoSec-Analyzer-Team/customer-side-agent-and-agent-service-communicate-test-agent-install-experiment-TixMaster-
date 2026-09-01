@@ -1,7 +1,7 @@
 # Stage 4 多元度驗收報告 — 路徑遍歷
 
 - 樣本數：120（⚠️ provisional，< MIN_SAMPLES，數字僅供參考）
-- **Diversity_stage = 0.2351**
+- **Diversity_stage = 0.1763**
 
 ## Warnings
 
@@ -45,5 +45,4 @@
 | `url_length` | 0.2679 | — | — |
 | `url_encoding_count` | 0.2800 | — | — |
 | `os_type` | 0.0000 | 0.12 | 0, 1, 2, 3, 4, 5, 6 |
-| `ua_length` | 0.5294 | — | — |
 | `has_double_encoding` | 0.0000 | 0.50 | 1 |

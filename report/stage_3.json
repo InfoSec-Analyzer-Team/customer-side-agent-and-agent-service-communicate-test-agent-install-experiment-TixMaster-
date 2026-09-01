@@ -1,7 +1,7 @@
 {
   "stage_id": 3,
   "n_samples": 250,
-  "diversity_score": 0.11775878442545111,
+  "diversity_score": 0.059829059829059825,
   "provisional": false,
   "per_feature": {
     "url_special_chars": {
@@ -10,10 +10,6 @@
     },
     "url_length": {
       "d": 0.1111111111111111,
-      "collapsed": false
-    },
-    "ua_length": {
-      "d": 0.4074074074074074,
       "collapsed": false
     },
     "url_encoding_count": {

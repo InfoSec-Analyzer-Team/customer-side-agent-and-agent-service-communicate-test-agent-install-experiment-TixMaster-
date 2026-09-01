@@ -1,12 +1,11 @@
 # Stage 1 多元度驗收報告 — 敏感路徑
 
 - 樣本數：16107
-- **Diversity_stage = 0.2142**
+- **Diversity_stage = 0.2571**
 
 ## Warnings
 
 - ⚠️ stage 1: 13549/16107 筆樣本不符合定義判準 [{'feature': 'accesses_sensitive_path', 'op': 'eq', 'value': 1, 'exclude_from_support': True}]，可能混入其他 stage 的樣本，或定義判準本身設錯（明細見 StageDiversityReport.defining_violations，只列前 500 筆，真實總數見 defining_violations_total）
-- ⚠️ stage 1: 支撐特徵 'ua_length' 的 QCD=0，但實際有 11 種取值（不是真塌縮，是低基數或尾部集中分布讓 Q1=Q3——見 §2.3 QCD 已知限制，strict 門檻的「塌縮數」不該把這種情況算進去）
 
 ## 不符合定義判準的樣本
 
@@ -40,7 +39,6 @@
 | 特徵 | d(f) | coverage | missing |
 | --- | --- | --- | --- |
 | `os_type` | 0.0520 | 0.25 | 0, 2, 3, 4, 5, 6 |
-| `ua_length` | 0.0000 | — | — |
 | `request_method` | 0.0377 | 0.75 | DELETE, PATCH |
 | `url_depth` | 0.5000 | — | — |
 | `url_length` | 0.6706 | — | — |
