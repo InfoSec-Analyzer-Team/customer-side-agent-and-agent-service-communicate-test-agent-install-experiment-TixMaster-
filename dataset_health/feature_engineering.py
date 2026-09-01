@@ -16,16 +16,57 @@
 import pandas as pd
 import numpy as np
 import re
+from urllib.parse import unquote
+
+# 敏感路徑偵測用的 token 清單，跟 processing/pipeline_utils.py 的 _SENSITIVE_PATHS
+# 保持一致（那支是即時 serving pipeline，這裡是離線訓練端，兩邊定義不同步會造成
+# training-serving skew）。
+SENSITIVE_PATH_TOKENS = [
+    'admin', 'backup', 'config', 'database', 'db',
+    'test', 'temp', 'tmp', 'log', 'old', 'bak',
+    'phpmyadmin', 'wp-admin', 'wp-login', '.git', '.env', '.env.example'
+]
+# (?<![A-Za-z]) ... (?![A-Za-z]) 要求 token 前後不能緊接英文字母，避免像
+# "log" 誤中 "blog"/"login"、"old" 誤中 "gold"/"household"/"folder"、
+# "test" 誤中 "latest"/"protest"/"testimonial" 這種純粹是英文單字巧合包含該
+# 子字串、跟真正的敏感路徑段完全無關的情況。結尾的 s? 讓 "/logs/"、"/tests/"
+# 這類複數目錄名仍然算命中。
+#
+# 兩個 token 需要跟通用規則不一樣：
+# - "admin"：英文裡幾乎所有以 admin 開頭的字都是管理後台相關
+#   （administrator/administration/adminpanel...），結尾邊界反而會漏掉
+#   Joomla 預設後台 /administrator/ 這類真實攻擊目標，所以放寬結尾不設限制，
+#   只保留開頭邊界（避免 "superadmin" 這種被別的字首接住的情況跑掉）。
+# - "db"：只有兩個字母，太容易在英數混合的商品型號／SKU 裡湊巧出現，例如
+#   "MDP860DB"（數字直接接在 db 前面）、"Sink-DB-125"、"DB-134"（db 隔著一個
+#   連字號/底線接數字，比直接相鄰更隱蔽）。所以前後除了字母、數字，也要排除
+#   「連字號或底線後面接數字」這種情況，比其他 token 嚴格得多。
+def _sensitive_path_regex(token: str) -> re.Pattern:
+    esc = re.escape(token)
+    if token == 'admin':
+        return re.compile(rf'(?<![A-Za-z]){esc}')
+    if token == 'db':
+        return re.compile(
+            rf'(?<![A-Za-z0-9])(?<!\d[-_]){esc}(?![A-Za-z0-9])(?![-_]\d)'
+        )
+    return re.compile(rf'(?<![A-Za-z]){esc}s?(?![A-Za-z])')
+
+
+SENSITIVE_PATH_PATTERNS = {
+    token: _sensitive_path_regex(token) for token in SENSITIVE_PATH_TOKENS
+}
 
 try:
     from .time_features import compute_time_features
     from .attack_patterns import (
         SQL_PATTERNS, XSS_PATTERNS, PATH_TRAVERSAL_PAT, CMD_PATTERNS, FILE_INCLUSION_PAT,
+        has_sql_tautology_expression,
     )
 except ImportError:  # 以獨立 script 執行，或非套件 context 匯入時（例如 api.py）
     from time_features import compute_time_features
     from attack_patterns import (
         SQL_PATTERNS, XSS_PATTERNS, PATH_TRAVERSAL_PAT, CMD_PATTERNS, FILE_INCLUSION_PAT,
+        has_sql_tautology_expression,
     )
 
 
@@ -246,8 +287,13 @@ def extract_url_features(df):
     # <> ' ";%( ) [ ]{}
 
     # ===== SQL Injection 特徵 =====
-    df['has_sql_injection'] = df['url'].str.contains(
-        '|'.join(SQL_PATTERNS), case=False, na=False, regex=True
+    # 兩層偵測：SQL_PATTERNS 這個大 regex 抓字面樣式（含裸數字緊鄰 = 的
+    # boolean-blind tautology，如 "22=44"）；has_sql_tautology_expression()
+    # 額外用安全 AST 求值抓被括號/運算子包裝過、regex 抓不到的算式 tautology
+    # （如 "(22+22)=44"），見 attack_patterns.py 的說明。
+    df['has_sql_injection'] = (
+        df['url'].str.contains('|'.join(SQL_PATTERNS), case=False, na=False, regex=True)
+        | df['url'].fillna('').apply(has_sql_tautology_expression)
     ).astype(int)
 
     # ===== XSS (Cross-Site Scripting) 特徵 =====
@@ -280,14 +326,22 @@ def extract_url_features(df):
     ).astype(int)
 
     # ===== 敏感路徑檢測 =====
-    sensitive_paths = [
-        'admin', 'backup', 'config', 'database', 'db',
-        'test', 'temp', 'tmp', 'log', 'old', 'bak',
-        'phpmyadmin', 'wp-admin', 'wp-login', '.git', '.env', '.env.example'
-    ]
-    df['accesses_sensitive_path'] = df['url'].apply(
-        lambda x: int(any(path in str(x).lower() for path in sensitive_paths)) if pd.notna(x) else 0
-    )
+    def _has_sensitive_path(url) -> int:
+        if pd.isna(url):
+            return 0
+        # 只比對 path，不掃 query string —— 否則像 "?forwardUri=%2Fadmin" 這種
+        # query 參數值裡帶有跳轉目標的正常請求會被誤判成存取敏感路徑（實際請求的
+        # path 是 /login/auth，跟 admin 無關）。用原始、未解碼的 '?' 切分即可，
+        # 因為合法的 URL 裡字面上的 '?' 一定是 query 分隔符（path 內若真的要有
+        # 問號字元，必須被編碼成 %3F）。
+        path_only = str(url).split('?', 1)[0]
+        # 再解掉 %XX URL 編碼比對，否則像 "db" 這種剛好都是合法 hex 字元的
+        # token，會在非 ASCII 網址（例如非英語系文字被編碼成 %D8%B3%D9%88... ）
+        # 的 %DB 這類片段裡誤中，跟真正的路徑段完全無關。
+        decoded = unquote(path_only, errors='replace').lower()
+        return int(any(p.search(decoded) for p in SENSITIVE_PATH_PATTERNS.values()))
+
+    df['accesses_sensitive_path'] = df['url'].apply(_has_sensitive_path)
 
     # ===== 副檔名類型分類 =====
     def extract_file_type(url):
