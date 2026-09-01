@@ -13,6 +13,14 @@ from pathlib import Path
 
 MIN_SAMPLES = 200  # 低於此，熵/QCD 標 provisional=true，CI 不得當硬門檻
 
+# defining_violations 明細（StageDiversityReport）超過這個數字就截斷，只留
+# 前 N 筆 + 真實總數。拿大型工具掃描（例如 15843 筆的 nikto scan，其中
+# 11223 筆不符合 stage 1 的定義判準）實測過：不截斷的話 JSON 報告會膨脹到
+# 5+ MB，且每次重跑內容都會變、被 git 追蹤只會讓 repo 越滾越大。500 這個數字
+# 純粹是「肉眼核對綽綽有餘、又不會讓報告失控變大」的經驗值，不是規格定義的
+# 門檻，需要的話可以調。
+MAX_DEFINING_VIOLATIONS = 500
+
 
 # ============================================================
 # §3.1 — 每個 stage 的定義 flag 與支撐特徵集
@@ -134,6 +142,13 @@ CARDINALITY = {
     "is_odd_hour": 2,
     "local_is_odd_hour": 2,
     "is_error_status": 2,
+    # stage 4（路徑遍歷）的支撐特徵集 F 明確保留 has_double_encoding 本身的
+    # 多元度（§3.1 表格 row 4）——這裡跟其他 stage 排除定義 flag 的規則不同，
+    # 不是漏掉，是 stage 4 就是要看「這批路徑遍歷樣本裡，有沒有混雙重編碼
+    # 變形」。之前漏掉沒登記進 CARDINALITY/EXPECTED_VALUES，拿真實 log
+    # （nginx/collected/nginx01_batch_path_traversal_001.log）測 stage 4
+    # 時直接 ValueError，這裡補上。
+    "has_double_encoding": 2,
 }
 
 EXPECTED_VALUES = {
@@ -164,6 +179,7 @@ EXPECTED_VALUES = {
     "is_odd_hour": [0, 1],
     "local_is_odd_hour": [0, 1],
     "is_error_status": [0, 1],
+    "has_double_encoding": [0, 1],
 }
 
 
@@ -202,23 +218,30 @@ STAGE_WEIGHTS = {
 # stage id，記得在這裡把它設 False。
 APPLY_TOOL_PENALTY = {stage_id: True for stage_id in SUPPORT_FEATURES}
 
-# stage_id -> log 檔案路徑。§3.7 原本一直留空的命名慣例，現在由
-# nginx/logs/stage_log_CHECK/stage_log_map.txt 拍板（格式與規則見同目錄
-# README.md）；這裡在 import 時自動解析那份純文字表，不用改這份 config.py。
-# 手動指定路徑（run_stage.py 的 --log）仍然優先於這裡的查表，兩者互不依賴。
+# stage_id -> log 檔案路徑清單（一個 stage 可以有多份 log，例如 stage 1 現在
+# 同時有手打的敏感路徑探測 + nikto 大量掃描）。§3.7 原本一直留空的命名慣例，
+# 現在由 nginx/logs/stage_log_CHECK/stage_log_map.txt 拍板（格式與規則見同
+# 目錄 README.md）；這裡在 import 時自動解析那份純文字表，不用改這份
+# config.py。手動指定路徑（run_stage.py 的 --log）仍然優先於這裡的查表，
+# 兩者互不依賴。
 _REPO_ROOT = Path(__file__).resolve().parent.parent
-_NGINX_LOGS_DIR = _REPO_ROOT / "nginx" / "logs"
-_STAGE_LOG_MAP_PATH = _NGINX_LOGS_DIR / "stage_log_CHECK" / "stage_log_map.txt"
+_NGINX_DIR = _REPO_ROOT / "nginx"
+_STAGE_LOG_MAP_PATH = _NGINX_DIR / "logs" / "stage_log_CHECK" / "stage_log_map.txt"
 
 
 def _load_stage_log_map(map_path: Path) -> dict:
-    """解析 stage_log_map.txt（`<檔名>==<stage id>`，# 開頭是註解）。
+    """解析 stage_log_map.txt。
+
+    格式：`<path1>[,<path2>,...]==<stage id>`，# 開頭是註解。每個 path 相對
+    `nginx/`（不是 `nginx/logs/`——collected/ 底下的批次也要能指到）。同一個
+    stage id 可以出現在多行，或用逗號在同一行列多個檔案，兩種寫法都會累積
+    進同一個 list，不會互相覆蓋。
 
     檔案不存在，或某一行格式不對，就跳過該行並發 warning，不讓
     `import dataset_health.config` 整個炸掉——這張表本來就是持續在填的
     施工中狀態，缺一筆不該讓其他完全無關的東西一起壞掉。
     """
-    result: dict[int, str] = {}
+    result: dict[int, list[str]] = {}
     if not map_path.exists():
         return result
 
@@ -230,8 +253,7 @@ def _load_stage_log_map(map_path: Path) -> dict:
             warnings.warn(f"{map_path}:{line_no}: 格式不對（缺 '=='），跳過：{raw_line!r}")
             continue
 
-        filename, _, stage_text = line.partition("==")
-        filename = filename.strip()
+        paths_text, _, stage_text = line.partition("==")
         stage_text = stage_text.strip()
         try:
             stage_id = int(stage_text)
@@ -239,7 +261,13 @@ def _load_stage_log_map(map_path: Path) -> dict:
             warnings.warn(f"{map_path}:{line_no}: stage id 不是整數，跳過：{raw_line!r}")
             continue
 
-        result[stage_id] = (_NGINX_LOGS_DIR / filename).relative_to(_REPO_ROOT).as_posix()
+        filenames = [f.strip() for f in paths_text.split(",") if f.strip()]
+        if not filenames:
+            warnings.warn(f"{map_path}:{line_no}: '==' 前面沒有檔名，跳過：{raw_line!r}")
+            continue
+
+        resolved = [(_NGINX_DIR / f).relative_to(_REPO_ROOT).as_posix() for f in filenames]
+        result.setdefault(stage_id, []).extend(resolved)
 
     return result
 
@@ -248,7 +276,7 @@ _LOG_PATH_MAP = _load_stage_log_map(_STAGE_LOG_MAP_PATH)
 
 # 只有 1-12（SUPPORT_FEATURES 涵蓋的攻擊 stage）會被 diversity 模組吃。
 STAGE_LOG_PATHS = {
-    stage_id: path for stage_id, path in _LOG_PATH_MAP.items() if stage_id in SUPPORT_FEATURES
+    stage_id: paths for stage_id, paths in _LOG_PATH_MAP.items() if stage_id in SUPPORT_FEATURES
 }
 
 # stage 0（benign/非攻擊，見 stage_log_CHECK/README.md）以及其他不在
@@ -258,7 +286,7 @@ STAGE_LOG_PATHS = {
 # diversity 這份規格只涵蓋攻擊 stage 的多元度，benign 流量的健檢屬於
 # 別的模組，不在這裡硬塞。
 NON_DIVERSITY_LOG_PATHS = {
-    stage_id: path for stage_id, path in _LOG_PATH_MAP.items() if stage_id not in SUPPORT_FEATURES
+    stage_id: paths for stage_id, paths in _LOG_PATH_MAP.items() if stage_id not in SUPPORT_FEATURES
 }
 
 # 以下欄位供後續 whole-dataset 模組（confounder.py / realism.py）共用，

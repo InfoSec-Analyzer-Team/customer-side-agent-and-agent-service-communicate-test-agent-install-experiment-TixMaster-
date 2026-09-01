@@ -1,4 +1,7 @@
 # 格式與規則見同目錄 README.md。
-# <檔名（相對 nginx/logs/）>==<stage id>
-access1_Aman.log==0
-access2_Dicurigai_sensitive_path.log==1
+# <path1>[,<path2>,...]==<stage id>，path 相對 nginx/（不是 nginx/logs/）
+logs/access1_Aman.log==0
+logs/access2_Dicurigai_sensitive_path.log,collected/nginx01_batch_nikto_scan_001.log==1
+collected/nginx01_batch_sqlmap_sqli_001.log==2
+collected/nginx01_batch_xss_001.log==3
+collected/nginx01_batch_path_traversal_001.log==4

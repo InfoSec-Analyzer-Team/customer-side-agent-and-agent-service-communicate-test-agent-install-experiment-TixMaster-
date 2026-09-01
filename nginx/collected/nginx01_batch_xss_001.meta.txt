@@ -1,0 +1,10 @@
+batch_id: nginx01_batch_xss_001
+label: BAHAYA
+traffic_type: xss_payload_attempt
+tool: powershell_manual_payload
+count_collected: 250
+nginx: nginx01
+target: http://localhost:8080
+log_file: nginx01_batch_xss_001.log
+notes: Manual XSS payload attempts against real local nginx URLs; payloads placed in query string so nginx access.log records them
+timezone_note: nginx timestamp is UTC; local time is Asia/Taipei UTC+8

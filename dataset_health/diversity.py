@@ -59,8 +59,12 @@ def _parse_time_local(raw: str) -> str:
 def load_stage_log(log_path: str, stage_id: int, cfg) -> pd.DataFrame:
     """讀一份 stage 的裸 access.log，parse 成 create_all_features() 需要的
     原始欄位 DataFrame（ip, request, referer, status, size, browser, datetime），
-    外加一個 `log_line_no`（原始檔案的 1-indexed 行號，create_all_features()
-    不會動它，會原樣保留到最終特徵表，供 `defining_violations` 回頭定位用）。
+    外加兩個定位用欄位（create_all_features() 不會動它們，會原樣保留到最終
+    特徵表，供 `defining_violations` 回頭定位用）：
+      - `log_line_no`：原始檔案的 1-indexed 行號。
+      - `log_source`：這一列是從哪份檔案讀出來的（= log_path）。單一 stage
+        可能合併多份 log（見 load_stage_logs），單靠 log_line_no 會分不出
+        「第 5 行」是哪一份檔案的第 5 行，所以兩欄要一起看。
 
     純 I/O + parsing，不算任何特徵。`stage_id`/`cfg` 目前不影響 parsing 本身
     （介面依 §4 契約保留，供未來需要依 stage 調整 parsing 規則時使用）。
@@ -83,6 +87,7 @@ def load_stage_log(log_path: str, stage_id: int, cfg) -> pd.DataFrame:
                 # 1-indexed，對應編輯器裡看到的行號，方便回頭定位是哪一行原始
                 # log（例如 diagnostics 裡「哪幾筆不符合定義判準」要能點回去看）。
                 "log_line_no": line_no,
+                "log_source": log_path,
                 "ip": ip,
                 "datetime": _parse_time_local(time_local),
                 "request": request,
@@ -100,6 +105,21 @@ def load_stage_log(log_path: str, stage_id: int, cfg) -> pd.DataFrame:
         )
 
     return pd.DataFrame(rows)
+
+
+def load_stage_logs(log_paths: list[str], stage_id: int, cfg) -> pd.DataFrame:
+    """對每個 path 各呼叫一次 load_stage_log()，垂直合併成一份 DataFrame。
+
+    一個 stage 可能同時有好幾批 log（例如 stage 1 手打的敏感路徑探測 +
+    nikto 大量掃描），要合起來一起評多元度，才是這個 stage 真正收集到的
+    全貌，不是各批各自算再取平均。`log_source`/`log_line_no` 兩欄讓合併
+    之後還能回頭定位是哪份檔案的哪一行。
+    """
+    frames = [load_stage_log(p, stage_id=stage_id, cfg=cfg) for p in log_paths]
+    non_empty = [f for f in frames if not f.empty]
+    if not non_empty:
+        return pd.DataFrame()
+    return pd.concat(non_empty, ignore_index=True)
 
 
 def extract_stage_features(df_raw: pd.DataFrame) -> pd.DataFrame:
@@ -246,7 +266,7 @@ def _defining_conditions(stage_id: int, cfg) -> list:
 # 跟編輯器行號對得上）；其餘是常見的識別欄位。單元測試餵的 fixture 通常沒有
 # 這些欄位，缺的就跳過，不強制要求。
 _VIOLATION_CONTEXT_COLUMNS = [
-    "log_line_no", "ip", "datetime", "request", "url", "request_method", "browser",
+    "log_source", "log_line_no", "ip", "datetime", "request", "url", "request_method", "browser",
 ]
 
 
@@ -272,37 +292,48 @@ def _describe_violations(bad: pd.DataFrame) -> list[dict]:
     return violations
 
 
-def _defining_violations(df: pd.DataFrame, stage_id: int, cfg) -> tuple[list[str], list[dict]]:
+def _defining_violations(df: pd.DataFrame, stage_id: int, cfg) -> tuple[list[str], list[dict], int]:
     """步驟 1：用 cfg.DEFINING_FLAG / DEFINING_PREDICATE 驗證這批確實屬於此
     stage（不符 → warn，並回傳每一筆不符合樣本的定位資訊）。stage 10/12 這種
-    「目標即多樣性」型沒有判準，兩者都回空。
+    「目標即多樣性」型沒有判準，三者都回空/0。
+
+    回傳 (warnings, violations, n_bad_total)：`violations` 依
+    cfg.MAX_DEFINING_VIOLATIONS 截斷（大型工具掃描動輒上萬筆不符合，明細
+    塞滿 JSON 沒有意義，還會讓報告檔案不必要地肥大）；`n_bad_total` 永遠是
+    真實總數，截斷與否都不失真。
     """
     conditions = _defining_conditions(stage_id, cfg)
     if not conditions:
-        return [], []
+        return [], [], 0
 
     n = len(df)
     if n == 0:
-        return [], []
+        return [], [], 0
 
     mask = pd.Series(True, index=df.index)
     for cond in conditions:
         try:
             mask &= _eval_condition(df, cond)
         except KeyError as exc:
-            return [f"stage {stage_id}: {exc}"], []
+            return [f"stage {stage_id}: {exc}"], [], 0
 
     bad = df.loc[~mask]
-    if bad.empty:
-        return [], []
+    n_bad = len(bad)
+    if n_bad == 0:
+        return [], [], 0
 
-    violations = _describe_violations(bad)
+    max_violations = getattr(cfg, "MAX_DEFINING_VIOLATIONS", None)
+    truncated = max_violations is not None and n_bad > max_violations
+    violations = _describe_violations(bad.iloc[:max_violations] if truncated else bad)
+
     warning = (
-        f"stage {stage_id}: {len(bad)}/{n} 筆樣本不符合定義判準 {conditions!r}，"
+        f"stage {stage_id}: {n_bad}/{n} 筆樣本不符合定義判準 {conditions!r}，"
         f"可能混入其他 stage 的樣本，或定義判準本身設錯"
-        f"（明細見 StageDiversityReport.defining_violations）"
+        f"（明細見 StageDiversityReport.defining_violations"
+        + (f"，只列前 {max_violations} 筆，真實總數見 defining_violations_total" if truncated else "")
+        + "）"
     )
-    return [warning], violations
+    return [warning], violations, n_bad
 
 
 # ============================================================
@@ -331,7 +362,8 @@ class StageDiversityReport:
     per_feature: dict  # feature -> PerFeatureDiversity
     warnings: list
     provisional: bool
-    defining_violations: list = dataclasses.field(default_factory=list)  # 不符合定義判準的樣本明細（見 _describe_violations）
+    defining_violations: list = dataclasses.field(default_factory=list)  # 不符合定義判準的樣本明細（見 _describe_violations，可能被 cfg.MAX_DEFINING_VIOLATIONS 截斷）
+    defining_violations_total: int = 0  # 不符合定義判準的真實總數，不受截斷影響
 
     def to_dict(self) -> dict:
         """供 report.py 序列化成 JSON（§4 輸出契約）。"""
@@ -343,6 +375,7 @@ class StageDiversityReport:
             "per_feature": {f: pf.to_dict() for f, pf in self.per_feature.items()},
             "warnings": list(self.warnings),
             "defining_violations": list(self.defining_violations),
+            "defining_violations_total": self.defining_violations_total,
         }
 
 
@@ -363,7 +396,7 @@ def stage_diversity(df: pd.DataFrame, stage_id: int, cfg) -> StageDiversityRepor
     if stage_id not in cfg.SUPPORT_FEATURES:
         raise KeyError(f"stage_diversity: 未知的 stage_id {stage_id!r}（不在 cfg.SUPPORT_FEATURES 裡）")
 
-    warnings_list, defining_violations = _defining_violations(df, stage_id, cfg)
+    warnings_list, defining_violations, defining_violations_total = _defining_violations(df, stage_id, cfg)
 
     if (
         stage_id == 9
@@ -433,4 +466,5 @@ def stage_diversity(df: pd.DataFrame, stage_id: int, cfg) -> StageDiversityRepor
         warnings=warnings_list,
         provisional=provisional,
         defining_violations=defining_violations,
+        defining_violations_total=defining_violations_total,
     )
