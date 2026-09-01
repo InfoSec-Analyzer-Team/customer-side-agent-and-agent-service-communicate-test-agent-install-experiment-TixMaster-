@@ -1,9 +1,19 @@
 # attack_patterns.py 偵測缺口 — 拿真實工具流量實測發現
 
+> **狀態(2026-09-02 更新)**：缺口 1、缺口 2 已由 `log-analysis-core` 權威版本
+> 修好，並透過 `sync/from-private` 同步進這個 repo、merge 進
+> `feat/yc-dev_nginx`（見文末「✅ 修復驗證」）。修法比這份文件原本建議的更完整
+> （缺口 2 除了裸數字 tautology，還加了括號/運算子算式的安全求值）。
+> 用同一批真實資料重新驗證後，發現**修完之後還有殘留的違規**，而且殘留不是
+> 隨機雜訊，是幾個完全沒被任何 pattern 涵蓋到的獨立技巧（`ORDER BY` 欄位數
+> 枚舉、MySQL `SLEEP()`/`BENCHMARK()`、MSSQL `WAITFOR DELAY`、Oracle
+> `DBMS_PIPE.RECEIVE_MESSAGE`）——這些記錄在文末「缺口 3（新發現）」一節，
+> 是這次驗證新發現的，還沒有人修。
+>
 > 這份文件記錄的是 **`has_path_traversal` / `has_sql_injection` 這兩個 regex
 > 本身的偵測缺口**，不是 `dataset_health`（diversity 驗收模組）的 bug。
 > `dataset_health/diversity.py` 忠實回報了「這批樣本不符合定義判準」——
-> 問題出在 `attack_patterns.py` 的 pattern 對這兩種工具產生的常見變形有漏洞，
+> 問題出在 `attack_patterns.py` 的 pattern 對這些工具產生的常見變形有漏洞，
 > 才會讓大量真實攻擊流量被判成 `has_*=0`。
 >
 > `attack_patterns.py` 的權威版本在 `log-analysis-core` repo 的
@@ -20,7 +30,7 @@
 樣本，逐筆看實際 payload 才發現的——這兩個缺口在只用少量手寫測試案例時
 不會浮現，因為手寫案例通常照著 pattern 的邏輯去寫，剛好會命中。
 
-## 缺口 1：`has_path_traversal` 漏掉 `..%2F`（dot-dot + URL 編碼斜線）
+## 缺口 1：`has_path_traversal` 漏掉 `..%2F`（dot-dot + URL 編碼斜線）✅ 已修復
 
 ```python
 PATH_TRAVERSAL_PAT = r"\.\./|\.\.\\|%2e%2e"
@@ -44,17 +54,18 @@ PATH_TRAVERSAL_PAT = r"\.\./|\.\.\\|%2e%2e"
 **105/120（87.5%）** `has_path_traversal=0`——絕大多數明確的路徑遍歷攻擊
 在這個特徵上完全偵測不到。
 
-**建議方向**（未套用，留給權威版本維護者決定）：把 `%2[fF]`、`%5[cC]`
-（分別是編碼後的 `/`、`\`）也算進斜線變形：
+**建議方向**（原本未套用，現已由權威版本採用類似寫法）：把 `%2f`、`%5c`
+（分別是編碼後的 `/`、`\`）也算進斜線變形。**權威版本實際採用的寫法**：
 
 ```python
-PATH_TRAVERSAL_PAT = r"\.\.(?:/|\\|%2[fF]|%5[cC])|%2e%2e"
+PATH_TRAVERSAL_PAT = r"\.\.(?:/|\\|%2f|%5c)|%2e%2e"
 ```
 
-需要注意：改寬鬆的同時也要留意有沒有引入誤判（例如合法檔名剛好含
-`..%2f` 字面文字的極端情境，機率很低但理論上存在）。
+跟這份文件原本建議的幾乎一樣，差別只是大小寫統一寫小寫、靠呼叫端
+`re.IGNORECASE`/`case=False` 處理（兩處呼叫端都已確認是 case-insensitive），
+不在 pattern 裡混用大小寫字元類別。驗證結果見文末「✅ 修復驗證」。
 
-## 缺口 2：`has_sql_injection` 漏掉 sqlmap 常見的數字型 boolean-blind payload
+## 缺口 2：`has_sql_injection` 漏掉 sqlmap 常見的數字型 boolean-blind payload ✅ 已修復
 
 ```python
 SQL_PATTERNS = [
@@ -81,15 +92,131 @@ WAF 規則擋下——這正是它被規避掉的原因）。
 **影響**：這個批次(378 筆，`.meta.txt` 標 `label: BAHAYA`)裡
 **259/378（68.5%）** `has_sql_injection=0`。
 
-**建議方向**（未套用，留給權威版本維護者決定，這個比缺口 1 更需要斟酌）：
-加一個通用的「數字 (=|%3D) 數字」pattern，例如
-`r"\d+\s*(?:=|%3[dD])\s*\d+"`。**這個改動的取捨比缺口 1 大**：字面
-`\d+=\d+` 在一般 query string 裡不算罕見（例如 `page=2`、`v=1` 這類參數
-剛好前後都是數字時不會誤觸，因為那是 `key=value` 不是 `value=value`，
-但如果之後要收 stage 12「異常 URL 結構」那種大量參數的樣本，或正常
-API 剛好有 `from=1&to=2` 這種語意，還是要留意會不會拉高 benign 流量的
-`has_sql_injection` 誤判率——這是為什麼沒有直接套用，需要團隊在權威版本
-那邊評估過再改。
+**建議方向**（原本未套用，現已由權威版本採用，而且比這份文件原本建議的更
+完整）：
+
+```python
+r"(?<![A-Za-z0-9_])\d+\s*(?:=|%3[dD])\s*\d+"
+```
+
+跟原本建議的差別：加了 `(?<![A-Za-z0-9_])` 排除左邊緊接字母/數字/底線的
+情況，避免像 `item1=5`、`v1=2`、`q1=100` 這種「參數名稱剛好以數字結尾」
+的正常 query string 被誤判成 `value=value` 型的 tautology——這正是原本這份
+文件提到「取捨比缺口 1 大」的那個疑慮，權威版本用排除規則解決了，不是
+放著不管。
+
+**權威版本還多做了一件事，是這份文件完全沒設想到的**：純 regex 只能認
+「裸數字緊鄰 `=`」，攻擊者只要在 `=` 前面加個括號（`(22+22)=44`）數字就不
+再緊鄰 `=`，regex 直接抓不到。權威版本額外加了
+`has_sql_tautology_expression()`：先用 regex 抓出 `=` 兩側的候選算式，再用
+Python `ast` 模組手刻白名單 walker 安全求值（只允許數字常數、`+ - * /`
+運算，其餘節點一律拒絕，不是對任意字串呼叫 `eval()`，不能被拿來當 RCE
+跳板），兩側都能算出合法數值就判定為 tautology 探測。細節見
+`dataset_health/attack_patterns.py` 該函式上方的大段註解。
+
+驗證結果見下方「✅ 修復驗證」。
+
+## ✅ 修復驗證（2026-09-02）
+
+### 方法
+
+修復透過 `sync/from-private`（同步私有 `log-analysis-core` repo 的偵測檔案）
+進到這個 repo，再經 `git merge origin/compare/yc-compare_premerge_branch`
+進到 `feat/yc-dev_nginx`。驗證方式：拿**完全同一批**真實 log
+（`nginx/collected/nginx01_batch_sqlmap_sqli_001.log` 378 筆、
+`nginx/collected/nginx01_batch_path_traversal_001.log` 120 筆——跟本文件
+一開始發現缺口時用的是同一份檔案，不是重新收集），修復前後各跑一次
+`python -m dataset_health.run_stage --stage 2` / `--stage 4`，用
+`StageDiversityReport.defining_violations_total` 比對「不符合定義判準」的
+筆數變化。
+
+### 結果
+
+| Stage | 特徵 | 修復前違規 | 修復後違規 | 下降 |
+|---|---|---|---|---|
+| 2（SQLi） | `has_sql_injection` | 259/378（68.5%） | **102/378（27.0%）** | −157 筆（−41.5 個百分點） |
+| 4（路徑遍歷） | `has_path_traversal` | 105/120（87.5%） | **30/120（25.0%）** | −75 筆（−62.5 個百分點） |
+
+兩個修復都確認有效，不是巧合或誤測——下面把修復後**剩下**的違規逐筆分類，
+證明殘留不是隨機雜訊，而是可以清楚指出原因的東西。
+
+### Stage 4 殘留的 30 筆：不是偵測缺口，是同一批次故意混了「非 traversal」的樣本
+
+```
+15 筆  /etc/passwd
+15 筆  /backend/.env
+```
+
+這兩個 payload **完全沒有 `..` 或任何遍歷語法**，是直接嘗試存取敏感檔案，
+跟 `has_path_traversal` 這個特徵的定義本來就無關（`collection_method.md`
+描述這批次同時包含「直接存取」與「用 `../` 變形讀取」兩種 payload，見該檔
+的 example payloads 清單）。這 30 筆 `PATH_TRAVERSAL_PAT` 判 0 是**正確
+行為**，stage 4 的缺口 1 已經**完全修復**（剩餘違規率降到 0，這 25% 是
+batch 組成問題，不是 regex 問題）。
+
+附帶一提，兩個 payload 的 `accesses_sensitive_path` 結果不一樣（實測
+`extract_stage_features()` 輸出確認過，不是用肉眼猜）：`/backend/.env`
+會命中（`.env` 就在 sensitive path token 清單裡），但 **`/etc/passwd`
+15 筆完全不會被任何一個 stage 1-12 的定義 flag 認領**——"etc"、"passwd"
+都不在 sensitive path token 清單裡，本身也沒有遍歷語法。這 15 筆算是
+「有攻擊意圖但目前沒有對應特徵可歸類」的資料，跟本文件的兩個 regex
+缺口是不同性質的問題（那兩個是「pattern 沒涵蓋到某個變形」，這個是
+「這個攻擊目標本身就不在任何現有特徵的偵測範圍內」），先記在這裡，不在
+這次修復範圍內。
+
+### 缺口 3（新發現）：stage 2 殘留的 102 筆，可以清楚拆成 6 類，其中 4 類是全新、目前完全沒被涵蓋的技巧
+
+用 `defining_violations` 裡的 `url` 欄位逐筆分類（102 筆全部人工核對過，
+不是抽樣）：
+
+| 類別 | 筆數 | 佔殘留比例 | 說明 |
+|---|---:|---:|---|
+| `ORDER BY` 欄位數枚舉 | 48 | 47% | 例：`id=1) ORDER BY 1-- WJqL`、`id=1' ORDER BY 2163#` |
+| MySQL `SLEEP()`/`BENCHMARK()` | 29 | 28% | 例：`id=1);SELECT SLEEP(5)#`（見下方原因說明） |
+| Oracle `DBMS_PIPE.RECEIVE_MESSAGE` | 10 | 10% | 例：`id=1 AND 9288=DBMS_PIPE.RECEIVE_MESSAGE(CHR(86)\|\|CHR(83)\|\|CHR(79)\|\|CHR(122),5)` |
+| MSSQL `WAITFOR DELAY` | 10 | 10% | 例：`id=1 WAITFOR DELAY '0:0:5'` |
+| 純 baseline 探測（真的不是 SQLi） | 3 | 3% | 例：`id=1`、`id=6275`——sqlmap 正式打 payload 前的基準請求 |
+| 特殊字元 fuzzing（無法歸類） | 2 | 2% | 例：`id=1))(.)'.,")"`、`id=1'PDjlVW<'">YGheEx`——測試應用程式對雜亂符號的反應，沒有可辨識的 SQL 語法結構 |
+
+**前四類合計 97/102（95%）都是有明確 SQL 語法結構、只是目前完全沒有對應
+pattern 的技巧**，不是模糊地帶：
+
+- **`ORDER BY` 枚舉是目前最大宗、也最單純的缺口**（佔全部殘留違規的
+  47%）：這是判斷 SELECT 語句欄位數最基本、幾乎每套自動化 SQLi 工具都會用
+  的技巧，`SQL_PATTERNS` 目前完全沒有涵蓋任何形式的 `ORDER BY`。
+- **`SLEEP()`/`BENCHMARK()` 沒被抓到，不是關鍵字沒寫對，是「原始字串
+  vs. 解碼字串」的問題**：`SQL_PATTERNS` 裡本來就有 `sleep\(` 跟
+  `benchmark\(` 兩個 pattern，但 sqlmap 預設會把 payload 裡的 `(`/`)`
+  URL-encode 成 `%28`/`%29`，而 `has_sql_injection` 是直接對**原始、未解碼
+  的 URL 字串**跑 regex（跟 `has_sql_tautology_expression()`
+  一樣是對原始字串操作，只是 tautology 那個 pattern 設計時就沒有要求
+  緊鄰的括號字元）。`SLEEP%285%29` 裡的關鍵字 `SLEEP` 是明碼、但緊接著的
+  不是字面 `(` 而是 `%28`，所以 `sleep\(` 對不上。這意味著 `SQL_PATTERNS`
+  裡任何要求緊鄰特定標點符號的 pattern（`sleep\(`、`benchmark\(`、
+  `admin'--`、`--\s*$`、`#\s*$`、`;\s*--`）都可能有同樣的系統性問題，不只
+  這一個——這次驗證只實際觀察到 `sleep\(`/`benchmark\(` 被繞過，其他幾個
+  沒有在這批真實資料裡剛好被測到，但原理相通，值得一併檢視。
+- **Oracle `DBMS_PIPE.RECEIVE_MESSAGE` 跟 MSSQL `WAITFOR DELAY`**：分別是
+  Oracle 跟 MSSQL 資料庫特有的 time-based blind 技巧關鍵字，`SQL_PATTERNS`
+  目前只涵蓋了 MySQL 的 `SLEEP`/`BENCHMARK`，對這兩套資料庫方言完全沒有
+  對應 pattern（不是遇到編碼問題，是關鍵字本身就不在清單裡）。
+
+**建議方向**（未套用，一樣留給權威版本維護者評估，這幾個牽涉到要不要擴大
+偵測範圍、每加一個 pattern 都要重新評估 benign 流量誤判風險，取捨比缺口
+1/2 都大，這裡不建議在沒有充分討論前直接動手）：
+
+1. 加 `order\s+by` 這類 pattern（風險：`ORDER BY` 是完全合法的 SQL
+   子句名稱，正常應用程式的除錯訊息、API 文件字串、甚至某些設計不良但合法
+   的 API 直接把排序欄位當參數名傳（如 `?sort=name`）有機會提到這個詞，
+   但**作為 URL query string 的值**出現「order by」字樣本身已經是很強的
+   訊號，誤判機率預期比 tautology pattern 更低）。
+2. 把 `sleep\(`/`benchmark\(` 這類要求緊鄰標點的 pattern，比照
+   `has_sql_tautology_expression()` 的做法，改成也接受 `%28`/`%29`
+   編碼形式，或先對整個 URL 做一次 `unquote()` 再跑全部 pattern（後者影響
+   範圍更大，等於是整個偵測邏輯的輸入前處理方式改變，需要更謹慎評估對
+   XSS/path traversal 那幾個 pattern 有沒有副作用）。
+3. 加 `waitfor\s+delay` 與 `dbms_pipe`（或更廣的 `dbms_\w+\(`）涵蓋 MSSQL
+   跟 Oracle 的 time-based blind 技巧。
 
 ## 已知不受影響的部分
 
@@ -97,4 +224,14 @@ API 剛好有 `from=1&to=2` 這種語意，還是要留意會不會拉高 benign
 正確回報了「這批樣本不符合定義判準」，`defining_violations` 明細
 （`log_source`/`log_line_no`/`url`/...）也正確地讓人能回頭核對是哪一行——
 問題全部出在 `attack_patterns.py` 的 pattern 覆蓋率，不是 diversity
-驗收邏輯本身。
+驗收邏輯本身。這次的修復驗證（拿同一批 102/30 筆殘留違規逐筆分類）也是
+直接靠 `defining_violations` 的明細資料做的，沒有另外寫工具——這條診斷路徑
+本身在這次驗證裡又被證明一次是可靠的。
+
+## 時間軸
+
+| 日期 | 事件 |
+|---|---|
+| （本文件初版） | 用 `nginx/collected/` 真實資料跑 `dataset_health`，發現缺口 1、2，寫成本文件 |
+| 2026-09-02 | `log-analysis-core` 私有 repo 修好缺口 1、2（修法比本文件建議更完整），透過 `sync/from-private` → `git merge origin/compare/yc-compare_premerge_branch` 進到 `feat/yc-dev_nginx` |
+| 2026-09-02 | 用同一批真實資料重新驗證：stage 2 違規率 68.5%→27.0%、stage 4 違規率 87.5%→25.0%（stage 4 剩餘 25% 確認是 batch 組成問題，非 regex 缺口）；逐筆分類 stage 2 殘留的 102 筆，發現缺口 3（`ORDER BY` 枚舉／`SLEEP`＋`BENCHMARK` 編碼繞過／`WAITFOR DELAY`／`DBMS_PIPE`，見上方「缺口 3」一節） |
