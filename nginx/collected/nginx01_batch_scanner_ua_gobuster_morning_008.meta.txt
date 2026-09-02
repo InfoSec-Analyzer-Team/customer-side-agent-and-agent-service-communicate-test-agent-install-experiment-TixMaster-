@@ -1,0 +1,10 @@
+batch_id: nginx01_batch_scanner_ua_gobuster_morning_008
+label: BAHAYA
+traffic_type: scanner_ua_gobuster_morning
+tool: gobuster
+count_collected: 33
+nginx: nginx01
+target: http://localhost:8080
+log_file: nginx01_batch_scanner_ua_gobuster_morning_008.log
+notes: Morning round 005 retry: real gobuster scanner traffic through Nginx with wildcard response length 6537 excluded; alternate scanner UA and X-Forwarded-For 10.120.10.54.
+timezone_note: nginx timestamp is UTC; local time is Asia/Taipei UTC+8

@@ -82,3 +82,41 @@ stage 6: LFI_method_record/access4_Local_file_inclusion_2_wfuzz_clean.log remove
 ```
 
 原始 log 沒有刪，保留作 audit source；正式 ML map 只吃 parser-compatible Nginx combined log。
+
+## Morning round 005 補強批次
+
+已補一輪真實早上時段資料，不修改 timestamp。這輪使用新的 lab source range `10.120.x.x`，並盡量換 browser-like UA / random-agent / alternate scanner UA。
+
+```text
+stage 2  SQLi                 collected/nginx01_batch_sqli_sqlmap_randomua_morning_005.log
+stage 3  XSS                  collected/nginx01_batch_xss_ffuf_browserua_morning_005.log
+stage 4  Path Traversal       collected/nginx01_batch_path_traversal_ffuf_morning_005.log
+stage 5  Command Injection    collected/nginx01_batch_command_injection_ffuf_browserua_morning_005.log
+stage 7  Double Encoding      collected/nginx01_batch_double_encoding_ffuf_morning_005.log
+stage 8  URL Encoding Count   collected/nginx01_batch_url_encoding_count_ffuf_morning_005.log
+stage 9  Special Chars Dense  collected/nginx01_batch_special_chars_dense_ffuf_morning_005.log
+stage 10 Scanner UA           collected/nginx01_batch_scanner_ua_gobuster_morning_008.log
+stage 11 Abnormal Methods     collected/nginx01_batch_abnormal_methods_ffuf_morning_006.log
+stage 12 Abnormal URL         collected/nginx01_batch_abnormal_url_ffuf_morning_005.log
+```
+
+檢查結果：10 個新增 morning log 皆為 `bad_format=0`，且來源 IP 都落在 `10.120.x.x`。這輪主要補 time/IP/UA diversity；POST method diversity 已由 Round 004 補強。
+
+## Afternoon local-IP round 006
+
+已依目前這台電腦 IP 補下午時段資料。Nginx 綁定 `192.168.0.112:8080`，工具目標也改打 `http://192.168.0.112:8080`，不是舊的 ZeroTier IP。正式 log 內來源 IP 全部為 `192.168.0.112`。
+
+```text
+stage 2  SQLi                 collected/nginx01_batch_sqli_sqlmap_randomua_afternoon_localip_006.log
+stage 3  XSS                  collected/nginx01_batch_xss_ffuf_afternoon_localip_006.log
+stage 4  Path Traversal       collected/nginx01_batch_path_traversal_ffuf_afternoon_localip_006.log
+stage 5  Command Injection    collected/nginx01_batch_command_injection_ffuf_afternoon_localip_006.log
+stage 7  Double Encoding      collected/nginx01_batch_double_encoding_ffuf_afternoon_localip_006.log
+stage 8  URL Encoding Count   collected/nginx01_batch_url_encoding_count_ffuf_afternoon_localip_006.log
+stage 9  Special Chars Dense  collected/nginx01_batch_special_chars_dense_ffuf_afternoon_localip_006.log
+stage 10 Scanner UA           collected/nginx01_batch_scanner_ua_gobuster_afternoon_localip_006.log
+stage 11 Abnormal Methods     collected/nginx01_batch_abnormal_methods_ffuf_afternoon_localip_006.log
+stage 12 Abnormal URL         collected/nginx01_batch_abnormal_url_ffuf_afternoon_localip_006.log
+```
+
+檢查結果：10 個檔案皆為 `bad_format=0`，來源 IP 皆為 `192.168.0.112`。這輪補的是 afternoon time window + current host IP alignment；仍需註明這不是真正跨機器來源 IP diversity。

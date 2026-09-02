@@ -168,3 +168,41 @@ Some real tool/browser traffic can produce malformed or pre-header request lines
 | `LFI_method_record/access4_Local_file_inclusion_2_wfuzz_clean.log` | `LFI_method_record/access4_Local_file_inclusion_2_wfuzz.log` | 1 | malformed/non-combined line |
 
 The original raw logs are preserved for auditability. `stage_log_map.txt` points to the clean files so dataset conversion and diversity checks do not fail on malformed lines.
+
+## Morning Round 005
+
+These batches were collected in a real morning time window (Asia/Taipei, UTC+8) on 2026-09-02. The purpose is to add time/IP/UA diversity without editing timestamps. Because the current ZeroTier IP configured in `docker-compose.nginx.yml` was not present on the host, this round used a temporary localhost Nginx container (`127.0.0.1:8080`) without changing the compose file.
+
+| Log | Stage | Tool | Count | Method shape | Diversity change |
+|---|---:|---|---:|---|---|
+| `collected/nginx01_batch_sqli_sqlmap_randomua_morning_005.log` | 2 | sqlmap | 75 | GET | morning window, `10.120.2.51`, sqlmap `--random-agent` |
+| `collected/nginx01_batch_xss_ffuf_browserua_morning_005.log` | 3 | ffuf | 30 | GET | morning window, `10.120.3.51`, browser-like Chrome UA |
+| `collected/nginx01_batch_path_traversal_ffuf_morning_005.log` | 4 | ffuf | 33 | GET | morning window, `10.120.4.51`, browser-like Safari UA |
+| `collected/nginx01_batch_command_injection_ffuf_browserua_morning_005.log` | 5 | ffuf | 30 | GET | morning window, `10.120.5.51`, browser-like Chrome/Linux UA |
+| `collected/nginx01_batch_double_encoding_ffuf_morning_005.log` | 7 | ffuf | 34 | GET | morning window, `10.120.7.51`, browser-like Firefox UA |
+| `collected/nginx01_batch_url_encoding_count_ffuf_morning_005.log` | 8 | ffuf | 36 | GET | morning window, `10.120.8.51`, browser-like Edge UA |
+| `collected/nginx01_batch_special_chars_dense_ffuf_morning_005.log` | 9 | ffuf | 30 | GET | morning window, `10.120.9.51`, browser-like iPad Safari UA |
+| `collected/nginx01_batch_scanner_ua_gobuster_morning_008.log` | 10 | gobuster | 33 | GET | morning window, `10.120.10.54`, alternate gobuster UA; wildcard length excluded |
+| `collected/nginx01_batch_abnormal_methods_ffuf_morning_006.log` | 11 | ffuf | 100 | PUT/DELETE/OPTIONS/PATCH/HEAD | morning window, `10.120.11.52`, browser-like Chrome UA |
+| `collected/nginx01_batch_abnormal_url_ffuf_morning_005.log` | 12 | ffuf | 30 | GET | morning window, `10.120.12.51`, browser-like Android Firefox UA |
+
+Validation result for this round: all ten files are parseable Nginx combined logs (`bad_format=0`), use the new `10.120.x.x` lab source range, and were collected during the real morning window. This round is for time/IP/UA diversity; POST method diversity is covered by the POST Method Diversity Round 004.
+
+## Afternoon Local-IP Round 006
+
+These batches were collected in a real afternoon time window (Asia/Taipei, UTC+8) on 2026-09-02. The Nginx container was bound to the current host Wi-Fi IP `192.168.0.112:8080`, and the attack tools targeted `http://192.168.0.112:8080` instead of the previous ZeroTier IP. `X-Forwarded-For` was also set to `192.168.0.112`, so the Nginx combined access log records the current host IP for this lab collection round.
+
+| Log | Stage | Tool | Count | Source IP | Notes |
+|---|---:|---|---:|---|---|
+| `collected/nginx01_batch_sqli_sqlmap_randomua_afternoon_localip_006.log` | 2 | sqlmap | 75 | `192.168.0.112` | real sqlmap traffic, random-agent |
+| `collected/nginx01_batch_xss_ffuf_afternoon_localip_006.log` | 3 | ffuf | 30 | `192.168.0.112` | XSS payload traffic, browser-like UA |
+| `collected/nginx01_batch_path_traversal_ffuf_afternoon_localip_006.log` | 4 | ffuf | 33 | `192.168.0.112` | traversal payload traffic against attachment sink |
+| `collected/nginx01_batch_command_injection_ffuf_afternoon_localip_006.log` | 5 | ffuf | 30 | `192.168.0.112` | command injection payload traffic |
+| `collected/nginx01_batch_double_encoding_ffuf_afternoon_localip_006.log` | 7 | ffuf | 34 | `192.168.0.112` | double-encoded payload traffic |
+| `collected/nginx01_batch_url_encoding_count_ffuf_afternoon_localip_006.log` | 8 | ffuf | 36 | `192.168.0.112` | URL-encoding-heavy payload traffic |
+| `collected/nginx01_batch_special_chars_dense_ffuf_afternoon_localip_006.log` | 9 | ffuf | 30 | `192.168.0.112` | special-character-dense payload traffic |
+| `collected/nginx01_batch_scanner_ua_gobuster_afternoon_localip_006.log` | 10 | gobuster | 33 | `192.168.0.112` | scanner UA traffic; wildcard response length excluded |
+| `collected/nginx01_batch_abnormal_methods_ffuf_afternoon_localip_006.log` | 11 | ffuf | 100 | `192.168.0.112` | PUT/DELETE/OPTIONS/PATCH/HEAD method traffic |
+| `collected/nginx01_batch_abnormal_url_ffuf_afternoon_localip_006.log` | 12 | ffuf | 30 | `192.168.0.112` | abnormal URL structure traffic |
+
+Validation result: all ten afternoon local-IP files are parser-compatible (`bad_format=0`), and every line records source IP `192.168.0.112`. This round improves real time-window coverage and aligns collection with the current host IP, but it is still a local lab setup rather than true multi-machine source diversity.
