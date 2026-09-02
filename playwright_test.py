@@ -157,18 +157,31 @@ def ensure_accounts_seeded(p):
             print(f"[seed] {account['email']} 註冊例外: {e}")
     request_context.dispose()
 
-with sync_playwright() as p:
-    ensure_accounts_seeded(p)
-    browser = p.chromium.launch(headless=False)   # 產生正式流量用 headless;要肉眼檢查就改 False
-    for i in range(SESSION_COUNT):
-        context = browser.new_context(          # 每個 session 開新 context
-            user_agent=random.choice(UA_POOL)   # 隨機 UA,撐開 os_type 特徵
-        )
-        page = context.new_page()
-        try:
-            one_user_session(page)
-        except Exception as e:
-            print(f"session {i} error: {e}")
-        context.close()
-        time.sleep(random.uniform(0.2, 2.0))   # session 之間也隨機間隔
-    browser.close()
+def main() -> None:
+    with sync_playwright() as p:
+        ensure_accounts_seeded(p)
+        browser = p.chromium.launch(headless=False)   # 產生正式流量用 headless;要肉眼檢查就改 False
+        for i in range(SESSION_COUNT):
+            context = browser.new_context(          # 每個 session 開新 context
+                user_agent=random.choice(UA_POOL)   # 隨機 UA,撐開 os_type 特徵
+            )
+            page = context.new_page()
+            try:
+                one_user_session(page)
+            except Exception as e:
+                print(f"session {i} error: {e}")
+            context.close()
+            time.sleep(random.uniform(0.2, 2.0))   # session 之間也隨機間隔
+        browser.close()
+
+
+if __name__ == "__main__":
+    # 這份檔案是手動流量產生器（要真的開瀏覽器打 http://localhost:8080），
+    # 不是給 pytest 收集用的自動化測試——但檔名符合 pytest 預設
+    # python_files 規則的 *_test.py，pytest 掃到 repo 根目錄時還是會嘗試
+    # import 它。這個 guard 只解決「import 本身不該啟動瀏覽器、不該打真實
+    # 流量」這個副作用問題；CI 那個 job 根本沒裝 `playwright` 這個 PyPI
+    # 套件，所以就算加了這個 guard，pytest 光是執行到頂部的
+    # `from playwright.sync_api import sync_playwright` 就會 ModuleNotFoundError
+    # ——那個要在 ci.yml 用 --ignore 排除掉，兩個問題要一起修才行。
+    main()
