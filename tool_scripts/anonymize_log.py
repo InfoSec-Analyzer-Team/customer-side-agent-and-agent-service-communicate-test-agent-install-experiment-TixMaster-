@@ -99,9 +99,24 @@ def parse_line(raw_line):
 
 
 def is_blocked(raw_line):
-    """整行只要命中黑名單子字串就回傳 True。"""
+    """整行只要命中黑名單子字串就回傳 True。
+
+    純英文字母的詞用 word-boundary 比對，避免像 "nig" 這種詞誤中
+    "night"/"sign"/"design" 等剛好包含該子字串的正常英文單字（純子字串比對
+    曾經把含 "night" 的合法 log 行整行刪掉）。含特殊符號的黑名單項目
+    （例如 "/etc/passwd"、"<script>"）維持子字串比對——這類 pattern 本來就
+    不會出現在一般英文單字中間，不需要邊界保護，而且 `\\b` 前後接的是
+    `/`、`<` 這類標點符號時邊界判定不穩定，反而可能比對不到。
+    """
     lower = raw_line.lower()
-    return any(bad.lower() in lower for bad in BLOCKLIST_SUBSTRINGS)
+    for bad in BLOCKLIST_SUBSTRINGS:
+        bad_lower = bad.lower()
+        if bad_lower.isalpha():
+            if re.search(rf"\b{re.escape(bad_lower)}\b", lower):
+                return True
+        elif bad_lower in lower:
+            return True
+    return False
 
 
 def load_entries(path):

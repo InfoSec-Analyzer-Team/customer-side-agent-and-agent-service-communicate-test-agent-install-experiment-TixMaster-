@@ -9,14 +9,20 @@
 #      （host port 80 留給 log-analysis-prod 的 Gateway nginx，本機同時跑兩套
 #      stack 時才不會搶 port；正式環境客戶端只有這一個 nginx，可以用 :80）
 #   4. agent/config.yaml 的 source path 指向 ./nginx/logs/access.log（見該檔註解）
+#
+# NGINX_BIND_HOST：預設只綁 127.0.0.1（本機自己測，任何機器都能直接跑起來）。
+# 需要讓同一個 ZeroTier/VPN 網段的其他機器連進來測試時，在專案根目錄的 .env
+# 加一行 NGINX_BIND_HOST=<你的 ZeroTier IP> 覆寫（docker-compose 會自動讀取
+# 根目錄 .env，跟 docker-compose.db.yml 的 POSTGRES_PORT 同一套模式）——不要
+# 直接改這裡寫死，寫死的 IP 只有原開發者的機器連得上，其他人 `up -d` 會直接
+# bind 失敗。
 
 services:
   nginx:
     image: nginx:1.27-alpine
     container_name: tixmaster-nginx
     ports:
-      - "192.168.194.86:8080:80"
-        #這是zerotier IP
+      - "${NGINX_BIND_HOST:-127.0.0.1}:8080:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/logs:/var/log/nginx

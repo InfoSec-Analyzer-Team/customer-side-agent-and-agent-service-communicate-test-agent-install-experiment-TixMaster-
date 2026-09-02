@@ -34,4 +34,3 @@ services:
 
 volumes:
   tixmaster_pgdata:
-    external: true
