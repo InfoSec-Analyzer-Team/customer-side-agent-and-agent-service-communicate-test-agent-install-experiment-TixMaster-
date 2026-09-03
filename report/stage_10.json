@@ -1,69 +1,47 @@
 {
   "stage_id": 10,
-  "n_samples": 132,
-  "diversity_score": 0.01730769230769231,
-  "provisional": true,
+  "n_samples": 516,
+  "diversity_score": 0.5602676082768896,
+  "provisional": false,
   "per_feature": {
     "os_type": {
-      "d": 0.0,
-      "coverage": 0.125,
+      "d": 0.7666937563970102,
+      "coverage": 0.875,
       "missing": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6
+        0
       ],
-      "collapsed": true
+      "collapsed": false
     },
     "ua_length": {
-      "d": 0.08653846153846154,
+      "d": 0.6086956521739131,
       "collapsed": false
     },
     "is_bot": {
-      "d": 0.0,
-      "coverage": 0.5,
-      "missing": [
-        1
-      ],
-      "collapsed": true
+      "d": 0.3353942964292546,
+      "coverage": 1.0,
+      "missing": [],
+      "collapsed": false
     },
     "referrer_type": {
-      "d": 0.0,
-      "coverage": 0.16666666666666666,
-      "missing": [
-        1,
-        2,
-        3,
-        4,
-        5
-      ],
-      "collapsed": true
+      "d": 0.6240866644318636,
+      "coverage": 1.0,
+      "missing": [],
+      "collapsed": false
     },
     "request_method": {
-      "d": 0.0,
-      "coverage": 0.125,
+      "d": 0.4664676719524068,
+      "coverage": 0.375,
       "missing": [
         "DELETE",
-        "HEAD",
-        "OPTIONS",
         "PATCH",
         "POST",
         "PUT",
         "TRACE"
       ],
-      "collapsed": true
+      "collapsed": false
     }
   },
-  "warnings": [
-    "stage 10: n_samples=132 < MIN_SAMPLES=200，熵/QCD 數字僅供參考（provisional），CI 不得當硬門檻",
-    "stage 10: 支撐特徵 'os_type' 完全塌縮（d=0，只有 1 種取值）",
-    "stage 10: 支撐特徵 'is_bot' 完全塌縮（d=0，只有 1 種取值）",
-    "stage 10: 支撐特徵 'referrer_type' 完全塌縮（d=0，只有 1 種取值）",
-    "stage 10: 支撐特徵 'request_method' 完全塌縮（d=0，只有 1 種取值）"
-  ],
+  "warnings": [],
   "defining_violations": [],
   "defining_violations_total": 0
 }

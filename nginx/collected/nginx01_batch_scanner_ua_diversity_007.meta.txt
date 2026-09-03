@@ -1,0 +1,24 @@
+batch_id: nginx01_batch_scanner_ua_diversity_007
+label: BAHAYA
+traffic_type: scanner_ua_diversity
+tool: feroxbuster
+count_collected: 384
+nginx: nginx01
+target: http://192.168.194.86:8080/
+log_file: nginx01_batch_scanner_ua_diversity_007.log
+notes: feroxbuster 從 Kali VM 真打宿主機 nginx（bridged，見 docker-compose.nginx.yml
+  的 NGINX_BIND_HOST=0.0.0.0），對同一份 8 條路徑 wordlist（admin/login/config.php/
+  backup/.env/phpmyadmin/wp-login.php/robots.txt）跑 12 輪：UA 一圈（win/android/
+  ios/linux/mac/bot/other 共 7 種）+ Referer 一圈（UA 固定 win，local/ip/search/
+  social/external 共 5 種）。每輪都用 -m GET,HEAD,OPTIONS 同時打三種 method。
+  目的是解掉舊 gobuster 批次裡 os_type/is_bot/referrer_type/request_method 四個
+  支撐特徵完全塌縮的問題（gobuster 預設 UA `gobuster/x.y` 不含任何
+  windows/android/iphone/linux/mac/bot 關鍵字，恆落在 os_type=7 other；預設不帶
+  Referer；dir 模式固定 GET）。原始 access.log 前 3 行是無關的手動瀏覽器檢查
+  流量（Chrome/152、curl 健康檢查），已排除，只取跟這輪掃描相關的 384 行。
+  單獨驗證：Diversity_stage=0.5000（os_type coverage 0.88、referrer_type coverage
+  1.00、is_bot coverage 1.00、request_method coverage 0.38，缺 DELETE/PATCH/
+  POST/PUT/TRACE 屬於預期內，這輪不含異常 method，那是 stage 11 的範疇）。
+  來源 IP 全部是 172.20.0.1（docker 網橋位址），沒有新增 IP diversity，仍是
+  已知caveat。
+timezone_note: nginx timestamp is UTC; local time is Asia/Taipei UTC+8
