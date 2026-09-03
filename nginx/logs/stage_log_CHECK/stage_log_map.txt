@@ -52,6 +52,3 @@ collected/nginx01_batch_special_chars_dense_ffuf_afternoon_localip_006.log==9
 collected/nginx01_batch_scanner_ua_gobuster_afternoon_localip_006.log==10
 collected/nginx01_batch_abnormal_methods_ffuf_afternoon_localip_006.log==11
 collected/nginx01_batch_abnormal_url_ffuf_afternoon_localip_006.log==12
-
-# 格式與規則見同目錄 README.md。
-# <path1>[,<path2>,...]==<stage id>，path 相對 nginx/（不是 nginx/logs/）
