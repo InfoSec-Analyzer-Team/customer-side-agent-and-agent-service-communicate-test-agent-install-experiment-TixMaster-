@@ -1,298 +1,208 @@
-﻿# Nginx Attack Log Collection Method
+# Nginx Attack Log Collection Method
 
-本資料夾內的 log 皆為本機 lab 環境中，攻擊工具或手動 payload 真的對本機 Nginx 發送 HTTP request 後，由 Nginx 自己寫出的 access log。不是手寫偽造 log。
+本資料夾只保留可作為正式資料來源的 Nginx access log。PowerShell Invoke-WebRequest 產生的 scripted attack-like batches 已判定不能作為正式 ML 訓練資料；PowerShell 只能用來輔助啟動工具、切批次與檢查檔案，不作為正式攻擊流量產生工具。
 
-Target:
-
-```text
-http://localhost:8080
-```
-
-收集方式固定為：
+保留原則：
 
 ```text
-1. capture-nginx-batch.ps1 start 記錄 access.log 起始行數
-2. 執行工具或手動 payload 對 Nginx 發 request
-3. capture-nginx-batch.ps1 finish 擷取本批新增 log
-4. 產生 .log 與 .meta.txt
+1. request 必須真的打到本機 Nginx / TixMaster lab target
+2. access log 必須由 Nginx 自己產生，不手寫偽造 log
+3. 惡意資料優先使用專用工具或明確手動漏洞驗證流程產生
+4. backend 必須有開，避免整批只打到 Nginx 而變成 502
 ```
 
-注意：這些資料是 lab / pentest traffic，不是 production real-world incident log。
+## Current Formal Logs
 
-## Batch Summary
+| Log | Label | Stage | Tool / Method | Count | Notes |
+|---|---|---:|---|---:|---|
+| `collected/nginx01_batch_sqli_sqlmap_randomua_002.log` | BAHAYA | 2 | sqlmap (`parrotsec/sqlmap`, `--random-agent`) | 378 | SQLi tool traffic through Nginx/backend, 200 responses |
+| `collected/nginx01_batch_xss_zap_fullscan_001.log` | BAHAYA | 3 | OWASP ZAP Docker full scan | 790 | XSS active scan traffic; ZAP also emits some SQLi/protocol probes |
+| `collected/nginx01_batch_path_traversal_ffuf_002.log` | BAHAYA | 4 | ffuf | 33 | Path traversal payloads against the lab attachment sink |
+| `collected/nginx01_batch_double_encoding_ffuf_002.log` | BAHAYA | 7 | ffuf | 34 | Double-encoded traversal payloads against the lab attachment sink |
+| `collected/nginx01_batch_url_encoding_count_ffuf_001.log` | BAHAYA | 8 | ffuf | 36 | Single-layer and multi-layer URL-encoded attack payloads against `/api/events?keyword=` |
+| `collected/nginx01_batch_special_chars_dense_ffuf_001.log` | BAHAYA | 9 | ffuf | 30 | Dense special-character attack payloads against `/api/events?keyword=` |
+| `collected/nginx01_batch_scanner_ua_gobuster_005.log` | BAHAYA | 10 | gobuster | 33 | Scanner User-Agent and directory enumeration traffic against the lab target |
+| `collected/nginx01_batch_abnormal_methods_ffuf_002.log` | BAHAYA | 11 | ffuf | 100 | PUT/DELETE/OPTIONS/PATCH/HEAD requests against common lab paths |
+| `collected/nginx01_batch_abnormal_url_ffuf_001.log` | BAHAYA | 12 | ffuf | 30 | Deep paths, long paths, repeated parameters, traversal-like segments, and unusual delimiters |
+| `collected/nginx01_batch_command_injection_commix_001.log` | BAHAYA | 5 | commix | 1666 | Command injection tool traffic against `/api/events?keyword=` |
+| `LFI_method_record/access3_Local_file_inclusion_1.log` | BAHAYA | 6 | Browser/manual LFI payload | 22 | Manual requests against the real attachment sink |
+| `LFI_method_record/access4_Local_file_inclusion_2_wfuzz.log` | BAHAYA | 6 | wfuzz | 881 | LFI/path traversal wordlist run against the real attachment sink |
+| `LFI_method_record/access5_Local_file_inclusion_3_wfuzz.log` | BAHAYA | 6 | wfuzz | 71 | Additional LFI/path traversal wordlist run |
 
-| Batch ID | Label | Traffic Type | Tool / Method | Count | Purpose |
-|---|---|---|---|---:|---|
-| nginx01_batch_nikto_scan_001 | BAHAYA | tool_generated_scan | Nikto Docker | 15843 | 敏感路徑掃描、弱點掃描、scanner UA |
-| nginx01_batch_sqlmap_sqli_001 | BAHAYA | tool_generated_sqli | sqlmap Docker | 378 | SQL Injection 測試請求 |
-| nginx01_batch_xss_001 | BAHAYA | xss_payload_attempt | PowerShell manual payload | 250 | XSS payload attempt |
-| nginx01_batch_path_traversal_001 | BAHAYA | path_traversal_attempt | PowerShell manual payload | 120 | Path traversal attempt |
-| nginx01_batch_dicurigai_probe_001 | DICURIGAI | suspicious_probe_mixed | PowerShell manual probe | 100 | 可疑但非確認攻擊的探測流量 |
+## Removed From Formal Dataset
 
-## Common Capture Commands
-
-Start batch:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\capture-nginx-batch.ps1 `
-  -Action start `
-  -BatchId <batch_id>
-```
-
-Finish batch:
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\tools\capture-nginx-batch.ps1 `
-  -Action finish `
-  -BatchId <batch_id> `
-  -Label <AMAN/DICURIGAI/BAHAYA> `
-  -TrafficType <traffic_type> `
-  -Tool <tool> `
-  -Notes "<notes>"
-```
-
-## 1. Nikto Scan
-
-Batch:
+以下批次已移除或不再列入 `stage_log_map.txt`：
 
 ```text
-nginx01_batch_nikto_scan_001
-```
-
-Command:
-
-```powershell
-docker run --rm ghcr.io/sullo/nikto:latest -h http://host.docker.internal:8080
-```
-
-Label:
-
-```text
-BAHAYA
-```
-
-Reason:
-
-```text
-Nikto 會產生大量敏感路徑探測與弱點掃描 request，例如 metadata endpoint、wp-config.php、admin/login、swagger、graphql 等。
-```
-
-Covers features:
-
-```text
-accesses_sensitive_path
-is_bot
-os_type / ua_length
-url_depth
-scanner-like behavior
-```
-
-## 2. SQL Injection via sqlmap
-
-Batch:
-
-```text
+nginx01_batch_sqli_browserua_001
+nginx01_batch_xss_browserua_001
+nginx01_batch_path_traversal_encoded_001
+nginx01_batch_dicurigai_diverse_probe_001
+nginx01_batch_command_injection_browserua_001
 nginx01_batch_sqlmap_sqli_001
-```
-
-Command:
-
-```powershell
-docker run --rm parrotsec/sqlmap:latest `
-  -u "http://host.docker.internal:8080/api/events?id=1" `
-  --batch --level=2 --risk=1
-```
-
-Label:
-
-```text
-BAHAYA
-```
-
-Reason:
-
-```text
-sqlmap 會對 id 參數發送 boolean-based、error-based、time-based、UNION 等 SQLi 測試 payload。即使目標未被確認可注入，這批仍是 SQLi attack attempt log。
-```
-
-Covers features:
-
-```text
-has_sql_injection
-url_encoding_count
-url_special_chars
-suspicious_user_agent
-query_param_payload
-```
-
-## 3. XSS Payload Attempts
-
-Batch:
-
-```text
 nginx01_batch_xss_001
-```
-
-Method:
-
-```text
-PowerShell 手動送出 XSS payload，payload 放在 query string 中，確保 Nginx access.log 能記錄到。
-```
-
-Example payloads:
-
-```text
-<script>alert(1)</script>
-<img src=x onerror=alert(1)>
-<svg onload=alert(1)>
-"><script>alert(document.domain)</script>
-<iframe src=javascript:alert(1)>
-```
-
-Example target paths:
-
-```text
-/event-detail.html?id=1&name=<payload>
-/login.html?returnUrl=<payload>
-/register.html?name=<payload>
-/api/events?keyword=<payload>
-/search?q=<payload>
-```
-
-Label:
-
-```text
-BAHAYA
-```
-
-Reason:
-
-```text
-這批是 XSS attack attempt log。它表示 request 內含 XSS payload，但不宣稱網站一定成功執行 JavaScript。
-```
-
-Covers features:
-
-```text
-has_xss
-url_special_chars
-url_encoding_count
-payload_in_query
-```
-
-## 4. Path Traversal Attempts
-
-Batch:
-
-```text
 nginx01_batch_path_traversal_001
-```
-
-Method:
-
-```text
-PowerShell 手動送出 path traversal payload。
-```
-
-Example payloads:
-
-```text
-/../../etc/passwd
-/..%2F..%2F..%2Fetc%2Fpasswd
-/static/../../backend/.env
-/download?file=..%2F..%2F..%2Fetc%2Fpasswd
-/download?file=..%5C..%5Cwindows%5Cwin.ini
-/images/%2e%2e/%2e%2e/%2e%2e/etc/passwd
-/view?file=..%2F..%2F..%2Fetc%2Fshadow
-/api/events?file=..%2F..%2F..%2Fetc%2Fpasswd
-```
-
-Label:
-
-```text
-BAHAYA
-```
-
-Reason:
-
-```text
-這批 request 嘗試使用 ../、URL encoded traversal、Windows 路徑等方式讀取敏感檔案。
-```
-
-Covers features:
-
-```text
-has_path_traversal
-accesses_sensitive_path
-url_encoding_count
-url_depth
-```
-
-## 5. Suspicious Probe Mixed
-
-Batch:
-
-```text
+nginx01_batch_nikto_scan_001
 nginx01_batch_dicurigai_probe_001
 ```
 
-Method:
+## Remaining Replacement Plan
+
+All 12 stages currently have mapped log data. Future work should focus on collecting additional batches across different IP ranges, time windows, and tool/user-agent settings.
+
+## Current Caveats
+
+目前 SQLi、XSS、path traversal、double encoding、URL encoding count、special chars dense、scanner UA、abnormal methods、abnormal URL、command injection 已符合「工具真打 Nginx/backend」的要求，但仍有泛化風險需要後續批次補強：
 
 ```text
-PowerShell 手動送出可疑但非確認攻擊的 request。
+- 單批 IP 幾乎都來自 Docker bridge，例如 172.17.0.1
+- 單批時間集中在短時間內
+- sqlmap/commix/wfuzz 這類工具批次仍可能有工具 UA 指紋
 ```
 
-Included request types:
+正式訓練前應使用多批次、不同時間、不同來源環境或不同工具設定補強 IP / time / UA diversity。
 
-```text
-敏感路徑探測但使用瀏覽器 UA
-輕量單引號 probe
-雙重編碼 probe
-OPTIONS / TRACE / PUT 等異常 method
-超長 URL
-大量 query parameters
-curl / PowerShell UA
-```
+Stage 4 使用的 traversal-only payload 清單保存在 `collected/path_traversal_ffuf_payloads_002.txt`。
+Stage 7 使用的 double-encoding payload 清單保存在 `collected/double_encoding_ffuf_payloads_001.txt`。
+Stage 8 使用的 URL encoding payload 清單保存在 `collected/url_encoding_count_ffuf_payloads_001.txt`。
+Stage 9 使用的 special-character payload 清單保存在 `collected/special_chars_dense_ffuf_payloads_001.txt`。
+Stage 10 使用的 gobuster wordlist 保存在 `collected/scanner_ua_gobuster_wordlist_001.txt`。
+Stage 11 使用的 abnormal-method path 清單保存在 `collected/abnormal_methods_ffuf_paths_001.txt`。
+Stage 12 使用的 abnormal-URL payload 清單保存在 `collected/abnormal_url_ffuf_payloads_001.txt`。
 
-Label:
 
-```text
-DICURIGAI
-```
+## IP / UA Diversity Round 002
 
-Reason:
+The following batches reuse the same lab endpoints and tool-generated payload lists, but collect another round with a different `X-Forwarded-For` range (`10.88.x.x`) and non-default User-Agent values where appropriate. These are not new stages; they are additional logs mapped to the same stage IDs to reduce IP and UA shortcut risk.
 
-```text
-這批行為可疑，但不一定能確認為成功攻擊，因此標為 DICURIGAI，而不是 BAHAYA。
-```
+| Log | Stage | Tool | Count | Diversity change |
+|---|---:|---|---:|---|
+| `collected/nginx01_batch_path_traversal_ffuf_ipua_003.log` | 4 | ffuf | 33 | `10.88.4.31`, browser-like Chrome UA |
+| `collected/nginx01_batch_double_encoding_ffuf_ipua_003.log` | 7 | ffuf | 34 | `10.88.7.31`, browser-like Firefox UA |
+| `collected/nginx01_batch_url_encoding_count_ffuf_ipua_002.log` | 8 | ffuf | 36 | `10.88.8.31`, browser-like Edge UA |
+| `collected/nginx01_batch_special_chars_dense_ffuf_ipua_002.log` | 9 | ffuf | 30 | `10.88.9.31`, browser-like Safari UA |
+| `collected/nginx01_batch_scanner_ua_gobuster_ipua_002.log` | 10 | gobuster | 33 | `10.88.10.31`, alternate gobuster UA |
+| `collected/nginx01_batch_abnormal_methods_ffuf_ipua_004.log` | 11 | ffuf | 100 | `10.88.11.32`, browser-like Chrome/Linux UA |
+| `collected/nginx01_batch_abnormal_url_ffuf_ipua_003.log` | 12 | ffuf | 30 | `10.88.12.32`, browser-like mobile Safari UA, clean-IP URL set |
 
-Covers features:
+Time diversity is intentionally not faked in the log files. To address time shortcut risk, collect another round in a separate real time window and map the resulting logs to the same stage IDs.
 
-```text
-accesses_sensitive_path
-request_method
-url_length
-url_depth
-url_param_count
-has_double_encoding
-suspicious_user_agent
-```
+
+## Night Round 003
+
+The following batches were collected in a real night time window (Asia/Taipei, UTC+8) instead of synthetically editing timestamps. They add time diversity for stages that previously had fewer later-time samples, while also using a different `X-Forwarded-For` range (`10.99.x.x`) and non-default User-Agent settings.
+
+| Log | Stage | Tool | Count | Diversity change |
+|---|---:|---|---:|---|
+| `collected/nginx01_batch_sqli_sqlmap_randomua_night_003.log` | 2 | sqlmap | 75 | night window, `10.99.2.31`, sqlmap `--random-agent` |
+| `collected/nginx01_batch_xss_ffuf_browserua_night_002.log` | 3 | ffuf | 30 | night window, `10.99.3.31`, browser-like Chrome UA |
+| `collected/nginx01_batch_command_injection_ffuf_browserua_night_002.log` | 5 | ffuf | 30 | night window, `10.99.5.32`, browser-like Chrome/Linux UA; complements commix baseline |
+
+A second commix run was attempted for stage 5, but the Kali package installation did not reach the request phase in a reasonable time window. No formal log was kept from that failed attempt; the retained night round uses ffuf-generated command injection payload traffic.
 
 ## Labeling Rule
 
-Nginx access.log 本身不包含 label。Label 寫在對應的 `.meta.txt` 中，例如：
+Nginx access.log 本身不包含 label。Label 應寫在對應 `.meta.txt`，或由 `stage_log_map.txt` 在轉 dataset 時補上。
 
 ```text
-nginx01_batch_xss_001.log
-nginx01_batch_xss_001.meta.txt  -> label: BAHAYA
+BAHAYA    = 明確攻擊 payload 或工具攻擊流量
+DICURIGAI = 可疑探測、異常結構或掃描行為，但不一定是確認攻擊
+AMAN      = 正常流量
 ```
 
-後續轉 dataset 時，應由 `.meta.txt` 將整批 log 補上 label 欄位。
 
-## Important Notes
 
-1. `BAHAYA` 表示明確攻擊 payload 或工具攻擊流量。
-2. `DICURIGAI` 表示可疑探測、異常結構或輕量 probe，但不一定是確認攻擊。
-3. 這些是 lab-generated / tool-generated attack attempt logs，不是 production incident logs。
-4. 有些 TixMaster 路徑會被 SPA fallback 回 200，因此不要只依賴 status code 或 response size 判斷惡意程度。
-5. 訓練模型時應避免過度依賴 source_ip、hour、User-Agent 單一特徵，應更重視 payload pattern、URL 結構、encoding、method、path 等特徵。
+
+
+
+
+
+
+
+
+## POST Method Diversity Round 004
+
+The following batches were collected after review feedback that most attack logs were GET-only. They are real tool-generated requests through Nginx, not hand-written logs. Because the current Nginx parser expects the standard `combined` log format and does not record request bodies, these batches use POST requests while keeping the attack payload in the query string. This preserves both the HTTP method and the payload in `access.log` without changing the parser contract.
+
+| Log | Stage | Tool | Count | Method | Notes |
+|---|---:|---|---:|---|---|
+| `collected/nginx01_batch_sqli_sqlmap_postquery_night_005.log` | 2 | sqlmap | 147 | POST | POST `/api/users/login` with SQLi probes; sqlmap `--random-agent`, `10.99.2.42` |
+| `collected/nginx01_batch_xss_ffuf_postquery_night_004.log` | 3 | ffuf | 30 | POST | XSS payloads against `/api/events?keyword=FUZZ`, browser-like UA, `10.99.3.41` |
+| `collected/nginx01_batch_path_traversal_ffuf_postquery_night_004.log` | 4 | ffuf | 33 | POST | traversal payloads against attachment path, `10.99.4.41` |
+| `collected/nginx01_batch_command_injection_ffuf_postquery_night_004.log` | 5 | ffuf | 30 | POST | command injection payloads against `/api/events?keyword=FUZZ`, `10.99.5.41` |
+| `collected/nginx01_batch_double_encoding_ffuf_postquery_night_004.log` | 7 | ffuf | 34 | POST | double-encoded payloads, `10.99.7.41` |
+| `collected/nginx01_batch_url_encoding_count_ffuf_postquery_night_004.log` | 8 | ffuf | 36 | POST | URL-encoding-heavy payloads, `10.99.8.41` |
+| `collected/nginx01_batch_special_chars_dense_ffuf_postquery_night_004.log` | 9 | ffuf | 30 | POST | special-character-dense payloads, `10.99.9.41` |
+| `collected/nginx01_batch_abnormal_url_ffuf_post_night_004.log` | 12 | ffuf | 30 | POST | abnormal URL paths using POST, `10.99.12.41` |
+
+Validation result for this round: all eight new files are parseable Nginx combined logs (`bad_format=0`) and each file is 100% POST. This does not eliminate every method shortcut by itself, but it removes the previous GET-only shape for the major attack stages while keeping log format compatible with the existing ML pipeline.
+
+## Nikto Stage 1補強
+
+PR feedback noted that stage 1 should combine the manual sensitive-path probe with a Nikto scanner batch. A controlled Nikto run was collected against the local Nginx/TixMaster lab target with a 45-second cap:
+
+```text
+collection: Nikto v2.6.1 real scan through local Nginx with a 45-second cap
+formal mapped log: collected/nginx01_batch_nikto_scan_xff_clean_003.log
+stage: 1
+label: DICURIGAI
+tool: nikto
+count: 4479
+source IP: 10.99.1.41 via X-Forwarded-For
+```
+
+The formal mapped file is a parser-compatible subset of the real Nginx access log. It excludes malformed/pre-header rejection lines and lines where Nginx could not apply the X-Forwarded-For source IP. This keeps the dataset compatible with the current Nginx combined-log parser while preserving real tool-generated traffic.
+
+Caveat: Nikto still has a strong scanner User-Agent fingerprint. It is included because stage 1 explicitly covers sensitive-path/scanner probing, but it should not be treated as solving UA diversity by itself.
+
+
+
+## Parser-Compatible Clean Subsets
+
+Some real tool/browser traffic can produce malformed or pre-header request lines that are valid Nginx observations but not accepted by the current combined-log parser. To keep the formal ML dataset parser-compatible, clean subset files were created without editing the original source logs.
+
+| Formal mapped log | Source log | Removed | Reason |
+|---|---|---:|---|
+| `logs/access1_Aman_clean.log` | `logs/access1_Aman.log` | 1 | malformed/non-combined line |
+| `collected/nginx01_batch_xss_zap_fullscan_clean_001.log` | `collected/nginx01_batch_xss_zap_fullscan_001.log` | 3 | ZAP TLS/pre-header probe lines such as `"\x16"` |
+| `LFI_method_record/access4_Local_file_inclusion_2_wfuzz_clean.log` | `LFI_method_record/access4_Local_file_inclusion_2_wfuzz.log` | 1 | malformed/non-combined line |
+
+The original raw logs are preserved for auditability. `stage_log_map.txt` points to the clean files so dataset conversion and diversity checks do not fail on malformed lines.
+
+## Morning Round 005
+
+These batches were collected in a real morning time window (Asia/Taipei, UTC+8) on 2026-09-02. The purpose is to add time/IP/UA diversity without editing timestamps. Because the current ZeroTier IP configured in `docker-compose.nginx.yml` was not present on the host, this round used a temporary localhost Nginx container (`127.0.0.1:8080`) without changing the compose file.
+
+| Log | Stage | Tool | Count | Method shape | Diversity change |
+|---|---:|---|---:|---|---|
+| `collected/nginx01_batch_sqli_sqlmap_randomua_morning_005.log` | 2 | sqlmap | 75 | GET | morning window, `10.120.2.51`, sqlmap `--random-agent` |
+| `collected/nginx01_batch_xss_ffuf_browserua_morning_005.log` | 3 | ffuf | 30 | GET | morning window, `10.120.3.51`, browser-like Chrome UA |
+| `collected/nginx01_batch_path_traversal_ffuf_morning_005.log` | 4 | ffuf | 33 | GET | morning window, `10.120.4.51`, browser-like Safari UA |
+| `collected/nginx01_batch_command_injection_ffuf_browserua_morning_005.log` | 5 | ffuf | 30 | GET | morning window, `10.120.5.51`, browser-like Chrome/Linux UA |
+| `collected/nginx01_batch_double_encoding_ffuf_morning_005.log` | 7 | ffuf | 34 | GET | morning window, `10.120.7.51`, browser-like Firefox UA |
+| `collected/nginx01_batch_url_encoding_count_ffuf_morning_005.log` | 8 | ffuf | 36 | GET | morning window, `10.120.8.51`, browser-like Edge UA |
+| `collected/nginx01_batch_special_chars_dense_ffuf_morning_005.log` | 9 | ffuf | 30 | GET | morning window, `10.120.9.51`, browser-like iPad Safari UA |
+| `collected/nginx01_batch_scanner_ua_gobuster_morning_008.log` | 10 | gobuster | 33 | GET | morning window, `10.120.10.54`, alternate gobuster UA; wildcard length excluded |
+| `collected/nginx01_batch_abnormal_methods_ffuf_morning_006.log` | 11 | ffuf | 100 | PUT/DELETE/OPTIONS/PATCH/HEAD | morning window, `10.120.11.52`, browser-like Chrome UA |
+| `collected/nginx01_batch_abnormal_url_ffuf_morning_005.log` | 12 | ffuf | 30 | GET | morning window, `10.120.12.51`, browser-like Android Firefox UA |
+
+Validation result for this round: all ten files are parseable Nginx combined logs (`bad_format=0`), use the new `10.120.x.x` lab source range, and were collected during the real morning window. This round is for time/IP/UA diversity; POST method diversity is covered by the POST Method Diversity Round 004.
+
+## Afternoon Local-IP Round 006
+
+These batches were collected in a real afternoon time window (Asia/Taipei, UTC+8) on 2026-09-02. The Nginx container was bound to the current host Wi-Fi IP `192.168.0.112:8080`, and the attack tools targeted `http://192.168.0.112:8080` instead of the previous ZeroTier IP. `X-Forwarded-For` was also set to `192.168.0.112`, so the Nginx combined access log records the current host IP for this lab collection round.
+
+| Log | Stage | Tool | Count | Source IP | Notes |
+|---|---:|---|---:|---|---|
+| `collected/nginx01_batch_sqli_sqlmap_randomua_afternoon_localip_006.log` | 2 | sqlmap | 75 | `192.168.0.112` | real sqlmap traffic, random-agent |
+| `collected/nginx01_batch_xss_ffuf_afternoon_localip_006.log` | 3 | ffuf | 30 | `192.168.0.112` | XSS payload traffic, browser-like UA |
+| `collected/nginx01_batch_path_traversal_ffuf_afternoon_localip_006.log` | 4 | ffuf | 33 | `192.168.0.112` | traversal payload traffic against attachment sink |
+| `collected/nginx01_batch_command_injection_ffuf_afternoon_localip_006.log` | 5 | ffuf | 30 | `192.168.0.112` | command injection payload traffic |
+| `collected/nginx01_batch_double_encoding_ffuf_afternoon_localip_006.log` | 7 | ffuf | 34 | `192.168.0.112` | double-encoded payload traffic |
+| `collected/nginx01_batch_url_encoding_count_ffuf_afternoon_localip_006.log` | 8 | ffuf | 36 | `192.168.0.112` | URL-encoding-heavy payload traffic |
+| `collected/nginx01_batch_special_chars_dense_ffuf_afternoon_localip_006.log` | 9 | ffuf | 30 | `192.168.0.112` | special-character-dense payload traffic |
+| `collected/nginx01_batch_scanner_ua_gobuster_afternoon_localip_006.log` | 10 | gobuster | 33 | `192.168.0.112` | scanner UA traffic; wildcard response length excluded |
+| `collected/nginx01_batch_abnormal_methods_ffuf_afternoon_localip_006.log` | 11 | ffuf | 100 | `192.168.0.112` | PUT/DELETE/OPTIONS/PATCH/HEAD method traffic |
+| `collected/nginx01_batch_abnormal_url_ffuf_afternoon_localip_006.log` | 12 | ffuf | 30 | `192.168.0.112` | abnormal URL structure traffic |
+
+Validation result: all ten afternoon local-IP files are parser-compatible (`bad_format=0`), and every line records source IP `192.168.0.112`. This round improves real time-window coverage and aligns collection with the current host IP, but it is still a local lab setup rather than true multi-machine source diversity.

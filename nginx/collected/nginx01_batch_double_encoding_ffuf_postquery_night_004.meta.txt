@@ -1,0 +1,10 @@
+batch_id: nginx01_batch_double_encoding_ffuf_postquery_night_004
+label: BAHAYA
+traffic_type: double_encoding_ffuf_post_query
+tool: ffuf
+count_collected: 34
+nginx: nginx01
+target: http://localhost:8080
+log_file: nginx01_batch_double_encoding_ffuf_postquery_night_004.log
+notes: Real ffuf run using POST method with double-encoded payloads in query string, preserving attack content in Nginx combined logs.
+timezone_note: nginx timestamp is UTC; local time is Asia/Taipei UTC+8

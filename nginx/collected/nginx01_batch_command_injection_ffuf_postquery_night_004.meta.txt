@@ -1,0 +1,10 @@
+batch_id: nginx01_batch_command_injection_ffuf_postquery_night_004
+label: BAHAYA
+traffic_type: command_injection_ffuf_post_query
+tool: ffuf
+count_collected: 30
+nginx: nginx01
+target: http://localhost:8080
+log_file: nginx01_batch_command_injection_ffuf_postquery_night_004.log
+notes: Real ffuf run using POST method with command-injection payloads in query string so the Nginx combined log records attack content while adding method diversity.
+timezone_note: nginx timestamp is UTC; local time is Asia/Taipei UTC+8

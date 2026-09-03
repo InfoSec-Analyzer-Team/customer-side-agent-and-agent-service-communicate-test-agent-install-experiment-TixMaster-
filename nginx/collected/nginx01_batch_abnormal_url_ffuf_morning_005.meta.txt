@@ -1,0 +1,10 @@
+batch_id: nginx01_batch_abnormal_url_ffuf_morning_005
+label: BAHAYA
+traffic_type: abnormal_url_ffuf_morning
+tool: ffuf
+count_collected: 30
+nginx: nginx01
+target: http://localhost:8080
+log_file: nginx01_batch_abnormal_url_ffuf_morning_005.log
+notes: Morning round 005 real ffuf abnormal URL traffic through Nginx/backend; X-Forwarded-For 10.120.12.51.
+timezone_note: nginx timestamp is UTC; local time is Asia/Taipei UTC+8

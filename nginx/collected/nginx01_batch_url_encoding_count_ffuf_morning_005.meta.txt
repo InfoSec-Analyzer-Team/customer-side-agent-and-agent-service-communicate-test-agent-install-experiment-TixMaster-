@@ -1,0 +1,10 @@
+batch_id: nginx01_batch_url_encoding_count_ffuf_morning_005
+label: BAHAYA
+traffic_type: url_encoding_count_ffuf_morning
+tool: ffuf
+count_collected: 36
+nginx: nginx01
+target: http://localhost:8080
+log_file: nginx01_batch_url_encoding_count_ffuf_morning_005.log
+notes: Morning round 005 real ffuf URL-encoding-heavy payload traffic; X-Forwarded-For 10.120.8.51.
+timezone_note: nginx timestamp is UTC; local time is Asia/Taipei UTC+8

@@ -1,0 +1,10 @@
+batch_id: nginx01_batch_sqli_sqlmap_randomua_morning_005
+label: BAHAYA
+traffic_type: sql_injection_sqlmap_morning
+tool: sqlmap
+count_collected: 75
+nginx: nginx01
+target: http://localhost:8080
+log_file: nginx01_batch_sqli_sqlmap_randomua_morning_005.log
+notes: Morning round 005 real sqlmap traffic through local Nginx/TixMaster; random-agent and X-Forwarded-For 10.120.2.51 add time/IP/UA diversity without synthetic timestamp edits.
+timezone_note: nginx timestamp is UTC; local time is Asia/Taipei UTC+8

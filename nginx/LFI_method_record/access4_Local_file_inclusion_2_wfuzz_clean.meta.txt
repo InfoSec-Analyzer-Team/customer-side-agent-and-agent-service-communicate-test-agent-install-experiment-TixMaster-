@@ -1,0 +1,9 @@
+batch_id: access4_Local_file_inclusion_2_wfuzz_clean
+label: BAHAYA
+stage: 6
+source_log: LFI_method_record\access4_Local_file_inclusion_2_wfuzz.log
+count_original: 882
+count_collected: 881
+removed_malformed_lines: 1
+notes: Clean parser-compatible subset from real wfuzz LFI run; excluded malformed/non-combined lines only.
+timezone_note: nginx timestamp is UTC; local time is Asia/Taipei UTC+8
