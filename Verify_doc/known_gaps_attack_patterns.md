@@ -10,8 +10,18 @@
 > `DBMS_PIPE.RECEIVE_MESSAGE`）——這些記錄在文末「缺口 3（新發現）」一節，
 > 是這次驗證新發現的，還沒有人修。
 >
-> 這份文件記錄的是 **`has_path_traversal` / `has_sql_injection` 這兩個 regex
-> 本身的偵測缺口**，不是 `dataset_health`（diversity 驗收模組）的 bug。
+> **2026-09-04 更新**：用同樣的方法對 stage 5（Command Injection）、stage 6
+> （LFI）跑了一次同樣的診斷，發現另外兩個缺口，記錄在「缺口 4」「缺口 5」
+> 兩節——`has_command_injection` 97.1% 的殘留違規是同一類「literal-only
+> regex 對不上 URL-encoded payload」問題（跟缺口 1/2 同一種病），而
+> `has_file_inclusion` 的問題不一樣：它只認 PHP wrapper scheme，完全沒
+> 設計來涵蓋這個 stage 實際收集的 traversal/絕對路徑 LFI，是 ground-truth
+> 判準選錯特徵，不只是 regex 漏寫變形。這兩個都還沒有人修，一樣先記錄下來
+> 交給權威版本維護者評估。
+>
+> 這份文件記錄的是 **`has_path_traversal` / `has_sql_injection` /
+> `has_command_injection` / `has_file_inclusion` 這幾個 regex 本身的偵測
+> 缺口**，不是 `dataset_health`（diversity 驗收模組）的 bug。
 > `dataset_health/diversity.py` 忠實回報了「這批樣本不符合定義判準」——
 > 問題出在 `attack_patterns.py` 的 pattern 對這些工具產生的常見變形有漏洞，
 > 才會讓大量真實攻擊流量被判成 `has_*=0`。
@@ -218,6 +228,118 @@ pattern 的技巧**，不是模糊地帶：
 3. 加 `waitfor\s+delay` 與 `dbms_pipe`（或更廣的 `dbms_\w+\(`）涵蓋 MSSQL
    跟 Oracle 的 time-based blind 技巧。
 
+## 缺口 4（新發現）：`has_command_injection` 幾乎完全偵測不到 URL-encoded 版本的 shell metacharacter
+
+用 `nginx/collected/`（commix/ffuf 真打本機 nginx 產生的 stage 5 全部批次，
+`cfg.STAGE_LOG_PATHS[5]`，合併後 1786 筆）跑 `dataset_health.run_stage --stage 5`，
+`defining_violations` 顯示 **1783/1786（99.8%）** `has_command_injection=0`——
+幾乎整個 stage 都不符合自己的定義判準。逐筆分類（1783 筆全部程式化分類，
+不是抽樣）：
+
+| 類別 | 筆數 | 佔比 | 說明 |
+|---|---:|---:|---|
+| URL-encoded shell metacharacter | 1732 | 97.1% | `;`→`%3B`、`|`→`%7C`、`&`→`%26`、`$(`→`%24%28`、`${`→`%24%7B`、`` ` ``→`%60` |
+| PHP 程式碼執行函式呼叫 | 36 | 2.0% | `phpinfo()`/`exec()`/`eval()`/`print()`/`system()`，例：`test.print%28phpinfo%28%29%29` |
+| 純換行注入 | 8 | 0.4% | `%0A`/`%0D%0A`，無任何運算子字元，例：`test%0Aid` |
+| baseline 探測（真的不是攻擊） | 7 | 0.4% | `keyword=test`，commix 正式打 payload 前的基準請求 |
+
+```python
+CMD_PATTERNS = [
+    r";.*ls", r";.*cat", r";.*rm", r";.*wget", r";.*curl",
+    r"\|.*ls", r"&&.*ls", r"`.*`", r"\$\(", r"\$\{",
+    r"/etc/passwd", r"/bin/bash", r"/bin/sh",
+]
+```
+
+跟缺口 1（path traversal）、缺口 2（SQLi）是同一類問題：`CMD_PATTERNS` 只認
+**字面**的 `;`/`|`/`&&`/`` ` ``/`$(`/`${`，commix 預設就會把 payload 裡的這些
+shell metacharacter URL-encode（`%3B`/`%7C`/`%26`/`%60`/`%24%28`/`%24%7B`），
+literal-only 的 regex 對編碼後的字串完全對不上。真實案例（URL 解碼後）：
+
+| Payload（解碼後） | `has_command_injection` |
+|---|---|
+| `test;echo TJWJZH$((16+21))$(echo TJWJZH)TJWJZH` | ❌ False |
+| `test&&echo TJWJZH$((12+54))$(echo TJWJZH)TJWJZH` | ❌ False |
+| `test\|echo $((5308 + 5139))` | ❌ False |
+| `test${IFS}id` | ❌ False |
+| `test.print(phpinfo())` | ❌ False |
+
+**這個缺口比缺口 1/2 更嚴重的地方**：就算把編碼問題修好，現有 pattern 對
+`;`/`\|`/`&&` 三個都還**綁死只認 `ls` 這一個命令**（`;.*ls`、`\|.*ls`、
+`&&.*ls`），但真實 commix 流量裡接在這些運算子後面的絕大多數是
+`whoami`/`id`/`uname -a`/`ping`/`nslookup`/`sleep`/`echo`——這些完全不在白
+名單內，就算補了編碼也一樣抓不到，屬於白名單本身太窄的獨立問題，跟編碼是
+兩層缺口疊在一起。
+
+**建議方向**（未套用，比照缺口 1/2 已修復的手法，一樣留給 `log-analysis-core`
+權威版本維護者評估）：
+
+1. 補上編碼變形，比照 `PATH_TRAVERSAL_PAT` 已經採用的 `%2f`/`%5c` 寫法：
+   `;`→加 `%3b`、`\|`→加 `%7c`、`&`→加 `%26`（不是只有 `&&`，單一 `&` 背景
+   執行也是常見技巧）、`` ` ``→加 `%60`、`\$\(`→加 `%24%28`、`\$\{`→加
+   `%24%7b`。
+2. 把 `;.*ls`/`\|.*ls`/`&&.*ls` 的命令白名單從只認 `ls` 擴大到至少涵蓋
+   `whoami`/`id`/`uname`/`ping`/`nslookup`/`sleep`/`echo`（風險：命令名稱
+   越通用，越可能在合法 query string 裡巧合出現，例如 `?q=echo` 這種正常
+   搜尋詞，需要跟 SQL_PATTERNS 缺口 3 的 `order by` 一樣評估 benign 誤判
+   風險，取捨可能比補編碼更大）。
+3. 加 `phpinfo\(|exec\(|eval\(|print\(|system\(` 涵蓋 PHP 程式碼執行函式呼叫
+   （同樣要考慮編碼變形 `%28`）。
+4. 加一個不依賴特定運算子字元的「裸換行後緊跟常見命令」pattern，涵蓋
+   `%0A`/`%0D%0A` 換行注入（風險最低——一般 query string 幾乎不會出現
+   URL-encoded 換行字元本身）。
+
+## 缺口 5（新發現）：`has_file_inclusion` 只認 wrapper scheme，完全沒涵蓋 traversal 或絕對路徑 LFI
+
+同樣用 `nginx/collected/` + `nginx/LFI_method_record/`（真實瀏覽器手動 payload +
+wfuzz 真打本機 nginx 產生的 stage 6 全部批次，合併後 974 筆）跑
+`dataset_health.run_stage --stage 6`，`defining_violations` 顯示
+**961/974（98.7%）** `has_file_inclusion=0`。逐筆分類：
+
+| 類別 | 筆數 | 佔比 | 說明 |
+|---|---:|---:|---|
+| 絕對路徑 LFI（無 `../`、無 wrapper scheme） | 890 | 92.6% | 例：`file=/etc/passwd`、`file=/etc/aliases`、`file=/etc/apache2/httpd.conf` |
+| traversal-style LFI（`has_path_traversal=1`） | 35 | 3.6% | 例：`file=../../etc/passwd`、`file=..%5C..%5Cwindows%5Cwin.ini` |
+| 空 `file=` 參數（wfuzz 過程雜訊） | 27 | 2.8% | `file=` 值本身是空字串，不是攻擊 payload |
+| `/favicon.ico`（瀏覽器自動請求，雜訊） | 7 | 0.7% | 手動瀏覽器 payload 那批混進的瀏覽器自動行為 |
+| 正常附件檔名（baseline 對照） | 2 | 0.2% | `file=poster.txt`——真實存在的附件，用來對照攻擊 payload 跟正常請求的回應差異 |
+
+```python
+FILE_INCLUSION_PAT = r"file://|php://|data://|expect://|input://"
+```
+
+這個 pattern 設計上就只認 PHP wrapper scheme（`php://filter`、`data://`、
+`expect://` 這類 PHP 特有的 stream wrapper 技巧），完全沒有涵蓋**古典
+directory traversal 讀檔**（`../../etc/passwd`）跟**直接絕對路徑讀檔**
+（`/etc/passwd`，連 `../` 都不用，因為應用程式本身沒有做路徑白名單）——但
+`LFI_method_record/lfi_sink_traversal_wordlist.txt` 這份收集用的 wordlist
+自己取名就叫 "traversal"，`collection_method.md` 也把這些批次歸在
+「stage 6 LFI」底下，可見這個 stage 收集時設定的範圍本來就包含 traversal
+跟絕對路徑兩種手法，不是只有 wrapper scheme——`DEFINING_FLAG` 選
+`has_file_inclusion` 這一個窄定義的 flag 來驗證整個 stage，範圍對不起來。
+
+**跟缺口 1-4 不同的地方**：這不是單純的「pattern 漏了一個編碼變形」，是
+**這個 stage 的 ground-truth 判準選錯特徵**，需要的修法也不只是加
+regex 變形：
+
+1. **35 筆 traversal-style**：已經有 `has_path_traversal` 認領，這 35 筆
+   `has_file_inclusion=0` 是符合這個 flag 窄定義下的正確行為（跟缺口 1
+   驗證時 stage 4 殘留的 `/etc/passwd`/`/backend/.env` 那 30 筆是同一種
+   「flag 定義本來就沒有要涵蓋這種 payload」的情況）。如果要讓 stage 6 的
+   `DEFINING_PREDICATE` 精準涵蓋這批資料的實際範圍，應該改成
+   `has_file_inclusion==1 OR (has_path_traversal==1 AND 命中 file= 類參數)`
+   這種複合判準，而不是單一 flag——但這牽涉到 `config.DEFINING_PREDICATE`
+   的設計，不是 `attack_patterns.py` regex 本身的問題，兩邊都要一起看。
+2. **890 筆絕對路徑 LFI 是真正的偵測空白**：純 regex 沒辦法只憑
+   `/etc/passwd` 這種字串本身判斷「這是攻擊」還是「這是正常參數值」，需要
+   類似缺口 3 討論 `order by` 時的取捨——用已知敏感路徑前綴當訊號
+   （`/etc/`、`/proc/`、`/root/`、`/var/log/`、`/windows/`、`c:\\` 等），
+   誤判風險比單純加編碼變形更高，需要團隊先拍板哪些前綴要收，這裡不建議
+   在沒有討論前直接動手。
+3. **36 筆雜訊（空參數/favicon/正常附件）不需要修 regex**：這是收集批次本身
+   混進的非攻擊請求，屬於 `collection_method.md` 該處理的資料清理問題，
+   不是 `attack_patterns.py` 的偵測缺口。
+
 ## 已知不受影響的部分
 
 `dataset_health` 這邊自己的邏輯是對的：`_defining_violations()`
@@ -235,3 +357,4 @@ pattern 的技巧**，不是模糊地帶：
 | （本文件初版） | 用 `nginx/collected/` 真實資料跑 `dataset_health`，發現缺口 1、2，寫成本文件 |
 | 2026-09-02 | `log-analysis-core` 私有 repo 修好缺口 1、2（修法比本文件建議更完整），透過 `sync/from-private` → `git merge origin/compare/yc-compare_premerge_branch` 進到 `feat/yc-dev_nginx` |
 | 2026-09-02 | 用同一批真實資料重新驗證：stage 2 違規率 68.5%→27.0%、stage 4 違規率 87.5%→25.0%（stage 4 剩餘 25% 確認是 batch 組成問題，非 regex 缺口）；逐筆分類 stage 2 殘留的 102 筆，發現缺口 3（`ORDER BY` 枚舉／`SLEEP`＋`BENCHMARK` 編碼繞過／`WAITFOR DELAY`／`DBMS_PIPE`，見上方「缺口 3」一節） |
+| 2026-09-04 | 對 stage 5、stage 6 跑同樣診斷：`has_command_injection` 違規率 99.8%（1783/1786），逐筆分類發現 97.1% 是 URL-encoded shell metacharacter（缺口 4）；`has_file_inclusion` 違規率 98.7%（961/974），逐筆分類發現 92.6% 是絕對路徑 LFI、3.6% 是已被 `has_path_traversal` 認領的 traversal-style（缺口 5，ground-truth 判準選錯特徵，不是單純 regex 漏寫） |
