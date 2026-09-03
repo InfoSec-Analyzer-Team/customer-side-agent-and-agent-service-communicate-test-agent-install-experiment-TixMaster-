@@ -1,0 +1,69 @@
+{
+  "stage_id": 10,
+  "n_samples": 132,
+  "diversity_score": 0.01730769230769231,
+  "provisional": true,
+  "per_feature": {
+    "os_type": {
+      "d": 0.0,
+      "coverage": 0.125,
+      "missing": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "collapsed": true
+    },
+    "ua_length": {
+      "d": 0.08653846153846154,
+      "collapsed": false
+    },
+    "is_bot": {
+      "d": 0.0,
+      "coverage": 0.5,
+      "missing": [
+        1
+      ],
+      "collapsed": true
+    },
+    "referrer_type": {
+      "d": 0.0,
+      "coverage": 0.16666666666666666,
+      "missing": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "collapsed": true
+    },
+    "request_method": {
+      "d": 0.0,
+      "coverage": 0.125,
+      "missing": [
+        "DELETE",
+        "HEAD",
+        "OPTIONS",
+        "PATCH",
+        "POST",
+        "PUT",
+        "TRACE"
+      ],
+      "collapsed": true
+    }
+  },
+  "warnings": [
+    "stage 10: n_samples=132 < MIN_SAMPLES=200，熵/QCD 數字僅供參考（provisional），CI 不得當硬門檻",
+    "stage 10: 支撐特徵 'os_type' 完全塌縮（d=0，只有 1 種取值）",
+    "stage 10: 支撐特徵 'is_bot' 完全塌縮（d=0，只有 1 種取值）",
+    "stage 10: 支撐特徵 'referrer_type' 完全塌縮（d=0，只有 1 種取值）",
+    "stage 10: 支撐特徵 'request_method' 完全塌縮（d=0，只有 1 種取值）"
+  ],
+  "defining_violations": [],
+  "defining_violations_total": 0
+}

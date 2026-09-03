@@ -1,0 +1,34 @@
+{
+  "stage_id": 8,
+  "n_samples": 180,
+  "diversity_score": 0.31457190223743575,
+  "provisional": true,
+  "per_feature": {
+    "url_length": {
+      "d": 0.26717557251908397,
+      "collapsed": false
+    },
+    "url_special_chars": {
+      "d": 0.4358974358974359,
+      "collapsed": false
+    },
+    "os_type": {
+      "d": 0.24064269829578747,
+      "coverage": 0.25,
+      "missing": [
+        0,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "collapsed": false
+    }
+  },
+  "warnings": [
+    "stage 8: n_samples=180 < MIN_SAMPLES=200，熵/QCD 數字僅供參考（provisional），CI 不得當硬門檻"
+  ],
+  "defining_violations": [],
+  "defining_violations_total": 0
+}

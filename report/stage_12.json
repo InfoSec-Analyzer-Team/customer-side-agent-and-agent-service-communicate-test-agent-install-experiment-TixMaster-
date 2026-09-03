@@ -1,0 +1,42 @@
+{
+  "stage_id": 12,
+  "n_samples": 150,
+  "diversity_score": 0.4332311789553452,
+  "provisional": true,
+  "per_feature": {
+    "url_length": {
+      "d": 0.20430107526881722,
+      "collapsed": false
+    },
+    "url_depth": {
+      "d": 0.45454545454545453,
+      "collapsed": false
+    },
+    "url_param_count": {
+      "d": 0.0,
+      "collapsed": false
+    },
+    "url_special_chars": {
+      "d": 1.0,
+      "collapsed": false
+    },
+    "os_type": {
+      "d": 0.5073093649624542,
+      "coverage": 0.375,
+      "missing": [
+        0,
+        1,
+        4,
+        5,
+        6
+      ],
+      "collapsed": false
+    }
+  },
+  "warnings": [
+    "stage 12: n_samples=150 < MIN_SAMPLES=200，熵/QCD 數字僅供參考（provisional），CI 不得當硬門檻",
+    "stage 12: 支撐特徵 'url_param_count' 的 QCD=0，但實際有 6 種取值（不是真塌縮，是低基數或尾部集中分布讓 Q1=Q3——見 §2.3 QCD 已知限制，strict 門檻的「塌縮數」不該把這種情況算進去）"
+  ],
+  "defining_violations": [],
+  "defining_violations_total": 0
+}
