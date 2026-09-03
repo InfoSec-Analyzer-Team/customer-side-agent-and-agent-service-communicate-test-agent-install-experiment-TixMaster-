@@ -49,8 +49,8 @@ def one_user_session(page):
     # 2. 隨機決定這個使用者做什麼(用權重模擬真實比例)
     # register 暫時關閉(先把登入測好),要恢復把它加回 choices/weights 即可
     action = random.choices(
-        ["browse_event", "login_email", "login_auth0_click", "guest_checkout"],
-        weights=[50, 25, 10, 15]   # 50%看活動 25%email登入 10%點Auth0 15%訪客結帳
+        ["browse_event", "login_email", "login_form_ui", "guest_checkout"],
+        weights=[50, 25, 10, 15]   # 50%看活動 25%email登入(API) 10%email登入(UI表單) 15%訪客結帳
     )[0]
 
     if action == "browse_event":
@@ -113,12 +113,23 @@ def one_user_session(page):
         except Exception as e:
             print(f"[login_email] {account['email']} 例外: {e}")
 
-    elif action == "login_auth0_click":
+    elif action == "login_form_ui":
+        # login_email 是直接呼叫 /api/users/login,完全繞過 login.html 本身的
+        # 表單與 JS(token 存放、跳轉邏輯);這個動作改成透過瀏覽器真的填表單、
+        # 按登入,才會實際跑到 login.html 的 client-side 邏輯。
+        #
+        # 原本這裡是點 #loginBtn 導向 Auth0(外部網域)的動作,但這個分支已經把
+        # login.html 從 Auth0 導向改成直接 email/password 表單,#loginBtn 現在
+        # 是表單的 submit 按鈕,不會再導去外部網域——不填欄位直接點會被瀏覽器
+        # 原生的 required 驗證擋下,完全不會送出請求,整個動作等於沒在測東西。
+        account = random.choice(ACCOUNTS)
         page.goto(f"{BASE}/login.html")
         human_delay()
+        page.fill("#email", account["email"])
+        page.fill("#password", account["password"])
+        human_delay()
         try:
-            # 會導向 /auth/login -> Auth0(外部網域),不等它完成登入
-            page.click("#loginBtn", timeout=3000)
+            page.click("#loginBtn")
             page.wait_for_timeout(1500)
         except Exception:
             pass
@@ -146,18 +157,31 @@ def ensure_accounts_seeded(p):
             print(f"[seed] {account['email']} 註冊例外: {e}")
     request_context.dispose()
 
-with sync_playwright() as p:
-    ensure_accounts_seeded(p)
-    browser = p.chromium.launch(headless=False)   # 產生正式流量用 headless;要肉眼檢查就改 False
-    for i in range(SESSION_COUNT):
-        context = browser.new_context(          # 每個 session 開新 context
-            user_agent=random.choice(UA_POOL)   # 隨機 UA,撐開 os_type 特徵
-        )
-        page = context.new_page()
-        try:
-            one_user_session(page)
-        except Exception as e:
-            print(f"session {i} error: {e}")
-        context.close()
-        time.sleep(random.uniform(0.2, 2.0))   # session 之間也隨機間隔
-    browser.close()
+def main() -> None:
+    with sync_playwright() as p:
+        ensure_accounts_seeded(p)
+        browser = p.chromium.launch(headless=False)   # 產生正式流量用 headless;要肉眼檢查就改 False
+        for i in range(SESSION_COUNT):
+            context = browser.new_context(          # 每個 session 開新 context
+                user_agent=random.choice(UA_POOL)   # 隨機 UA,撐開 os_type 特徵
+            )
+            page = context.new_page()
+            try:
+                one_user_session(page)
+            except Exception as e:
+                print(f"session {i} error: {e}")
+            context.close()
+            time.sleep(random.uniform(0.2, 2.0))   # session 之間也隨機間隔
+        browser.close()
+
+
+if __name__ == "__main__":
+    # 這份檔案是手動流量產生器（要真的開瀏覽器打 http://localhost:8080），
+    # 不是給 pytest 收集用的自動化測試——但檔名符合 pytest 預設
+    # python_files 規則的 *_test.py，pytest 掃到 repo 根目錄時還是會嘗試
+    # import 它。這個 guard 只解決「import 本身不該啟動瀏覽器、不該打真實
+    # 流量」這個副作用問題；CI 那個 job 根本沒裝 `playwright` 這個 PyPI
+    # 套件，所以就算加了這個 guard，pytest 光是執行到頂部的
+    # `from playwright.sync_api import sync_playwright` 就會 ModuleNotFoundError
+    # ——那個要在 ci.yml 用 --ignore 排除掉，兩個問題要一起修才行。
+    main()

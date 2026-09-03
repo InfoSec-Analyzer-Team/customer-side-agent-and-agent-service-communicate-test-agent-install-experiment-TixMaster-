@@ -1,7 +1,7 @@
 {
   "stage_id": 1,
   "n_samples": 16107,
-  "diversity_score": 0.2142486954032191,
+  "diversity_score": 0.25709843448386294,
   "provisional": false,
   "per_feature": {
     "os_type": {
@@ -14,10 +14,8 @@
         4,
         5,
         6
-      ]
-    },
-    "ua_length": {
-      "d": 0.0
+      ],
+      "collapsed": false
     },
     "request_method": {
       "d": 0.037669710252923,
@@ -25,13 +23,16 @@
       "missing": [
         "DELETE",
         "PATCH"
-      ]
+      ],
+      "collapsed": false
     },
     "url_depth": {
-      "d": 0.5
+      "d": 0.5,
+      "collapsed": false
     },
     "url_length": {
-      "d": 0.6705882352941176
+      "d": 0.6705882352941176,
+      "collapsed": false
     },
     "referrer_type": {
       "d": 0.02519053965560522,
@@ -41,14 +42,102 @@
         2,
         3,
         4
-      ]
+      ],
+      "collapsed": false
     }
   },
   "warnings": [
-    "stage 1: 11223/16107 筆樣本不符合定義判準 [{'feature': 'accesses_sensitive_path', 'op': 'eq', 'value': 1, 'exclude_from_support': True}]，可能混入其他 stage 的樣本，或定義判準本身設錯（明細見 StageDiversityReport.defining_violations，只列前 500 筆，真實總數見 defining_violations_total）",
-    "stage 1: 支撐特徵 'ua_length' 完全塌縮（d=0）"
+    "stage 1: 13549/16107 筆樣本不符合定義判準 [{'feature': 'accesses_sensitive_path', 'op': 'eq', 'value': 1, 'exclude_from_support': True}]，可能混入其他 stage 的樣本，或定義判準本身設錯（明細見 StageDiversityReport.defining_violations，只列前 500 筆，真實總數見 defining_violations_total）"
   ],
   "defining_violations": [
+    {
+      "index": 16,
+      "log_source": "nginx/logs/access2_Dicurigai_sensitive_path.log",
+      "log_line_no": 17,
+      "ip": "172.20.0.1",
+      "datetime": "2026-08-08T00:44:24+00:00",
+      "request": "GET /configuration.php HTTP/1.1",
+      "url": "/configuration.php",
+      "request_method": "GET",
+      "browser": "curl/8.5.0"
+    },
+    {
+      "index": 47,
+      "log_source": "nginx/logs/access2_Dicurigai_sensitive_path.log",
+      "log_line_no": 48,
+      "ip": "172.20.0.1",
+      "datetime": "2026-08-08T00:50:47+00:00",
+      "request": "GET /configuration.php HTTP/1.1",
+      "url": "/configuration.php",
+      "request_method": "GET",
+      "browser": "curl/8.5.0"
+    },
+    {
+      "index": 72,
+      "log_source": "nginx/logs/access2_Dicurigai_sensitive_path.log",
+      "log_line_no": 73,
+      "ip": "172.20.0.1",
+      "datetime": "2026-08-08T00:53:17+00:00",
+      "request": "GET /configuration.php HTTP/1.1",
+      "url": "/configuration.php",
+      "request_method": "GET",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36"
+    },
+    {
+      "index": 104,
+      "log_source": "nginx/logs/access2_Dicurigai_sensitive_path.log",
+      "log_line_no": 105,
+      "ip": "172.20.0.1",
+      "datetime": "2026-08-15T20:05:45+00:00",
+      "request": "GET /configuration.php HTTP/1.1",
+      "url": "/configuration.php",
+      "request_method": "GET",
+      "browser": "Nikto/2.5.0"
+    },
+    {
+      "index": 137,
+      "log_source": "nginx/logs/access2_Dicurigai_sensitive_path.log",
+      "log_line_no": 138,
+      "ip": "172.20.0.1",
+      "datetime": "2026-08-15T20:05:45+00:00",
+      "request": "GET /configuration.php HTTP/1.1",
+      "url": "/configuration.php",
+      "request_method": "GET",
+      "browser": "Nikto/2.5.0"
+    },
+    {
+      "index": 166,
+      "log_source": "nginx/logs/access2_Dicurigai_sensitive_path.log",
+      "log_line_no": 167,
+      "ip": "172.20.0.1",
+      "datetime": "2026-08-15T20:08:52+00:00",
+      "request": "GET /configuration.php HTTP/1.1",
+      "url": "/configuration.php",
+      "request_method": "GET",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36"
+    },
+    {
+      "index": 240,
+      "log_source": "nginx/logs/access2_Dicurigai_sensitive_path.log",
+      "log_line_no": 241,
+      "ip": "172.20.0.1",
+      "datetime": "2026-08-20T14:06:13+00:00",
+      "request": "HEAD /configuration.php HTTP/1.1",
+      "url": "/configuration.php",
+      "request_method": "HEAD",
+      "browser": "gobuster/3.6"
+    },
+    {
+      "index": 256,
+      "log_source": "nginx/logs/access2_Dicurigai_sensitive_path.log",
+      "log_line_no": 257,
+      "ip": "172.20.0.1",
+      "datetime": "2026-08-20T14:06:14+00:00",
+      "request": "HEAD /configuration.php HTTP/1.1",
+      "url": "/configuration.php",
+      "request_method": "HEAD",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/151.0.0.0 Safari/537.36"
+    },
     {
       "index": 264,
       "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
@@ -699,6 +788,17 @@
       "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     },
     {
+      "index": 327,
+      "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
+      "log_line_no": 64,
+      "ip": "172.22.0.1",
+      "datetime": "2026-08-06T13:59:58+00:00",
+      "request": "GET /Et6fMbjV.bakup HTTP/1.1",
+      "url": "/Et6fMbjV.bakup",
+      "request_method": "GET",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+    },
+    {
       "index": 329,
       "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
       "log_line_no": 66,
@@ -853,6 +953,17 @@
       "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     },
     {
+      "index": 343,
+      "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
+      "log_line_no": 80,
+      "ip": "172.22.0.1",
+      "datetime": "2026-08-06T13:59:59+00:00",
+      "request": "GET /Et6fMbjV.dbc HTTP/1.1",
+      "url": "/Et6fMbjV.dbc",
+      "request_method": "GET",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+    },
+    {
       "index": 344,
       "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
       "log_line_no": 81,
@@ -882,6 +993,17 @@
       "datetime": "2026-08-06T13:59:59+00:00",
       "request": "GET /Et6fMbjV.cp866 HTTP/1.1",
       "url": "/Et6fMbjV.cp866",
+      "request_method": "GET",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+    },
+    {
+      "index": 347,
+      "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
+      "log_line_no": 84,
+      "ip": "172.22.0.1",
+      "datetime": "2026-08-06T13:59:59+00:00",
+      "request": "GET /Et6fMbjV.dbm HTTP/1.1",
+      "url": "/Et6fMbjV.dbm",
       "request_method": "GET",
       "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     },
@@ -1667,6 +1789,17 @@
       "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     },
     {
+      "index": 421,
+      "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
+      "log_line_no": 158,
+      "ip": "172.22.0.1",
+      "datetime": "2026-08-06T13:59:59+00:00",
+      "request": "GET /Et6fMbjV.mdb HTTP/1.1",
+      "url": "/Et6fMbjV.mdb",
+      "request_method": "GET",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+    },
+    {
       "index": 422,
       "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
       "log_line_no": 159,
@@ -1953,6 +2086,17 @@
       "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     },
     {
+      "index": 449,
+      "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
+      "log_line_no": 186,
+      "ip": "172.22.0.1",
+      "datetime": "2026-08-06T14:00:00+00:00",
+      "request": "GET /Et6fMbjV.mdb+ HTTP/1.1",
+      "url": "/Et6fMbjV.mdb+",
+      "request_method": "GET",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+    },
+    {
       "index": 450,
       "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
       "log_line_no": 187,
@@ -2202,6 +2346,17 @@
       "datetime": "2026-08-06T14:00:00+00:00",
       "request": "GET /Et6fMbjV.show HTTP/1.1",
       "url": "/Et6fMbjV.show",
+      "request_method": "GET",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+    },
+    {
+      "index": 473,
+      "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
+      "log_line_no": 210,
+      "ip": "172.22.0.1",
+      "datetime": "2026-08-06T14:00:00+00:00",
+      "request": "GET /Et6fMbjV.nsconfig HTTP/1.1",
+      "url": "/Et6fMbjV.nsconfig",
       "request_method": "GET",
       "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     },
@@ -2730,6 +2885,17 @@
       "datetime": "2026-08-06T14:00:01+00:00",
       "request": "GET /scgi-bin/ HTTP/1.1",
       "url": "/scgi-bin/",
+      "request_method": "GET",
+      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
+    },
+    {
+      "index": 524,
+      "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
+      "log_line_no": 261,
+      "ip": "172.22.0.1",
+      "datetime": "2026-08-06T14:00:01+00:00",
+      "request": "GET /cgi-bin-sdb/ HTTP/1.1",
+      "url": "/cgi-bin-sdb/",
       "request_method": "GET",
       "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     },
@@ -5383,172 +5549,7 @@
       "url": "/dump.cer",
       "request_method": "GET",
       "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-    },
-    {
-      "index": 803,
-      "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
-      "log_line_no": 540,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-06T14:00:05+00:00",
-      "request": "GET /favicon.ico HTTP/1.1",
-      "url": "/favicon.ico",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-    },
-    {
-      "index": 804,
-      "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
-      "log_line_no": 541,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-06T14:00:05+00:00",
-      "request": "GET /favicons/favicon.ico HTTP/1.1",
-      "url": "/favicons/favicon.ico",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-    },
-    {
-      "index": 805,
-      "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
-      "log_line_no": 542,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-06T14:00:05+00:00",
-      "request": "GET /favicon.gif HTTP/1.1",
-      "url": "/favicon.gif",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-    },
-    {
-      "index": 806,
-      "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
-      "log_line_no": 543,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-06T14:00:05+00:00",
-      "request": "GET /favicons/favicon.gif HTTP/1.1",
-      "url": "/favicons/favicon.gif",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-    },
-    {
-      "index": 807,
-      "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
-      "log_line_no": 544,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-06T14:00:05+00:00",
-      "request": "GET /favicon.png HTTP/1.1",
-      "url": "/favicon.png",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-    },
-    {
-      "index": 808,
-      "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
-      "log_line_no": 545,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-06T14:00:05+00:00",
-      "request": "GET /favicons/favicon.png HTTP/1.1",
-      "url": "/favicons/favicon.png",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-    },
-    {
-      "index": 809,
-      "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
-      "log_line_no": 546,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-06T14:00:05+00:00",
-      "request": "GET / HTTP/1.1",
-      "url": "/",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-    },
-    {
-      "index": 810,
-      "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
-      "log_line_no": 547,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-06T14:00:05+00:00",
-      "request": "GET / HTTP/1.1",
-      "url": "/",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-    },
-    {
-      "index": 811,
-      "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
-      "log_line_no": 548,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-06T14:00:05+00:00",
-      "request": "GET /domcfg.nsf HTTP/1.1",
-      "url": "/domcfg.nsf",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-    },
-    {
-      "index": 816,
-      "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
-      "log_line_no": 553,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-06T14:00:05+00:00",
-      "request": "GET /nonexistent.nsf HTTP/1.1",
-      "url": "/nonexistent.nsf",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-    },
-    {
-      "index": 817,
-      "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
-      "log_line_no": 554,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-06T14:00:05+00:00",
-      "request": "GET /index HTTP/1.1",
-      "url": "/index",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-    },
-    {
-      "index": 818,
-      "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
-      "log_line_no": 555,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-06T14:00:05+00:00",
-      "request": "GET / HTTP/1.1",
-      "url": "/",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-    },
-    {
-      "index": 819,
-      "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
-      "log_line_no": 556,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-06T14:00:05+00:00",
-      "request": "GET / HTTP/1.1",
-      "url": "/",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-    },
-    {
-      "index": 820,
-      "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
-      "log_line_no": 557,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-06T14:00:05+00:00",
-      "request": "GET /index.asp HTTP/1.1",
-      "url": "/index.asp",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
-    },
-    {
-      "index": 821,
-      "log_source": "nginx/collected/nginx01_batch_nikto_scan_001.log",
-      "log_line_no": 558,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-06T14:00:05+00:00",
-      "request": "GET /index.asp\\x5C HTTP/1.1",
-      "url": "/index.asp\\x5C",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     }
   ],
-  "defining_violations_total": 11223
+  "defining_violations_total": 13549
 }

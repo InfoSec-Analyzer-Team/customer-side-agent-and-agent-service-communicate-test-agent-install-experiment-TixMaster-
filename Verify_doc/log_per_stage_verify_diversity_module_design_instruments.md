@@ -162,6 +162,19 @@ config 是唯一事實來源。`diversity.py` 不得硬編任何 stage 專屬常
 stage 的 `Diversity_stage` 直接衡量它自己的成敗,是最單純的用法。
 > 
 
+> ⚠️ **實作偏離紀錄(2026-09-02)**:上面這張表列的 `ua_length` 在
+> `dataset_health/config.py` 的 `SUPPORT_FEATURES` 裡,除了 stage 10,其餘 11 個
+> stage 都已經拿掉。原因:拿真實資料驗證發現 QCD 量的是「UA 長度的離散」不是
+> 「UA 的多樣性」——工具 UA 短、瀏覽器 UA 長,混一點攻擊工具流量進來,雙峰分布
+> 就把 QCD 撐得很高,變成「工具混得越多分數越高」,跟 §1.1 shortcut-learning
+> 防範的目的相反(實測 QCD=0.8347 vs 純瀏覽器零指紋資料的 0.1878)。stage 10
+> 因為本身就是在評 UA 多樣性,拿掉會讓這個 stage 的定義特徵開天窗,先保留;
+> 長期修法(換成 UA 家族類別型熵)還沒做,見
+> `Verify_doc/known_gaps_diversity_config.md`。這張表
+> 本身先不改(保留原始設計意圖的紀錄),以 `config.py` 的 `SUPPORT_FEATURES`
+> 註解為準。
+> 
+
 ### 3.2 類別型特徵的理論基數與期望取值
 
 | 特徵 | `N_f`(理論基數) | `expected(f)` | 依據 |

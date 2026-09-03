@@ -292,7 +292,11 @@
 
                 setTimeout(() => {
                     if (returnUrl) {
-                        window.location.href = decodeURIComponent(returnUrl);
+                        // returnUrl 在上面已經是解碼過的字串了（來自
+                        // urlParams.get() 或 localStorage 裡未再編碼存的值），
+                        // 這裡不能再 decodeURIComponent 一次——值裡若剛好有
+                        // 不成對的 "%" 會直接 throw URIError，整個跳轉失敗。
+                        window.location.href = returnUrl;
                     } else {
                         window.location.href = 'index.html';
                     }

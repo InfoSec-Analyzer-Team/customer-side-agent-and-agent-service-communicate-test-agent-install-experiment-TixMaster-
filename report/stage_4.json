@@ -1,17 +1,20 @@
 {
   "stage_id": 4,
   "n_samples": 120,
-  "diversity_score": 0.23511160439018375,
+  "diversity_score": 0.17625157232704403,
   "provisional": true,
   "per_feature": {
     "url_depth": {
-      "d": 0.3333333333333333
+      "d": 0.3333333333333333,
+      "collapsed": false
     },
     "url_length": {
-      "d": 0.2679245283018868
+      "d": 0.2679245283018868,
+      "collapsed": false
     },
     "url_encoding_count": {
-      "d": 0.28
+      "d": 0.28,
+      "collapsed": false
     },
     "os_type": {
       "d": 0.0,
@@ -24,24 +27,23 @@
         4,
         5,
         6
-      ]
-    },
-    "ua_length": {
-      "d": 0.5294117647058824
+      ],
+      "collapsed": true
     },
     "has_double_encoding": {
       "d": 0.0,
       "coverage": 0.5,
       "missing": [
         1
-      ]
+      ],
+      "collapsed": true
     }
   },
   "warnings": [
-    "stage 4: 105/120 筆樣本不符合定義判準 [{'feature': 'has_path_traversal', 'op': 'eq', 'value': 1, 'exclude_from_support': True}]，可能混入其他 stage 的樣本，或定義判準本身設錯（明細見 StageDiversityReport.defining_violations）",
+    "stage 4: 30/120 筆樣本不符合定義判準 [{'feature': 'has_path_traversal', 'op': 'eq', 'value': 1, 'exclude_from_support': True}]，可能混入其他 stage 的樣本，或定義判準本身設錯（明細見 StageDiversityReport.defining_violations）",
     "stage 4: n_samples=120 < MIN_SAMPLES=200，熵/QCD 數字僅供參考（provisional），CI 不得當硬門檻",
-    "stage 4: 支撐特徵 'os_type' 完全塌縮（d=0）",
-    "stage 4: 支撐特徵 'has_double_encoding' 完全塌縮（d=0）"
+    "stage 4: 支撐特徵 'os_type' 完全塌縮（d=0，只有 1 種取值）",
+    "stage 4: 支撐特徵 'has_double_encoding' 完全塌縮（d=0，只有 1 種取值）"
   ],
   "defining_violations": [
     {
@@ -56,17 +58,6 @@
       "browser": "Mozilla/5.0 Chrome"
     },
     {
-      "index": 1,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 2,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:15+00:00",
-      "request": "GET /..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "-"
-    },
-    {
       "index": 2,
       "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
       "log_line_no": 3,
@@ -76,50 +67,6 @@
       "url": "/backend/.env",
       "request_method": "GET",
       "browser": "Mozilla/5.0 Chrome"
-    },
-    {
-      "index": 3,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 4,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:15+00:00",
-      "request": "GET /download?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/download?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "nikto"
-    },
-    {
-      "index": 4,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 5,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:15+00:00",
-      "request": "GET /download?file=..%5C..%5Cwindows%5Cwin.ini HTTP/1.1",
-      "url": "/download?file=..%5C..%5Cwindows%5Cwin.ini",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 Chrome"
-    },
-    {
-      "index": 6,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 7,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:15+00:00",
-      "request": "GET /view?file=..%2F..%2F..%2Fetc%2Fshadow HTTP/1.1",
-      "url": "/view?file=..%2F..%2F..%2Fetc%2Fshadow",
-      "request_method": "GET",
-      "browser": "curl/8.0"
-    },
-    {
-      "index": 7,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 8,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:15+00:00",
-      "request": "GET /api/events?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/api/events?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "dotdotpwn/3.0"
     },
     {
       "index": 8,
@@ -133,17 +80,6 @@
       "browser": "curl/8.0"
     },
     {
-      "index": 9,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 10,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:15+00:00",
-      "request": "GET /..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "-"
-    },
-    {
       "index": 10,
       "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
       "log_line_no": 11,
@@ -153,50 +89,6 @@
       "url": "/backend/.env",
       "request_method": "GET",
       "browser": "dotdotpwn/3.0"
-    },
-    {
-      "index": 11,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 12,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:16+00:00",
-      "request": "GET /download?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/download?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "dotdotpwn/3.0"
-    },
-    {
-      "index": 12,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 13,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:16+00:00",
-      "request": "GET /download?file=..%5C..%5Cwindows%5Cwin.ini HTTP/1.1",
-      "url": "/download?file=..%5C..%5Cwindows%5Cwin.ini",
-      "request_method": "GET",
-      "browser": "nikto"
-    },
-    {
-      "index": 14,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 15,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:16+00:00",
-      "request": "GET /view?file=..%2F..%2F..%2Fetc%2Fshadow HTTP/1.1",
-      "url": "/view?file=..%2F..%2F..%2Fetc%2Fshadow",
-      "request_method": "GET",
-      "browser": "nikto"
-    },
-    {
-      "index": 15,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 16,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:16+00:00",
-      "request": "GET /api/events?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/api/events?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "curl/8.0"
     },
     {
       "index": 16,
@@ -210,17 +102,6 @@
       "browser": "dotdotpwn/3.0"
     },
     {
-      "index": 17,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 18,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:16+00:00",
-      "request": "GET /..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "-"
-    },
-    {
       "index": 18,
       "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
       "log_line_no": 19,
@@ -230,50 +111,6 @@
       "url": "/backend/.env",
       "request_method": "GET",
       "browser": "dotdotpwn/3.0"
-    },
-    {
-      "index": 19,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 20,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:16+00:00",
-      "request": "GET /download?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/download?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "curl/8.0"
-    },
-    {
-      "index": 20,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 21,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:16+00:00",
-      "request": "GET /download?file=..%5C..%5Cwindows%5Cwin.ini HTTP/1.1",
-      "url": "/download?file=..%5C..%5Cwindows%5Cwin.ini",
-      "request_method": "GET",
-      "browser": "dotdotpwn/3.0"
-    },
-    {
-      "index": 22,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 23,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:16+00:00",
-      "request": "GET /view?file=..%2F..%2F..%2Fetc%2Fshadow HTTP/1.1",
-      "url": "/view?file=..%2F..%2F..%2Fetc%2Fshadow",
-      "request_method": "GET",
-      "browser": "curl/8.0"
-    },
-    {
-      "index": 23,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 24,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:16+00:00",
-      "request": "GET /api/events?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/api/events?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "curl/8.0"
     },
     {
       "index": 24,
@@ -287,17 +124,6 @@
       "browser": "curl/8.0"
     },
     {
-      "index": 25,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 26,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:16+00:00",
-      "request": "GET /..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "-"
-    },
-    {
       "index": 26,
       "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
       "log_line_no": 27,
@@ -307,50 +133,6 @@
       "url": "/backend/.env",
       "request_method": "GET",
       "browser": "Mozilla/5.0 Chrome"
-    },
-    {
-      "index": 27,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 28,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:16+00:00",
-      "request": "GET /download?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/download?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 Chrome"
-    },
-    {
-      "index": 28,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 29,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:16+00:00",
-      "request": "GET /download?file=..%5C..%5Cwindows%5Cwin.ini HTTP/1.1",
-      "url": "/download?file=..%5C..%5Cwindows%5Cwin.ini",
-      "request_method": "GET",
-      "browser": "dotdotpwn/3.0"
-    },
-    {
-      "index": 30,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 31,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:16+00:00",
-      "request": "GET /view?file=..%2F..%2F..%2Fetc%2Fshadow HTTP/1.1",
-      "url": "/view?file=..%2F..%2F..%2Fetc%2Fshadow",
-      "request_method": "GET",
-      "browser": "dotdotpwn/3.0"
-    },
-    {
-      "index": 31,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 32,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:16+00:00",
-      "request": "GET /api/events?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/api/events?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "dotdotpwn/3.0"
     },
     {
       "index": 32,
@@ -364,17 +146,6 @@
       "browser": "nikto"
     },
     {
-      "index": 33,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 34,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:16+00:00",
-      "request": "GET /..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "-"
-    },
-    {
       "index": 34,
       "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
       "log_line_no": 35,
@@ -384,50 +155,6 @@
       "url": "/backend/.env",
       "request_method": "GET",
       "browser": "nikto"
-    },
-    {
-      "index": 35,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 36,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:16+00:00",
-      "request": "GET /download?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/download?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "dotdotpwn/3.0"
-    },
-    {
-      "index": 36,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 37,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:16+00:00",
-      "request": "GET /download?file=..%5C..%5Cwindows%5Cwin.ini HTTP/1.1",
-      "url": "/download?file=..%5C..%5Cwindows%5Cwin.ini",
-      "request_method": "GET",
-      "browser": "dotdotpwn/3.0"
-    },
-    {
-      "index": 38,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 39,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:16+00:00",
-      "request": "GET /view?file=..%2F..%2F..%2Fetc%2Fshadow HTTP/1.1",
-      "url": "/view?file=..%2F..%2F..%2Fetc%2Fshadow",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 Chrome"
-    },
-    {
-      "index": 39,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 40,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:16+00:00",
-      "request": "GET /api/events?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/api/events?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "dotdotpwn/3.0"
     },
     {
       "index": 40,
@@ -441,17 +168,6 @@
       "browser": "curl/8.0"
     },
     {
-      "index": 41,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 42,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:17+00:00",
-      "request": "GET /..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "-"
-    },
-    {
       "index": 42,
       "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
       "log_line_no": 43,
@@ -461,50 +177,6 @@
       "url": "/backend/.env",
       "request_method": "GET",
       "browser": "curl/8.0"
-    },
-    {
-      "index": 43,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 44,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:17+00:00",
-      "request": "GET /download?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/download?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 Chrome"
-    },
-    {
-      "index": 44,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 45,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:17+00:00",
-      "request": "GET /download?file=..%5C..%5Cwindows%5Cwin.ini HTTP/1.1",
-      "url": "/download?file=..%5C..%5Cwindows%5Cwin.ini",
-      "request_method": "GET",
-      "browser": "dotdotpwn/3.0"
-    },
-    {
-      "index": 46,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 47,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:17+00:00",
-      "request": "GET /view?file=..%2F..%2F..%2Fetc%2Fshadow HTTP/1.1",
-      "url": "/view?file=..%2F..%2F..%2Fetc%2Fshadow",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 Chrome"
-    },
-    {
-      "index": 47,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 48,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:17+00:00",
-      "request": "GET /api/events?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/api/events?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "nikto"
     },
     {
       "index": 48,
@@ -518,17 +190,6 @@
       "browser": "curl/8.0"
     },
     {
-      "index": 49,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 50,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:17+00:00",
-      "request": "GET /..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "-"
-    },
-    {
       "index": 50,
       "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
       "log_line_no": 51,
@@ -538,50 +199,6 @@
       "url": "/backend/.env",
       "request_method": "GET",
       "browser": "nikto"
-    },
-    {
-      "index": 51,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 52,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:17+00:00",
-      "request": "GET /download?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/download?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "dotdotpwn/3.0"
-    },
-    {
-      "index": 52,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 53,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:17+00:00",
-      "request": "GET /download?file=..%5C..%5Cwindows%5Cwin.ini HTTP/1.1",
-      "url": "/download?file=..%5C..%5Cwindows%5Cwin.ini",
-      "request_method": "GET",
-      "browser": "dotdotpwn/3.0"
-    },
-    {
-      "index": 54,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 55,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:17+00:00",
-      "request": "GET /view?file=..%2F..%2F..%2Fetc%2Fshadow HTTP/1.1",
-      "url": "/view?file=..%2F..%2F..%2Fetc%2Fshadow",
-      "request_method": "GET",
-      "browser": "curl/8.0"
-    },
-    {
-      "index": 55,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 56,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:17+00:00",
-      "request": "GET /api/events?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/api/events?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "curl/8.0"
     },
     {
       "index": 56,
@@ -595,17 +212,6 @@
       "browser": "dotdotpwn/3.0"
     },
     {
-      "index": 57,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 58,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:17+00:00",
-      "request": "GET /..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "-"
-    },
-    {
       "index": 58,
       "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
       "log_line_no": 59,
@@ -615,50 +221,6 @@
       "url": "/backend/.env",
       "request_method": "GET",
       "browser": "Mozilla/5.0 Chrome"
-    },
-    {
-      "index": 59,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 60,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:17+00:00",
-      "request": "GET /download?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/download?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "nikto"
-    },
-    {
-      "index": 60,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 61,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:17+00:00",
-      "request": "GET /download?file=..%5C..%5Cwindows%5Cwin.ini HTTP/1.1",
-      "url": "/download?file=..%5C..%5Cwindows%5Cwin.ini",
-      "request_method": "GET",
-      "browser": "dotdotpwn/3.0"
-    },
-    {
-      "index": 62,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 63,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:17+00:00",
-      "request": "GET /view?file=..%2F..%2F..%2Fetc%2Fshadow HTTP/1.1",
-      "url": "/view?file=..%2F..%2F..%2Fetc%2Fshadow",
-      "request_method": "GET",
-      "browser": "curl/8.0"
-    },
-    {
-      "index": 63,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 64,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:17+00:00",
-      "request": "GET /api/events?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/api/events?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "nikto"
     },
     {
       "index": 64,
@@ -672,17 +234,6 @@
       "browser": "nikto"
     },
     {
-      "index": 65,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 66,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:17+00:00",
-      "request": "GET /..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "-"
-    },
-    {
       "index": 66,
       "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
       "log_line_no": 67,
@@ -692,50 +243,6 @@
       "url": "/backend/.env",
       "request_method": "GET",
       "browser": "nikto"
-    },
-    {
-      "index": 67,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 68,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:17+00:00",
-      "request": "GET /download?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/download?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 Chrome"
-    },
-    {
-      "index": 68,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 69,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:17+00:00",
-      "request": "GET /download?file=..%5C..%5Cwindows%5Cwin.ini HTTP/1.1",
-      "url": "/download?file=..%5C..%5Cwindows%5Cwin.ini",
-      "request_method": "GET",
-      "browser": "curl/8.0"
-    },
-    {
-      "index": 70,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 71,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:17+00:00",
-      "request": "GET /view?file=..%2F..%2F..%2Fetc%2Fshadow HTTP/1.1",
-      "url": "/view?file=..%2F..%2F..%2Fetc%2Fshadow",
-      "request_method": "GET",
-      "browser": "dotdotpwn/3.0"
-    },
-    {
-      "index": 71,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 72,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:17+00:00",
-      "request": "GET /api/events?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/api/events?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "dotdotpwn/3.0"
     },
     {
       "index": 72,
@@ -749,17 +256,6 @@
       "browser": "Mozilla/5.0 Chrome"
     },
     {
-      "index": 73,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 74,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:17+00:00",
-      "request": "GET /..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "-"
-    },
-    {
       "index": 74,
       "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
       "log_line_no": 75,
@@ -769,50 +265,6 @@
       "url": "/backend/.env",
       "request_method": "GET",
       "browser": "dotdotpwn/3.0"
-    },
-    {
-      "index": 75,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 76,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:17+00:00",
-      "request": "GET /download?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/download?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 Chrome"
-    },
-    {
-      "index": 76,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 77,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:17+00:00",
-      "request": "GET /download?file=..%5C..%5Cwindows%5Cwin.ini HTTP/1.1",
-      "url": "/download?file=..%5C..%5Cwindows%5Cwin.ini",
-      "request_method": "GET",
-      "browser": "nikto"
-    },
-    {
-      "index": 78,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 79,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:17+00:00",
-      "request": "GET /view?file=..%2F..%2F..%2Fetc%2Fshadow HTTP/1.1",
-      "url": "/view?file=..%2F..%2F..%2Fetc%2Fshadow",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 Chrome"
-    },
-    {
-      "index": 79,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 80,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:17+00:00",
-      "request": "GET /api/events?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/api/events?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "nikto"
     },
     {
       "index": 80,
@@ -826,17 +278,6 @@
       "browser": "curl/8.0"
     },
     {
-      "index": 81,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 82,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:17+00:00",
-      "request": "GET /..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "-"
-    },
-    {
       "index": 82,
       "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
       "log_line_no": 83,
@@ -846,50 +287,6 @@
       "url": "/backend/.env",
       "request_method": "GET",
       "browser": "nikto"
-    },
-    {
-      "index": 83,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 84,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:18+00:00",
-      "request": "GET /download?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/download?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 Chrome"
-    },
-    {
-      "index": 84,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 85,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:18+00:00",
-      "request": "GET /download?file=..%5C..%5Cwindows%5Cwin.ini HTTP/1.1",
-      "url": "/download?file=..%5C..%5Cwindows%5Cwin.ini",
-      "request_method": "GET",
-      "browser": "dotdotpwn/3.0"
-    },
-    {
-      "index": 86,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 87,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:18+00:00",
-      "request": "GET /view?file=..%2F..%2F..%2Fetc%2Fshadow HTTP/1.1",
-      "url": "/view?file=..%2F..%2F..%2Fetc%2Fshadow",
-      "request_method": "GET",
-      "browser": "dotdotpwn/3.0"
-    },
-    {
-      "index": 87,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 88,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:18+00:00",
-      "request": "GET /api/events?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/api/events?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "dotdotpwn/3.0"
     },
     {
       "index": 88,
@@ -903,17 +300,6 @@
       "browser": "curl/8.0"
     },
     {
-      "index": 89,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 90,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:18+00:00",
-      "request": "GET /..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "-"
-    },
-    {
       "index": 90,
       "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
       "log_line_no": 91,
@@ -923,50 +309,6 @@
       "url": "/backend/.env",
       "request_method": "GET",
       "browser": "dotdotpwn/3.0"
-    },
-    {
-      "index": 91,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 92,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:18+00:00",
-      "request": "GET /download?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/download?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 Chrome"
-    },
-    {
-      "index": 92,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 93,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:18+00:00",
-      "request": "GET /download?file=..%5C..%5Cwindows%5Cwin.ini HTTP/1.1",
-      "url": "/download?file=..%5C..%5Cwindows%5Cwin.ini",
-      "request_method": "GET",
-      "browser": "dotdotpwn/3.0"
-    },
-    {
-      "index": 94,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 95,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:18+00:00",
-      "request": "GET /view?file=..%2F..%2F..%2Fetc%2Fshadow HTTP/1.1",
-      "url": "/view?file=..%2F..%2F..%2Fetc%2Fshadow",
-      "request_method": "GET",
-      "browser": "dotdotpwn/3.0"
-    },
-    {
-      "index": 95,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 96,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:18+00:00",
-      "request": "GET /api/events?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/api/events?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 Chrome"
     },
     {
       "index": 96,
@@ -980,17 +322,6 @@
       "browser": "dotdotpwn/3.0"
     },
     {
-      "index": 97,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 98,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:18+00:00",
-      "request": "GET /..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "-"
-    },
-    {
       "index": 98,
       "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
       "log_line_no": 99,
@@ -1000,50 +331,6 @@
       "url": "/backend/.env",
       "request_method": "GET",
       "browser": "Mozilla/5.0 Chrome"
-    },
-    {
-      "index": 99,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 100,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:18+00:00",
-      "request": "GET /download?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/download?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "nikto"
-    },
-    {
-      "index": 100,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 101,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:18+00:00",
-      "request": "GET /download?file=..%5C..%5Cwindows%5Cwin.ini HTTP/1.1",
-      "url": "/download?file=..%5C..%5Cwindows%5Cwin.ini",
-      "request_method": "GET",
-      "browser": "dotdotpwn/3.0"
-    },
-    {
-      "index": 102,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 103,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:18+00:00",
-      "request": "GET /view?file=..%2F..%2F..%2Fetc%2Fshadow HTTP/1.1",
-      "url": "/view?file=..%2F..%2F..%2Fetc%2Fshadow",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 Chrome"
-    },
-    {
-      "index": 103,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 104,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:18+00:00",
-      "request": "GET /api/events?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/api/events?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "nikto"
     },
     {
       "index": 104,
@@ -1057,17 +344,6 @@
       "browser": "nikto"
     },
     {
-      "index": 105,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 106,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:18+00:00",
-      "request": "GET /..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "-"
-    },
-    {
       "index": 106,
       "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
       "log_line_no": 107,
@@ -1077,50 +353,6 @@
       "url": "/backend/.env",
       "request_method": "GET",
       "browser": "Mozilla/5.0 Chrome"
-    },
-    {
-      "index": 107,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 108,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:19+00:00",
-      "request": "GET /download?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/download?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "Mozilla/5.0 Chrome"
-    },
-    {
-      "index": 108,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 109,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:19+00:00",
-      "request": "GET /download?file=..%5C..%5Cwindows%5Cwin.ini HTTP/1.1",
-      "url": "/download?file=..%5C..%5Cwindows%5Cwin.ini",
-      "request_method": "GET",
-      "browser": "dotdotpwn/3.0"
-    },
-    {
-      "index": 110,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 111,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:19+00:00",
-      "request": "GET /view?file=..%2F..%2F..%2Fetc%2Fshadow HTTP/1.1",
-      "url": "/view?file=..%2F..%2F..%2Fetc%2Fshadow",
-      "request_method": "GET",
-      "browser": "curl/8.0"
-    },
-    {
-      "index": 111,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 112,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:19+00:00",
-      "request": "GET /api/events?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/api/events?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "curl/8.0"
     },
     {
       "index": 112,
@@ -1134,17 +366,6 @@
       "browser": "dotdotpwn/3.0"
     },
     {
-      "index": 113,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 114,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:19+00:00",
-      "request": "GET /..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "-"
-    },
-    {
       "index": 114,
       "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
       "log_line_no": 115,
@@ -1154,51 +375,7 @@
       "url": "/backend/.env",
       "request_method": "GET",
       "browser": "dotdotpwn/3.0"
-    },
-    {
-      "index": 115,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 116,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:19+00:00",
-      "request": "GET /download?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/download?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "nikto"
-    },
-    {
-      "index": 116,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 117,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:19+00:00",
-      "request": "GET /download?file=..%5C..%5Cwindows%5Cwin.ini HTTP/1.1",
-      "url": "/download?file=..%5C..%5Cwindows%5Cwin.ini",
-      "request_method": "GET",
-      "browser": "dotdotpwn/3.0"
-    },
-    {
-      "index": 118,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 119,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:19+00:00",
-      "request": "GET /view?file=..%2F..%2F..%2Fetc%2Fshadow HTTP/1.1",
-      "url": "/view?file=..%2F..%2F..%2Fetc%2Fshadow",
-      "request_method": "GET",
-      "browser": "curl/8.0"
-    },
-    {
-      "index": 119,
-      "log_source": "nginx/collected/nginx01_batch_path_traversal_001.log",
-      "log_line_no": 120,
-      "ip": "172.22.0.1",
-      "datetime": "2026-08-11T15:17:19+00:00",
-      "request": "GET /api/events?file=..%2F..%2F..%2Fetc%2Fpasswd HTTP/1.1",
-      "url": "/api/events?file=..%2F..%2F..%2Fetc%2Fpasswd",
-      "request_method": "GET",
-      "browser": "curl/8.0"
     }
   ],
-  "defining_violations_total": 105
+  "defining_violations_total": 30
 }

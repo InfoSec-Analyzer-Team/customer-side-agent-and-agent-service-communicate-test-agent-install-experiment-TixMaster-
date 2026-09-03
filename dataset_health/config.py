@@ -102,22 +102,71 @@ DEFINING_PREDICATE = {
 }
 
 # stage_id -> 支撐特徵集 F（評多元度用，已排除定義 flag，例外見上方 stage 11 註）
+#
+# ⚠️ ua_length 從下面 11 個 stage（除了 stage 10）的 F 裡拿掉了，是刻意的，
+# 不是漏打：真實資料驗證發現 QCD 量的是「UA 長度的離散」不是「UA 的多樣性」，
+# 工具 UA 短（curl/8.5.0 = 10 字元）、瀏覽器 UA 長（100+ 字元），只要混一點
+# 攻擊工具流量進來，雙峰分布就把 IQR 比值撐到很高，QCD 反而給高分——工具
+# 混得越多分數越高，跟 shortcut-learning 防範的目的完全相反（§1.1），而且
+# ua_length 原本出現在全部 12 個 stage 的 F 裡，是系統性問題。詳細數字對照
+# 見 Verify_doc/known_gaps_diversity_config.md（QCD=0.8347
+# vs 純瀏覽器零指紋資料的 0.1878）。
+#
+# 沒有整批刪掉、stage 10 刻意保留：stage 10「UA 多樣性」本身的收集目標就是
+# UA 夠不夠雜，拿掉 ua_length 會讓這個 stage 自己的定義特徵開天窗（F 只剩
+# os_type/is_bot 這種粗粒度分類，力道不夠）。長期修法是把 ua_length 換成
+# UA 家族的類別型熵（browser/curl/python/scanner...），但那需要在
+# feature_engineering.py 新增分類邏輯（而且那份檔案的權威版本在
+# log-analysis-core，不是這裡，見 §4），還要先確認跟 fingerprint.py 有沒有
+# 職責重疊，不是能在這裡單方面做的小改動——stage 10 先維持原狀，等那個
+# UA 家族特徵真的做出來再換掉。
 SUPPORT_FEATURES = {
-    1: ["os_type", "ua_length", "request_method", "url_depth", "url_length", "referrer_type"],
-    2: [
-        "os_type", "ua_length", "url_length", "url_special_chars",
-        "url_param_count", "request_method", "url_encoding_count",
+    1: [
+        "os_type", "request_method", "url_depth", "url_length", "referrer_type",
+        # "ua_length",  # 移除，見上方本區塊開頭的說明
     ],
-    3: ["url_special_chars", "url_length", "ua_length", "url_encoding_count", "os_type", "request_method"],
-    4: ["url_depth", "url_length", "url_encoding_count", "os_type", "ua_length", "has_double_encoding"],
-    5: ["url_length", "url_special_chars", "os_type", "ua_length", "request_method", "url_param_count"],
-    6: ["url_length", "url_special_chars", "os_type", "ua_length", "url_encoding_count"],
-    7: ["url_encoding_count", "url_length", "os_type", "ua_length"],
-    8: ["url_length", "url_special_chars", "os_type", "ua_length"],
-    9: ["url_length", "os_type", "ua_length", "url_encoding_count"],
-    10: ["os_type", "ua_length", "is_bot", "referrer_type", "request_method"],
-    11: ["request_method", "url_length", "os_type", "ua_length"],
-    12: ["url_length", "url_depth", "url_param_count", "url_special_chars", "os_type", "ua_length"],
+    2: [
+        "os_type", "url_length", "url_special_chars",
+        "url_param_count", "request_method", "url_encoding_count",
+        # "ua_length",  # 移除，見上方本區塊開頭的說明
+    ],
+    3: [
+        "url_special_chars", "url_length", "url_encoding_count", "os_type", "request_method",
+        # "ua_length",  # 移除，見上方本區塊開頭的說明
+    ],
+    4: [
+        "url_depth", "url_length", "url_encoding_count", "os_type", "has_double_encoding",
+        # "ua_length",  # 移除，見上方本區塊開頭的說明
+    ],
+    5: [
+        "url_length", "url_special_chars", "os_type", "request_method", "url_param_count",
+        # "ua_length",  # 移除，見上方本區塊開頭的說明
+    ],
+    6: [
+        "url_length", "url_special_chars", "os_type", "url_encoding_count",
+        # "ua_length",  # 移除，見上方本區塊開頭的說明
+    ],
+    7: [
+        "url_encoding_count", "url_length", "os_type",
+        # "ua_length",  # 移除，見上方本區塊開頭的說明
+    ],
+    8: [
+        "url_length", "url_special_chars", "os_type",
+        # "ua_length",  # 移除，見上方本區塊開頭的說明
+    ],
+    9: [
+        "url_length", "os_type", "url_encoding_count",
+        # "ua_length",  # 移除，見上方本區塊開頭的說明
+    ],
+    10: ["os_type", "ua_length", "is_bot", "referrer_type", "request_method"],  # ua_length 保留，見上方說明
+    11: [
+        "request_method", "url_length", "os_type",
+        # "ua_length",  # 移除，見上方本區塊開頭的說明
+    ],
+    12: [
+        "url_length", "url_depth", "url_param_count", "url_special_chars", "os_type",
+        # "ua_length",  # 移除，見上方本區塊開頭的說明
+    ],
 }
 
 
