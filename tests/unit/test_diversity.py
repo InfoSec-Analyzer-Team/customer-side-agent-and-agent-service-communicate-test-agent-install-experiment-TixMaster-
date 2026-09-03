@@ -350,6 +350,42 @@ def test_stage_diversity_stage11_defining_violation_when_get_post_present():
     assert any("不符合定義判準" in w for w in report.warnings)
 
 
+def _stage6_fixture(n=300, has_file_inclusion=1, has_path_traversal=0):
+    """Stage 6 = LFI。定義判準是 "any" 群組（has_file_inclusion==1 OR
+    has_path_traversal==1），見 config.DEFINING_PREDICATE[6] 跟
+    Verify_doc/known_gaps_attack_patterns.md 缺口 5。"""
+    return pd.DataFrame({
+        "has_file_inclusion": [has_file_inclusion] * n,
+        "has_path_traversal": [has_path_traversal] * n,
+        "url_length": [20 + (i % 40) for i in range(n)],
+        "url_special_chars": [i % 5 for i in range(n)],
+        "os_type": [i % 8 for i in range(n)],
+        "url_encoding_count": [i % 4 for i in range(n)],
+    })
+
+
+def test_stage_diversity_stage6_any_predicate_no_violation_when_file_inclusion_flag_set():
+    df = _stage6_fixture(has_file_inclusion=1, has_path_traversal=0)
+    report = stage_diversity(df, stage_id=6, cfg=cfg)
+    assert not any("不符合定義判準" in w for w in report.warnings)
+
+
+def test_stage_diversity_stage6_any_predicate_no_violation_when_path_traversal_flag_set():
+    # 這是缺口 5 的迴歸測試：traversal-style LFI（../../etc/passwd）只會讓
+    # has_path_traversal=1、has_file_inclusion=0（FILE_INCLUSION_PAT 只認
+    # wrapper scheme），改成 "any" 複合判準前這批會被誤判成「不屬於 stage 6」。
+    df = _stage6_fixture(has_file_inclusion=0, has_path_traversal=1)
+    report = stage_diversity(df, stage_id=6, cfg=cfg)
+    assert not any("不符合定義判準" in w for w in report.warnings)
+
+
+def test_stage_diversity_stage6_any_predicate_violation_when_neither_flag_set():
+    df = _stage6_fixture(has_file_inclusion=0, has_path_traversal=0)
+    report = stage_diversity(df, stage_id=6, cfg=cfg)
+    assert any("不符合定義判準" in w for w in report.warnings)
+    assert report.defining_violations_total == len(df)
+
+
 def test_stage_diversity_missing_column_warns_and_is_skipped():
     df = _stage2_fixture(n=300).drop(columns=["os_type"])
     report = stage_diversity(df, stage_id=2, cfg=cfg)

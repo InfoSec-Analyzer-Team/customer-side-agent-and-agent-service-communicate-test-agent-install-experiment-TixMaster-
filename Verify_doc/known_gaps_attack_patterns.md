@@ -289,6 +289,20 @@ literal-only 的 regex 對編碼後的字串完全對不上。真實案例（URL
    `%0A`/`%0D%0A` 換行注入（風險最低——一般 query string 幾乎不會出現
    URL-encoded 換行字元本身）。
 
+## 缺口 5：`has_file_inclusion` 只認 wrapper scheme，完全沒涵蓋 traversal 或絕對路徑 LFI（項目 1 已修復，項目 2 未修）
+
+> **狀態(2026-09-04 更新)**：下面「跟缺口 1-4 不同的地方」列的三個項目裡，
+> **項目 1（35 筆 traversal-style flag 不對）已經修好**——這個不是
+> `attack_patterns.py` regex 的問題（那份檔案的權威版本在 `log-analysis-core`，
+> 本地改了會被蓋掉，見文件開頭說明），是 `dataset_health/config.py` 的
+> `DEFINING_PREDICATE` 選錯判準這個**本地、非同步檔案**的問題，本地改是真的
+> 有效的。改法：把 stage 6 的 `DEFINING_FLAG` 從單一 `has_file_inclusion`
+> 改成 `DEFINING_PREDICATE` 的複合 `"any"` 群組（`has_file_inclusion==1 OR
+> has_path_traversal==1`），連帶在 `dataset_health/diversity.py` 的
+> `_eval_condition`/`_flatten_leaf_conditions` 加了 OR 群組支援（原本
+> `DEFINING_PREDICATE` 的條件 list 只有 AND 語意）。**項目 2（890 筆絕對路徑
+> LFI）仍未修**——這個真的需要新特徵，不是判準能解的，維持原樣待評估。
+
 ## 缺口 5（新發現）：`has_file_inclusion` 只認 wrapper scheme，完全沒涵蓋 traversal 或絕對路徑 LFI
 
 同樣用 `nginx/collected/` + `nginx/LFI_method_record/`（真實瀏覽器手動 payload +
@@ -322,14 +336,26 @@ directory traversal 讀檔**（`../../etc/passwd`）跟**直接絕對路徑讀�
 **這個 stage 的 ground-truth 判準選錯特徵**，需要的修法也不只是加
 regex 變形：
 
-1. **35 筆 traversal-style**：已經有 `has_path_traversal` 認領，這 35 筆
-   `has_file_inclusion=0` 是符合這個 flag 窄定義下的正確行為（跟缺口 1
+1. **35 筆 traversal-style ✅ 已修復**：已經有 `has_path_traversal` 認領，這
+   35 筆 `has_file_inclusion=0` 是符合這個 flag 窄定義下的正確行為（跟缺口 1
    驗證時 stage 4 殘留的 `/etc/passwd`/`/backend/.env` 那 30 筆是同一種
-   「flag 定義本來就沒有要涵蓋這種 payload」的情況）。如果要讓 stage 6 的
-   `DEFINING_PREDICATE` 精準涵蓋這批資料的實際範圍，應該改成
-   `has_file_inclusion==1 OR (has_path_traversal==1 AND 命中 file= 類參數)`
-   這種複合判準，而不是單一 flag——但這牽涉到 `config.DEFINING_PREDICATE`
-   的設計，不是 `attack_patterns.py` regex 本身的問題，兩邊都要一起看。
+   「flag 定義本來就沒有要涵蓋這種 payload」的情況）。修法：把 stage 6 的
+   `DEFINING_PREDICATE` 從單一 flag 改成複合 `"any"` 判準
+   （`has_file_inclusion==1 OR has_path_traversal==1`）——這牽涉的是
+   `dataset_health/config.py`/`diversity.py`，不是 `attack_patterns.py`
+   regex，而且 `config.py`/`diversity.py` 是本地、非同步檔案（不像
+   `attack_patterns.py` 那樣改了會被 `sync/from-private` 蓋掉），本地改
+   真的有效，已經改完。原本考慮過再加一個「AND 命中 `file=` 類參數」的
+   條件避免誤收其他 endpoint 的 traversal payload，但 stage 6 目前所有
+   批次本來就都是打同一個 `/api/events/1/attachment?file=` sink 收集的，
+   這個額外條件目前用不到，先不加，需要時再補。驗證：修復前
+   `defining_violations_total`＝961/974，修復後＝**926/974**
+   （−35，跟分類數字完全對上）；`Diversity_stage` 本身沒變（stage 6 的
+   `SUPPORT_FEATURES` 不含 `has_file_inclusion`/`has_path_traversal`，這個
+   修法解決的是 ground-truth 判準的準確度，不是這裡的多元度分數，兩者是
+   獨立的兩件事）。單元測試見
+   `tests/unit/test_diversity.py::test_stage_diversity_stage6_any_predicate_*`
+   三個新測試。
 2. **890 筆絕對路徑 LFI 是真正的偵測空白**：純 regex 沒辦法只憑
    `/etc/passwd` 這種字串本身判斷「這是攻擊」還是「這是正常參數值」，需要
    類似缺口 3 討論 `order by` 時的取捨——用已知敏感路徑前綴當訊號
@@ -358,3 +384,4 @@ regex 變形：
 | 2026-09-02 | `log-analysis-core` 私有 repo 修好缺口 1、2（修法比本文件建議更完整），透過 `sync/from-private` → `git merge origin/compare/yc-compare_premerge_branch` 進到 `feat/yc-dev_nginx` |
 | 2026-09-02 | 用同一批真實資料重新驗證：stage 2 違規率 68.5%→27.0%、stage 4 違規率 87.5%→25.0%（stage 4 剩餘 25% 確認是 batch 組成問題，非 regex 缺口）；逐筆分類 stage 2 殘留的 102 筆，發現缺口 3（`ORDER BY` 枚舉／`SLEEP`＋`BENCHMARK` 編碼繞過／`WAITFOR DELAY`／`DBMS_PIPE`，見上方「缺口 3」一節） |
 | 2026-09-04 | 對 stage 5、stage 6 跑同樣診斷：`has_command_injection` 違規率 99.8%（1783/1786），逐筆分類發現 97.1% 是 URL-encoded shell metacharacter（缺口 4）；`has_file_inclusion` 違規率 98.7%（961/974），逐筆分類發現 92.6% 是絕對路徑 LFI、3.6% 是已被 `has_path_traversal` 認領的 traversal-style（缺口 5，ground-truth 判準選錯特徵，不是單純 regex 漏寫） |
+| 2026-09-04 | 修好缺口 5 項目 1：`config.py`/`diversity.py` 是本地檔案，不用等 `log-analysis-core`，把 stage 6 的 `DEFINING_PREDICATE` 改成 `has_file_inclusion==1 OR has_path_traversal==1` 複合判準（`diversity.py` 新增 `"any"` OR 群組支援），違規數 961→926/974（−35，即 traversal-style 那批）。缺口 4 跟缺口 5 項目 2（絕對路徑 LFI）都還要等 `attack_patterns.py`/`feature_engineering.py` 的權威版本更新，本地不動 |

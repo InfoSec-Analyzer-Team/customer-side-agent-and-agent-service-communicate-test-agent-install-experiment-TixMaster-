@@ -50,7 +50,7 @@ DEFINING_FLAG = {
     3: "has_xss",
     4: "has_path_traversal",
     5: "has_command_injection",
-    6: "has_file_inclusion",
+    6: None,  # 改用 DEFINING_PREDICATE 的複合判準，見下方 DEFINING_PREDICATE[6] 註解
     7: "has_double_encoding",
     8: None,
     9: None,
@@ -97,6 +97,25 @@ DEFINING_PREDICATE = {
             "op": "not_in",
             "value": ["GET", "POST"],
             "exclude_from_support": False,
+        },
+    ],
+    # stage 6（LFI）：原本只驗 has_file_inclusion==1，但 attack_patterns.py 的
+    # FILE_INCLUSION_PAT 只認 PHP wrapper scheme（php://、data://...），完全沒
+    # 涵蓋這個 stage 實際收集範圍裡的古典 directory traversal 讀檔
+    # （../../etc/passwd，已經有 has_path_traversal 認領）。用真實資料驗證：
+    # 合併後 974 筆裡有 35 筆是 has_path_traversal==1 但 has_file_inclusion==0
+    # 的 traversal-style LFI，被單一 has_file_inclusion flag 誤判成「不屬於
+    # 這個 stage」。改成複合判準（兩個 flag 任一命中即算數）修掉這 35 筆；
+    # 詳細分類與剩餘的絕對路徑 LFI 缺口（890 筆，需要新特徵，不是這裡能修的）
+    # 見 Verify_doc/known_gaps_attack_patterns.md 缺口 5。
+    # "any"：子條件之間是 OR，跟這個 dict 頂層 list 元素之間的 AND 語意相反，
+    # 見 diversity._eval_condition 對 "any" 的處理。
+    6: [
+        {
+            "any": [
+                {"feature": "has_file_inclusion", "op": "eq", "value": 1, "exclude_from_support": True},
+                {"feature": "has_path_traversal", "op": "eq", "value": 1, "exclude_from_support": True},
+            ],
         },
     ],
 }

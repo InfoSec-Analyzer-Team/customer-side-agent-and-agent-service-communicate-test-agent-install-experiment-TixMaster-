@@ -243,6 +243,17 @@ _PREDICATE_OPS = {
 
 
 def _eval_condition(df: pd.DataFrame, condition: dict) -> pd.Series:
+    # "any" 群組：子條件之間用 OR（累加式 |），跟 DEFINING_PREDICATE 頂層 list
+    # 本身的 AND 語意相反，用來表達「符合其中一個 flag/條件就算數」——目前
+    # 唯一用例是 stage 6，見 config.py 對 DEFINING_PREDICATE[6] 的註解與
+    # Verify_doc/known_gaps_attack_patterns.md 缺口 5。
+    sub_conditions = condition.get("any")
+    if sub_conditions is not None:
+        result = pd.Series(False, index=df.index)
+        for sub in sub_conditions:
+            result |= _eval_condition(df, sub)
+        return result
+
     feature = condition["feature"]
     if feature not in df.columns:
         raise KeyError(
@@ -250,6 +261,16 @@ def _eval_condition(df: pd.DataFrame, condition: dict) -> pd.Series:
         )
     op = _PREDICATE_OPS[condition["op"]]
     return op(df[feature], condition["value"])
+
+
+def _flatten_leaf_conditions(condition: dict) -> list[dict]:
+    """把一個 condition（可能是 "any" 群組）展開成葉節點 condition 的 flat
+    list，每個葉節點都保留自己的 "feature"/"exclude_from_support"，供支撐
+    特徵集互斥檢查用（見 stage_diversity 裡排除定義判準特徵那段）。"""
+    sub_conditions = condition.get("any")
+    if sub_conditions is not None:
+        return [leaf for sub in sub_conditions for leaf in _flatten_leaf_conditions(sub)]
+    return [condition]
 
 
 def _defining_conditions(stage_id: int, cfg) -> list:
@@ -429,13 +450,15 @@ def stage_diversity(df: pd.DataFrame, stage_id: int, cfg) -> StageDiversityRepor
 
     # 定義判準特徵不該混進支撐集，除非明確標 exclude_from_support=False
     # （唯一已知例外是 stage 11 的 request_method，見 config.py 註解與 §3.5）。
+    # "any" 群組（見 stage 6）要先展開成葉節點才有 "feature" 可查。
     for cond in _defining_conditions(stage_id, cfg):
-        feature = cond["feature"]
-        if cond.get("exclude_from_support", True) and feature in support_features:
-            warnings_list.append(
-                f"stage {stage_id}: 定義判準特徵 {feature!r} 出現在支撐特徵集 F 中，"
-                f"違反 §1.2「多元度只評支撐特徵,不評定義 flag」的原則"
-            )
+        for leaf in _flatten_leaf_conditions(cond):
+            feature = leaf["feature"]
+            if leaf.get("exclude_from_support", True) and feature in support_features:
+                warnings_list.append(
+                    f"stage {stage_id}: 定義判準特徵 {feature!r} 出現在支撐特徵集 F 中，"
+                    f"違反 §1.2「多元度只評支撐特徵,不評定義 flag」的原則"
+                )
 
     per_feature: dict[str, PerFeatureDiversity] = {}
     weighted_sum = 0.0
