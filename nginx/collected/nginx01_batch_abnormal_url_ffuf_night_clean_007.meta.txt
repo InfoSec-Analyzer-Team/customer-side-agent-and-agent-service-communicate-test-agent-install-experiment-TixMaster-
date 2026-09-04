@@ -1,0 +1,13 @@
+batch_id: nginx01_batch_abnormal_url_ffuf_night_clean_007
+label: BAHAYA
+traffic_type: tool_generated
+tool: ffuf
+source_log: nginx01_batch_abnormal_url_ffuf_night_007.log
+count_original: 60
+count_collected: 55
+removed_pre_header_rejections: 5
+nginx: nginx01
+target: http://192.168.0.112:8080
+log_file: nginx01_batch_abnormal_url_ffuf_night_clean_007.log
+notes: Clean parser-compatible and IP/UA-preserving subset from real ffuf abnormal URL round 007; removes Nginx pre-header 400 lines that did not carry X-Forwarded-For or User-Agent.
+timezone_note: nginx timestamp is UTC; local time is Asia/Taipei UTC+8
