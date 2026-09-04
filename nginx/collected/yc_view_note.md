@@ -120,3 +120,15 @@ stage 12 Abnormal URL         collected/nginx01_batch_abnormal_url_ffuf_afternoo
 ```
 
 檢查結果：10 個檔案皆為 `bad_format=0`，來源 IP 皆為 `192.168.0.112`。這輪補的是 afternoon time window + current host IP alignment；仍需註明這不是真正跨機器來源 IP diversity。
+
+## Night round 007 樣本數補強
+
+針對 PR 回覆中仍低於 200 筆、會被標成 provisional 的 stage 7 / 8 / 12，已補一輪真實晚上時段 ffuf 流量。PowerShell 只負責切 batch，實際 request 由 ffuf 打到 Nginx/backend。
+
+```text
+stage 7  Double Encoding      collected/nginx01_batch_double_encoding_ffuf_night_007.log
+stage 8  URL Encoding Count   collected/nginx01_batch_url_encoding_count_ffuf_night_007.log
+stage 12 Abnormal URL         collected/nginx01_batch_abnormal_url_ffuf_night_clean_007.log
+```
+
+檢查結果：三個正式 map 檔皆為 `bad_format=0`。更新後 mapped sample count 為 stage 7 = 204、stage 8 = 216、stage 12 = 205，皆已跨過 200 筆門檻。stage 12 原始 60 筆中有 5 筆被 Nginx 在 header 前拒絕，來源 IP/UA 退回 Docker bridge 與 `"-"`，因此正式 map 使用 55 筆 clean 版，raw log 保留作 audit。
