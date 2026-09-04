@@ -1,0 +1,10 @@
+batch_id: nginx01_batch_abnormal_methods_ffuf_morning_006
+label: BAHAYA
+traffic_type: abnormal_methods_ffuf_morning
+tool: ffuf
+count_collected: 100
+nginx: nginx01
+target: http://localhost:8080
+log_file: nginx01_batch_abnormal_methods_ffuf_morning_006.log
+notes: Morning round 005 retry: real ffuf abnormal HTTP method traffic using PUT/DELETE/OPTIONS/PATCH/HEAD; X-Forwarded-For 10.120.11.52.
+timezone_note: nginx timestamp is UTC; local time is Asia/Taipei UTC+8

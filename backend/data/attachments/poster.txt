@@ -1,0 +1,1 @@
+TixMaster event poster placeholder — benign attachment used for LFI-sink AMAN baseline traffic.

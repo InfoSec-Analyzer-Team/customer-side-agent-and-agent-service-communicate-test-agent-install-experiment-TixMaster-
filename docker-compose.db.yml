@@ -1,0 +1,37 @@
+# TixMaster 的 PostgreSQL 資料庫
+#
+# 使用方式：
+#   1. 複製 .env.example 為專案根目錄的 .env，填入 POSTGRES_PASSWORD 等變數
+#      （docker-compose 會自動讀取根目錄的 .env 做變數替換）
+#   2. docker-compose -f docker-compose.db.yml up -d
+#   3. backend/.env 的 DATABASE_URL 指到 localhost:${POSTGRES_PORT}
+#
+# 全新的 volume 第一次啟動時，官方 postgres image 會自動執行
+# /docker-entrypoint-initdb.d/ 底下的 init.sql 建表；已經有資料的 volume
+# 則會照舊掛載現有資料，init.sql 不會重跑（見 init.sql 開頭註解，
+# 這份是目前後端程式碼實際依賴的 schema，不是 schema_postgresql.sql）。
+#
+# 如果 host port 忽然連不上（password authentication failed 但密碼明明沒錯），
+# 通常是 Docker Desktop 的 port-forwarding 卡住，換一個 host port 或
+# 重啟 Docker Desktop 即可，不是這裡的設定壞掉。
+
+name: tixmaster-db
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tixmaster-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-tixmaster}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-tixmaster}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - tixmaster_pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    restart: unless-stopped
+
+volumes:
+  tixmaster_pgdata:
+    external: true

@@ -1,0 +1,10 @@
+batch_id: nginx01_batch_url_encoding_count_ffuf_night_007
+label: BAHAYA
+traffic_type: tool_generated
+tool: ffuf
+count_collected: 36
+nginx: nginx01
+target: http://192.168.0.112:8080
+log_file: nginx01_batch_url_encoding_count_ffuf_night_007.log
+notes: Stage 8 URL-encoding-count sample-count top-up; real ffuf traffic against Nginx/backend, night window, XFF 10.140.8.71, browser-like macOS Safari UA.
+timezone_note: nginx timestamp is UTC; local time is Asia/Taipei UTC+8

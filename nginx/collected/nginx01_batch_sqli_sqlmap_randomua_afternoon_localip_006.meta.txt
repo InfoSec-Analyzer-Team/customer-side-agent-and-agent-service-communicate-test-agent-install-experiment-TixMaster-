@@ -1,0 +1,10 @@
+batch_id: nginx01_batch_sqli_sqlmap_randomua_afternoon_localip_006
+label: BAHAYA
+traffic_type: sql_injection_sqlmap_afternoon_localip
+tool: sqlmap
+count_collected: 75
+nginx: nginx01
+target: http://localhost:8080
+log_file: nginx01_batch_sqli_sqlmap_randomua_afternoon_localip_006.log
+notes: Afternoon round 006 real sqlmap traffic through Nginx bound to the host Wi-Fi IP 192.168.0.112; X-Forwarded-For also set to 192.168.0.112; no synthetic timestamp edits.
+timezone_note: nginx timestamp is UTC; local time is Asia/Taipei UTC+8

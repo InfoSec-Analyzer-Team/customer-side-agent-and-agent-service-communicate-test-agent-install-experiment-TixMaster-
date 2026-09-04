@@ -1,0 +1,11 @@
+batch_id: nginx01_batch_nikto_scan_xff_clean_003
+label: DICURIGAI
+traffic_type: sensitive_path_scanner_nikto
+tool: nikto
+count_collected: 4479
+nginx: nginx01
+target: http://localhost:8080
+log_file: nginx01_batch_nikto_scan_xff_clean_003.log
+notes: Clean parser-compatible subset from a real Nikto run. Kept only Nginx combined-format lines with X-Forwarded-For source 10.99.1.41; malformed/pre-header rejection lines were excluded because they are not accepted by the current ML parser.
+timezone_note: nginx timestamp is UTC; local time is Asia/Taipei UTC+8
+

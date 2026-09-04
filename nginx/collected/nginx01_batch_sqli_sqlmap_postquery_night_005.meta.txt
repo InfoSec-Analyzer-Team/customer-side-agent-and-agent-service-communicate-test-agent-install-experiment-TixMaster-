@@ -1,0 +1,10 @@
+batch_id: nginx01_batch_sqli_sqlmap_postquery_night_005
+label: BAHAYA
+traffic_type: sql_injection_sqlmap_post_query
+tool: sqlmap
+count_collected: 147
+nginx: nginx01
+target: http://localhost:8080
+log_file: nginx01_batch_sqli_sqlmap_postquery_night_005.log
+notes: Real sqlmap run against POST /api/users/login with SQLi probes on the email query parameter; Nginx combined access.log records POST method and query payload while X-Forwarded-For separates this lab batch IP.
+timezone_note: nginx timestamp is UTC; local time is Asia/Taipei UTC+8

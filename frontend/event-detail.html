@@ -190,11 +190,29 @@
             transform: translateY(-2px);
         }
 
+        .buy-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .total-price {
             text-align: center;
             margin-top: 15px;
             font-size: 0.9rem;
             color: #666;
+        }
+
+        .stock-info {
+            text-align: center;
+            margin-top: 5px;
+            font-size: 0.85rem;
+            color: #9ca3af;
+        }
+
+        .stock-info.low {
+            color: #dc2626;
+            font-weight: 600;
         }
 
         .viewing-badge {
@@ -329,11 +347,12 @@
                         <button class="quantity-btn" onclick="changeQuantity(1)">+</button>
                     </div>
 
-                    <button class="buy-btn" onclick="buyTickets()">立即購票</button>
+                    <button class="buy-btn" id="buyBtn" onclick="buyTickets()">立即購票</button>
 
                     <div class="total-price">
                         總計：NT$ <span id="totalPrice">0</span>
                     </div>
+                    <div class="stock-info" id="stockInfo"></div>
                 </div>
             </div>
         </div>
@@ -382,8 +401,63 @@
 
         const event = events.find(e => e.id === eventId) || events[0];
         let quantity = 1;
+        let availableQuantity = null; // null = 尚未取得真實庫存
         let countdownInterval = null;
         let remainingSeconds = 15 * 60; // 15 minutes
+
+        // 向後端查詢這張票種的真實剩餘數量
+        async function fetchTicketAvailability() {
+            const stockEl = document.getElementById('stockInfo');
+            const buyBtn = document.getElementById('buyBtn');
+
+            try {
+                const response = await fetch(`/api/events/${event.id}/tickets`);
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || '無法取得票券資訊');
+                }
+
+                const ticket = (data.tickets || []).find(t => String(t.id) === String(event.ticketId));
+
+                if (!ticket) {
+                    stockEl.textContent = '';
+                    return;
+                }
+
+                availableQuantity = ticket.available_quantity;
+                renderStock();
+            } catch (error) {
+                console.error('[EventDetail] Failed to fetch ticket availability:', error);
+                stockEl.textContent = '';
+            }
+        }
+
+        function renderStock() {
+            const stockEl = document.getElementById('stockInfo');
+            const buyBtn = document.getElementById('buyBtn');
+
+            if (availableQuantity === null) return;
+
+            if (availableQuantity <= 0) {
+                stockEl.textContent = '已售完';
+                stockEl.classList.add('low');
+                buyBtn.disabled = true;
+                buyBtn.textContent = '已售完';
+            } else {
+                stockEl.textContent = `剩餘 ${availableQuantity} 張`;
+                stockEl.classList.toggle('low', availableQuantity <= 10);
+                buyBtn.disabled = false;
+                buyBtn.textContent = '立即購票';
+
+                // 若目前選擇的數量超過庫存，夾回庫存上限
+                if (quantity > availableQuantity) {
+                    quantity = availableQuantity;
+                    document.getElementById('quantity').textContent = quantity;
+                    updateTotal();
+                }
+            }
+        }
 
         // Initialize page
         async function initPage() {
@@ -397,6 +471,9 @@
             document.getElementById('description').textContent = event.description;
             document.getElementById('unitPrice').textContent = event.price;
             document.getElementById('totalPrice').textContent = event.price;
+
+            // 取得真實庫存數量
+            fetchTicketAvailability();
 
             // Initialize feature flags
             try {
@@ -490,8 +567,9 @@
 
         // 數量調整
         function changeQuantity(delta) {
+            const maxQuantity = availableQuantity === null ? 10 : Math.min(10, availableQuantity);
             const newQuantity = quantity + delta;
-            if (newQuantity >= 1 && newQuantity <= 10) {
+            if (newQuantity >= 1 && newQuantity <= maxQuantity) {
                 quantity = newQuantity;
                 document.getElementById('quantity').textContent = quantity;
                 updateTotal();
@@ -504,6 +582,11 @@
         }
 
         async function buyTickets() {
+            if (availableQuantity !== null && availableQuantity <= 0) {
+                alert('很抱歉，此票種已售完');
+                return;
+            }
+
             // 檢查使用者是否已登入
             const token = localStorage.getItem('token');
             const currentUser = localStorage.getItem('currentUser');
