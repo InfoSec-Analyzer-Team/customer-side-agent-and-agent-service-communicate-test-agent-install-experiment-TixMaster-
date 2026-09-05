@@ -1,0 +1,10 @@
+batch_id: nginx01_batch_command_injection_ffuf_browserua_morning_005
+label: BAHAYA
+traffic_type: command_injection_ffuf_morning
+tool: ffuf
+count_collected: 30
+nginx: nginx01
+target: http://localhost:8080
+log_file: nginx01_batch_command_injection_ffuf_browserua_morning_005.log
+notes: Morning round 005 real ffuf command injection payload traffic through Nginx/backend; browser-like UA and X-Forwarded-For 10.120.5.51.
+timezone_note: nginx timestamp is UTC; local time is Asia/Taipei UTC+8

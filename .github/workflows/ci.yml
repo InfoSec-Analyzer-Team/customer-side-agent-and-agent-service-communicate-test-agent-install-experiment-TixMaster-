@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main, dev_front_end ]
+    branches: [ main, dev_front_end,compare/yc-compare_premerge_branch ]
   pull_request:
-    branches: [ main, dev_front_end ]
+    branches: [ main, dev_front_end,compare/yc-compare_premerge_branch ]
 
 jobs:
   test:
@@ -160,7 +160,16 @@ jobs:
       - name: Run pytest
         run: |
           mkdir -p reports
-          pytest -q --junitxml=reports/tests-junit.xml --html=reports/test-report.html
+          # tests/unit/test_diversity.py 需要 pandas/numpy/scipy（dataset_health/requirements.txt），
+          # 這個 job 沒裝那些依賴；那份測試改由專屬的 diversity-unit workflow 跑，這裡排除避免收集失敗。
+          #
+          # playwright_test.py 是手動流量產生器（真的開瀏覽器打 http://localhost:8080 用的腳本，
+          # 見檔頭說明），不是自動化測試，但檔名符合 pytest 預設 python_files 規則的 *_test.py，
+          # 不排除的話 pytest 掃到 repo 根目錄會嘗試 import 它——這個 job 沒裝 `playwright`
+          # 這個 PyPI 套件（下面「Run Playwright tests」跑的是 npm 那套 @playwright/test，
+          # 是完全不同的東西），import 到 `from playwright.sync_api import sync_playwright`
+          # 就會 ModuleNotFoundError，讓整個 collection 失敗。
+          pytest -q --ignore=tests/unit/test_diversity.py --ignore=playwright_test.py --junitxml=reports/tests-junit.xml --html=reports/test-report.html
 
       - name: Run Playwright tests
         run: |

@@ -23,9 +23,13 @@ if (process.env.SKIP_DB === 'true' || !process.env.DATABASE_URL) {
         console.log('✓ Connected to PostgreSQL database');
     });
 
+    // An idle client can emit 'error' if its connection drops (DB restart, network
+    // blip, etc). node-postgres removes that client from the pool automatically;
+    // the next query just gets a new connection. No need to crash the whole API
+    // over a transient disconnect — that turned a few seconds of DB downtime into
+    // a full server outage the last time this happened.
     pool.on('error', (err) => {
-        console.error('Unexpected database error:', err);
-        process.exit(-1);
+        console.error('Unexpected database error (pool will recover):', err);
     });
 
     module.exports = {

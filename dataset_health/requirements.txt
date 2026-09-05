@@ -1,0 +1,23 @@
+# dataset_health 可重現性要求（§6.3）：percentile / 熵計算依賴這三個套件，
+# 版本浮動會讓分數不可重現，故 pin 死。CI 用這份檔案安裝。
+#
+# 這幾個版本是針對 .github/workflows/diversity-*.yml 宣告的 python-version
+# "3.11" 選的（numpy>=2.5 要求 Python>=3.12，pin 太新在 CI 上會直接
+# ERROR: Could not find a version that satisfies...，實際發生過一次）。
+# 已在本機 Python 3.12 venv 裝過這組版本、跑過 tests/unit/test_diversity.py
+# 全過（cp311/cp312 是同一批 manylinux wheel）。
+#
+# 本機主要開發用的 venv/ 是 Python 3.14，裝不了這幾個版本（numpy 2.4.6 沒有
+# cp314 wheel），本機另外用了 numpy==2.5.2/scipy==1.18.0 那組——這是正常的，
+# 只要 CI 用的是這份 requirements.txt + workflow 宣告的 python-version 就好，
+# 不用讓本機 venv 版本跟這裡完全一致。
+#
+# 之後如果把 diversity-*.yml 的 python-version 改掉，要重新用那個版本核對
+# 一次相容的 numpy/pandas/scipy 版本（可以用
+# `pip download --only-binary=:all: --python-version <ver> --platform
+# manylinux_2_28_x86_64 --implementation cp --abi cp<ver 去掉點>` 不裝真的
+# interpreter 也能查）。
+numpy==2.4.6
+pandas==3.0.5
+scipy==1.17.1
+pytest==8.3.4

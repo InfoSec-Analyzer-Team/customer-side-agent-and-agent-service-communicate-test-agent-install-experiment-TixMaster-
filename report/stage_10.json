@@ -1,0 +1,47 @@
+{
+  "stage_id": 10,
+  "n_samples": 516,
+  "diversity_score": 0.5602676082768896,
+  "provisional": false,
+  "per_feature": {
+    "os_type": {
+      "d": 0.7666937563970102,
+      "coverage": 0.875,
+      "missing": [
+        0
+      ],
+      "collapsed": false
+    },
+    "ua_length": {
+      "d": 0.6086956521739131,
+      "collapsed": false
+    },
+    "is_bot": {
+      "d": 0.3353942964292546,
+      "coverage": 1.0,
+      "missing": [],
+      "collapsed": false
+    },
+    "referrer_type": {
+      "d": 0.6240866644318636,
+      "coverage": 1.0,
+      "missing": [],
+      "collapsed": false
+    },
+    "request_method": {
+      "d": 0.4664676719524068,
+      "coverage": 0.375,
+      "missing": [
+        "DELETE",
+        "PATCH",
+        "POST",
+        "PUT",
+        "TRACE"
+      ],
+      "collapsed": false
+    }
+  },
+  "warnings": [],
+  "defining_violations": [],
+  "defining_violations_total": 0
+}

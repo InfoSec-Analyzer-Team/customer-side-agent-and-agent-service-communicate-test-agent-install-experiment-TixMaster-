@@ -1,0 +1,32 @@
+# Reverse-proxy nginx in front of the Node backend, so nginx produces a real
+# access.log for the XDR agent to tail — replaces the in-process fake logging
+# in backend/agent-collector.js.
+#
+# 使用方式：
+#   1. 先啟動 backend：cd backend && npm start   (監聽 :3000)
+#   2. docker-compose -f docker-compose.nginx.yml up -d
+#   3. 所有流量改走 http://localhost:8080，nginx 會 proxy 到 backend 並寫 access.log
+#      （host port 80 留給 log-analysis-prod 的 Gateway nginx，本機同時跑兩套
+#      stack 時才不會搶 port；正式環境客戶端只有這一個 nginx，可以用 :80）
+#   4. agent/config.yaml 的 source path 指向 ./nginx/logs/access.log（見該檔註解）
+#
+# NGINX_BIND_HOST：預設只綁 127.0.0.1（本機自己測，任何機器都能直接跑起來）。
+# 需要讓同一個 ZeroTier/VPN 網段的其他機器連進來測試時，在專案根目錄的 .env
+# 加一行 NGINX_BIND_HOST=<你的 ZeroTier IP> 覆寫（docker-compose 會自動讀取
+# 根目錄 .env，跟 docker-compose.db.yml 的 POSTGRES_PORT 同一套模式）——不要
+# 直接改這裡寫死，寫死的 IP 只有原開發者的機器連得上，其他人 `up -d` 會直接
+# bind 失敗。
+
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: tixmaster-nginx
+    ports:
+      - "${NGINX_BIND_HOST:-127.0.0.1}:8080:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/logs:/var/log/nginx
+    restart: unless-stopped
+    # Docker Desktop (Windows/Mac) resolves host.docker.internal out of the
+    # box. Only add `extra_hosts: [host.docker.internal:host-gateway]` back
+    # if you move this to native Linux Docker Engine.

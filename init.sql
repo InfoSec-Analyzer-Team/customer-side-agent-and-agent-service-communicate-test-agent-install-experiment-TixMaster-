@@ -1,3 +1,26 @@
+-- ============================================
+-- TixMaster 正式 Schema（給 PostgreSQL 用，非 SQLite）
+--
+-- 這是後端實際在用的版本：backend/check_schema.js 教的安裝指令
+--   psql -U postgres -d tixmaster -f init.sql
+-- 就是指這支。users 表有 role / attributes 欄位（RBAC/ABAC，
+-- 詳見 backend/DBA_CHANGE_REPORT_20251125.md），backend/routes/users.js
+-- 的註冊/登入 SQL 直接寫死要用這兩個欄位，所以註冊登入必須用這份 schema，
+-- 不能單獨用 schema_postgresql.sql（那份沒有 role/attributes）。
+--
+-- 跟 schema_postgresql.sql 的差異：
+--   - 有 role / attributes（這份有，那份沒有）← 決定能不能註冊登入的關鍵
+--   - timestamp 用 TIMESTAMPTZ（那份用不含時區的 TIMESTAMP）
+--   - 沒有 waiting_queue 表、沒有 DB 端 trigger/function
+--     （訂單編號產生、防超賣鎖庫存、訂單自動過期，這些邏輯
+--     backend/routes/orders.js 是在 Node 這邊自己做，不靠 DB trigger）
+--   - 沒有種子資料（活動/票種要自己另外 insert）
+--
+-- 換句話說：這份是「目前程式碼實際依賴」的最小可跑版本；
+-- schema_postgresql.sql 是較早、功能較豐富的草稿版，兩者當初分岔
+-- 之後沒有再合併。
+-- ============================================
+
 -- 1. 建立 ENUM 類型 (PostgreSQL 特有)
 CREATE TYPE event_status AS ENUM ('draft', 'published', 'sold_out', 'cancelled');
 CREATE TYPE order_status AS ENUM ('pending', 'paid', 'cancelled', 'expired');

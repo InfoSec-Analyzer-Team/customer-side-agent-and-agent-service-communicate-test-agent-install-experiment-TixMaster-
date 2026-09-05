@@ -1,0 +1,37 @@
+{
+  "stage_id": 11,
+  "n_samples": 400,
+  "diversity_score": 0.4642016428238658,
+  "provisional": false,
+  "per_feature": {
+    "request_method": {
+      "d": 0.8280612399263964,
+      "coverage": 0.75,
+      "missing": [
+        "GET",
+        "POST"
+      ],
+      "collapsed": false
+    },
+    "url_length": {
+      "d": 0.29411764705882354,
+      "collapsed": false
+    },
+    "os_type": {
+      "d": 0.2704260414863776,
+      "coverage": 0.25,
+      "missing": [
+        0,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "collapsed": false
+    }
+  },
+  "warnings": [],
+  "defining_violations": [],
+  "defining_violations_total": 0
+}

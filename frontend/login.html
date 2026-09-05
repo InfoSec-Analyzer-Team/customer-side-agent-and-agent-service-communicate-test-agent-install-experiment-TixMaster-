@@ -54,6 +54,9 @@
             width: 100%;
             max-width: 400px;
             padding: 50px 40px;
+        }
+
+        .logo {
             text-align: center;
         }
 
@@ -66,14 +69,47 @@
         .logo p {
             color: #666;
             font-size: 1.2rem;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
 
-        .message {
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
             color: #333;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
             font-size: 1rem;
-            margin-bottom: 30px;
-            line-height: 1.6;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
         }
 
         .success-message {
@@ -82,6 +118,7 @@
             padding: 12px;
             border-radius: 8px;
             margin-bottom: 20px;
+            font-size: 0.9rem;
             display: none;
         }
 
@@ -107,6 +144,12 @@
             box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
         }
 
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .btn-secondary {
             background: white;
             color: #667eea;
@@ -120,7 +163,8 @@
         }
 
         .links {
-            margin-top: 30px;
+            margin-top: 20px;
+            text-align: center;
             color: #666;
             font-size: 0.9rem;
         }
@@ -133,31 +177,6 @@
 
         .links a:hover {
             text-decoration: underline;
-        }
-
-        .spinner {
-            display: none;
-            margin: 20px auto;
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f4f6;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .redirecting .spinner {
-            display: block;
-        }
-
-        .redirecting .message {
-            color: #667eea;
-            font-weight: 600;
         }
     </style>
 </head>
@@ -174,105 +193,99 @@
             <p>登入 TixMaster</p>
         </div>
 
-        <div class="success-message" id="successMessage">
-            ✅ 登入成功！正在導向...
-        </div>
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage">✅ 登入成功！正在導向...</div>
 
-        <div class="message" id="message">
-            點擊下方按鈕使用 Auth0 進行安全登入
-        </div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required autocomplete="email">
+            </div>
 
-        <div class="spinner" id="spinner"></div>
+            <div class="form-group">
+                <label for="password">密碼</label>
+                <input type="password" id="password" name="password" required autocomplete="current-password">
+            </div>
 
-        <button class="btn" id="loginBtn" onclick="startOAuth()">
-            🔐 使用 Auth0 登入
-        </button>
+            <button type="submit" class="btn" id="loginBtn">登入</button>
+        </form>
 
         <button class="btn btn-secondary" onclick="location.href='admin-login.html'">
             👑 管理員登入
         </button>
 
         <div class="links">
-            還沒有帳號？<a href="register.html">立即註冊</a>
-            <br><br>
-            <a href="index.html">← 返回首頁</a>
+            還沒有帳號？<a href="register.html" id="registerLink">立即註冊</a>
         </div>
     </div>
 
     <script>
-        // const API_BASE_URL = 'http://localhost:3000';
+        const API_BASE_URL = '/api';
 
-        function startOAuth() {
-            document.getElementById('message').textContent = '正在導向 Auth0 登入頁面...';
-            document.body.querySelector('.login-container').classList.add('redirecting');
-            document.getElementById('loginBtn').style.display = 'none';
-
-            // 導向到後端 OAuth 登入路由（使用相對路徑，會導向同一個 host）
-            setTimeout(() => {
-                window.location.href = '/auth/login';
-            }, 500);
-        }
-
-        // 檢查 URL fragment 中是否有 token（從 OAuth callback 回來）
-        if (window.location.hash) {
-            const hash = window.location.hash.substring(1);
-            const params = new URLSearchParams(hash);
-            const token = params.get('token');
-
-            if (token) {
-                // 儲存 token（統一使用 'token' key）
-                localStorage.setItem('token', token);
-
-                // 顯示成功訊息
-                document.getElementById('successMessage').classList.add('show');
-                document.getElementById('message').style.display = 'none';
-                document.getElementById('loginBtn').style.display = 'none';
-
-                // 解析 token 獲取用戶資訊（簡單的 base64 decode）
-                try {
-                    const payload = JSON.parse(atob(token.split('.')[1]));
-                    localStorage.setItem('currentUser', JSON.stringify({
-                        id: payload.userId,
-                        email: payload.email,
-                        role: payload.role,
-                        token: token
-                    }));
-
-                    // 檢查是否有返回 URL
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const returnUrl = urlParams.get('returnUrl') || localStorage.getItem('loginReturnUrl');
-
-                    // 清除暫存的返回 URL
-                    localStorage.removeItem('loginReturnUrl');
-
-                    // 2 秒後導向指定頁面或首頁
-                    setTimeout(() => {
-                        if (returnUrl) {
-                            window.location.href = decodeURIComponent(returnUrl);
-                        } else {
-                            window.location.href = 'index.html';
-                        }
-                    }, 2000);
-                } catch (e) {
-                    console.error('Token parsing error:', e);
-                    document.getElementById('message').innerHTML = '<span style="color: #ef4444;">登入失敗，請重試</span>';
-                }
-            }
-        }
-
-        // 檢查是否有錯誤參數
+        // 若從其他頁面（例如購票流程）被導來這裡，保留返回位置
         const urlParams = new URLSearchParams(window.location.search);
-        const error = urlParams.get('error');
-
-        if (error) {
-            let errorMessage = '登入失敗，請重試';
-            if (error === 'oauth_failed') {
-                errorMessage = 'OAuth 認證失敗，請重試';
-            } else if (error === 'server_error') {
-                errorMessage = '伺服器錯誤，請稍後再試';
-            }
-            document.getElementById('message').innerHTML = `<span style="color: #ef4444;">❌ ${errorMessage}</span>`;
+        const returnUrl = urlParams.get('returnUrl') || localStorage.getItem('loginReturnUrl');
+        if (returnUrl) {
+            document.getElementById('registerLink').href = `register.html?returnUrl=${encodeURIComponent(returnUrl)}`;
         }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorEl = document.getElementById('errorMessage');
+            const loginBtn = document.getElementById('loginBtn');
+
+            errorEl.classList.remove('show');
+            loginBtn.disabled = true;
+            loginBtn.textContent = '登入中...';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/users/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || '登入失敗');
+                }
+
+                // 儲存 token 與使用者資訊（供其他頁面如 checkout.html 使用）
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('currentUser', JSON.stringify({
+                    id: data.user.id,
+                    email: data.user.email,
+                    name: data.user.name,
+                    phone: data.user.phone,
+                    role: data.user.role,
+                    token: data.token
+                }));
+
+                document.getElementById('successMessage').classList.add('show');
+                localStorage.removeItem('loginReturnUrl');
+
+                setTimeout(() => {
+                    if (returnUrl) {
+                        // returnUrl 在上面已經是解碼過的字串了（來自
+                        // urlParams.get() 或 localStorage 裡未再編碼存的值），
+                        // 這裡不能再 decodeURIComponent 一次——值裡若剛好有
+                        // 不成對的 "%" 會直接 throw URIError，整個跳轉失敗。
+                        window.location.href = returnUrl;
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                }, 800);
+            } catch (error) {
+                errorEl.textContent = `❌ ${error.message}`;
+                errorEl.classList.add('show');
+                loginBtn.disabled = false;
+                loginBtn.textContent = '登入';
+            }
+        });
     </script>
 </body>
 

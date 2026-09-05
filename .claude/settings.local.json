@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(node migrate_database.js:*)"
+      "Bash(node migrate_database.js:*)",
+      "Bash(bash -n tool_scripts/sensitive_path_scan.sh)"
     ],
     "deny": [],
     "ask": []

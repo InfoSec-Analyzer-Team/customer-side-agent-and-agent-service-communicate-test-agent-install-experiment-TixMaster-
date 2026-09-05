@@ -1,0 +1,31 @@
+{
+  "stage_id": 8,
+  "n_samples": 216,
+  "diversity_score": 0.37342757695970913,
+  "provisional": false,
+  "per_feature": {
+    "url_length": {
+      "d": 0.26717557251908397,
+      "collapsed": false
+    },
+    "url_special_chars": {
+      "d": 0.4358974358974359,
+      "collapsed": false
+    },
+    "os_type": {
+      "d": 0.4172097224626076,
+      "coverage": 0.375,
+      "missing": [
+        0,
+        2,
+        3,
+        4,
+        6
+      ],
+      "collapsed": false
+    }
+  },
+  "warnings": [],
+  "defining_violations": [],
+  "defining_violations_total": 0
+}

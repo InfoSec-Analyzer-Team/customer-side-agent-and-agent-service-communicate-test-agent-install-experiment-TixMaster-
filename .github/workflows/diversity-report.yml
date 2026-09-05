@@ -1,0 +1,106 @@
+name: diversity-report
+
+# Tier 2（規格 §6.2）：測資料夠不夠好，吃真實收集的 stage 裸 access.log。
+# soft 模式：只產報告 artifact，不設 exit code 失敗。§7 的門檻（Diversity_stage
+# < 0.4 擋、涵蓋率門檻等）明白標示「起始建議值，不是定論，需先用印尼真實資料集
+# 校準」，所以 DIVERSITY_STRICT 嚴格模式的判斷邏輯還沒接上；等門檻校準過再回來做。
+#
+# 兩個 job：
+#   - health-auto（push 觸發）：跑 tests/unit/test_run_stage.py，它會自動掃過
+#     config.STAGE_LOG_PATHS（來自 nginx/logs/stage_log_CHECK/stage_log_map.txt）
+#     裡目前有對應 log 的每一個 stage，等於是輕量版的「掃全部 stage」，不用等
+#     §8 步驟 4 後半那支獨立的 run_all_stages.py。
+#   - health-manual（workflow_dispatch 觸發）：手動指定單一 stage + log 路徑，
+#     直接呼叫 run_stage.py。適合測還沒收進 stage_log_map.txt 的 log，或
+#     stage_log_map.txt 之外的一次性檢查。
+on:
+  push:
+    paths:
+      - "nginx/logs/**"
+      - "dataset_health/**"
+      - ".github/workflows/diversity-report.yml"
+  workflow_dispatch:
+    inputs:
+      stage_id:
+        description: "stage id（1-12，見 dataset_health/config.py 的 SUPPORT_FEATURES）"
+        required: true
+      stage_log_path:
+        description: "裸 access.log 路徑（相對 repo 根目錄，例如 nginx/logs/access2_Dicurigai_sensitive_path.log）"
+        required: true
+
+jobs:
+  health-auto:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dataset_health dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r dataset_health/requirements.txt
+
+      - name: Run all mapped-stage diversity reports
+        # test_run_stage.py 對 config.STAGE_LOG_PATHS 裡每個 stage 各跑一次
+        # `python -m dataset_health.run_stage`，並各自寫出 report/stage_<id>.json/.md。
+        # 這裡故意不設 continue-on-error：這份測試斷言的是「CLI 有沒有正常跑完、
+        # 輸出 schema 對不對」這種結構性問題，跟 §7 那種「分數夠不夠高」的資料
+        # 品質門檻不是同一件事，結構壞了就該讓 job 紅。
+        run: pytest tests/unit/test_run_stage.py -v
+
+      - name: Upload report artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diversity-report-${{ github.sha }}
+          path: report/
+
+      - name: Append reports to job summary
+        if: always()
+        run: |
+          shopt -s nullglob
+          for f in report/stage_*.md; do
+            cat "$f" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+  health-manual:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dataset_health dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r dataset_health/requirements.txt
+
+      - name: Run stage diversity report
+        run: |
+          python -m dataset_health.run_stage \
+            --stage "${{ inputs.stage_id }}" \
+            --log "${{ inputs.stage_log_path }}" \
+            --out report/
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: diversity-report-stage-${{ inputs.stage_id }}
+          path: report/
+
+      - name: Append report to job summary
+        if: always()
+        run: |
+          md_path="report/stage_${{ inputs.stage_id }}.md"
+          if [ -f "$md_path" ]; then
+            cat "$md_path" >> "$GITHUB_STEP_SUMMARY"
+          fi

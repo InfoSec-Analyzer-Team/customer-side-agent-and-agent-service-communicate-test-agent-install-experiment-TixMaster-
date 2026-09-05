@@ -10,7 +10,6 @@ const errorHandler = require('./middleware/errorHandler');
 const featureFlagsMiddleware = require('./middleware/featureFlags');
 const metricsMiddleware = require('./middleware/metricsMiddleware');  // NEW - Metrics tracking
 const { register } = require('./config/metrics');  // NEW - Prometheus registry
-const agentCollector = require('./agent-collector');  // IDS Agent Collector
 const path = require('path');
 const fs = require('fs');
 
@@ -116,16 +115,6 @@ app.use(logger.middleware);
  * 必須在 logger 之後、路由之前使用
  */
 app.use(metricsMiddleware);
-
-/**
- * 🕵️ IDS Agent Collector
- *
- * 收集 HTTP 請求日誌並發送到 Agent Service
- * 跳過 /health 和 /metrics 避免雜訊
- */
-app.use(agentCollector.middleware({
-    skip: (req) => ['/health', '/metrics'].includes(req.path)
-}));
 
 /**
  * 🚩 Feature Flags Middleware
@@ -348,12 +337,6 @@ app.listen(PORT, async () => {
         logger.info(`✅ Feature flags initialized`);
     } catch (error) {
         logger.error(`❌ Failed to initialize feature flags:`, { error: error.message, stack: error.stack });
-    }
-
-    // 🕵️ 啟動 IDS Agent Collector
-    if (process.env.ENABLE_AGENT_COLLECTOR !== 'false') {
-        agentCollector.start();
-        logger.info(`🕵️ IDS Agent Collector: ${agentCollector.getStatus().agentId}`);
     }
 });
 
